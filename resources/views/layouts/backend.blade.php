@@ -51,7 +51,9 @@
     }
   </script>
   <style>
+    /* Prevent FOUC while Tailwind CDN loads */
     body {
+      visibility: hidden;
       font-family: 'Public Sans', sans-serif;
       background-color: #f4f6f9;
     }
@@ -142,6 +144,21 @@
         }, 300);
         document.body.classList.remove('overflow-hidden');
       }
+    }
+  </script>
+
+  <script>
+    // Reveal body after Tailwind CSS has initialized to prevent FOUC
+    if (typeof tailwind !== 'undefined') {
+      document.body.style.visibility = 'visible';
+    } else {
+      document.addEventListener('DOMContentLoaded', function () {
+        document.body.style.visibility = 'visible';
+      });
+      // Fallback: force visible after 500ms
+      setTimeout(function () {
+        document.body.style.visibility = 'visible';
+      }, 500);
     }
   </script>
 
