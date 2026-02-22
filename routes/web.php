@@ -7,8 +7,8 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Public Verification Route
-Route::get('/verifikasi/{perizinan}', [\App\Http\Controllers\Public\VerificationController::class, 'verify'])->name('perizinan.verification');
+// Public Verification Route (Anti-Tamper & Immutable)
+Route::get('/verify/{hash}', [\App\Http\Controllers\Public\VerificationController::class, 'verify'])->name('perizinan.verify');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
@@ -59,8 +59,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/perizinan/{perizinan}', [\App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'show'])->name('perizinan.show');
         Route::get('/perizinan/{perizinan}/finalisasi', [\App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'showFinalisasi'])->name('perizinan.finalisasi');
         Route::post('/perizinan/{perizinan}/release', [\App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'release'])->name('perizinan.release');
-        Route::post('/perizinan/{perizinan}/approve', [\App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'approve'])->name('perizinan.approve');
-        Route::post('/perizinan/{perizinan}/revision', [\App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'needRevision'])->name('perizinan.revision');
+        Route::post('perizinan/{perizinan}/approve', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'approve'])->name('perizinan.approve');
+        Route::post('perizinan/{perizinan}/auto-release', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'autoRelease'])->name('perizinan.auto_release');
+        Route::post('perizinan/{perizinan}/revision', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'needRevision'])->name('perizinan.revision');
         Route::post('/perizinan/{perizinan}/discussion', [\App\Http\Controllers\Backend\PerizinanDiscussionController::class, 'store'])->name('perizinan.discussion.store');
 
         // Master Data: Jenis Perizinan
@@ -72,6 +73,10 @@ Route::middleware('auth')->group(function () {
         Route::put('jenis-perizinan/{jenisPerizinan}/syarat/{syarat}', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanSyaratController::class, 'update'])->name('jenis_perizinan.syarat.update');
         Route::delete('jenis-perizinan/{jenisPerizinan}/syarat/{syarat}', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanSyaratController::class, 'destroy'])->name('jenis_perizinan.syarat.destroy');
 
+        // Form Builder
+        Route::get('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'formConfig'])->name('jenis_perizinan.form');
+        Route::post('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'updateFormConfig'])->name('jenis_perizinan.form.update');
+
         // Pengguna
         Route::resource('users', \App\Http\Controllers\Backend\SuperAdmin\UserController::class);
         Route::post('users/{user}/reset-password', [\App\Http\Controllers\Backend\SuperAdmin\UserController::class, 'resetPassword'])->name('users.reset_password');
@@ -80,6 +85,23 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\Backend\SuperAdmin\ReportController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/export-excel', [\App\Http\Controllers\Backend\SuperAdmin\ReportController::class, 'exportExcel'])->name('laporan.export_excel');
         Route::get('/laporan/export-pdf', [\App\Http\Controllers\Backend\SuperAdmin\ReportController::class, 'exportPdf'])->name('laporan.export_pdf');
+
+        // Penerbitan Sertifikat
+        Route::group(['prefix' => 'penerbitan', 'as' => 'penerbitan.'], function () {
+            Route::get('/antrian', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'antrian'])->name('antrian');
+            Route::get('/riwayat', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'riwayat'])->name('riwayat');
+            Route::get('/pusat-cetak', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'pusatCetak'])->name('pusat_cetak');
+            Route::get('/{perizinan}/preview', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'preview'])->name('preview');
+            Route::get('/{perizinan}/export-pdf', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportPdf'])->name('export_pdf');
+            Route::get('/{perizinan}/finalisasi', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'finalisasi'])->name('finalisasi');
+
+            // Preset & Layout
+            Route::get('/preset', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetIndex'])->name('preset.index');
+            Route::post('/preset', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetStore'])->name('preset.store');
+            Route::put('/preset/{preset}', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetUpdate'])->name('preset.update');
+            Route::delete('/preset/{preset}', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetDestroy'])->name('preset.destroy');
+            Route::post('/preset/{preset}/set-active', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetSetActive'])->name('preset.set_active');
+        });
 
         // Settings
         Route::get('/settings', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'index'])->name('settings.index');

@@ -4,404 +4,513 @@
 @section('breadcrumb', 'Setting')
 
 @section('content')
-  <div class="mx-auto max-w-6xl space-y-6">
-    <!-- Breadcrumbs & Title -->
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Pengaturan Akun</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Kelola profil dan keamanan akun Anda.</p>
-      </div>
-    </div>
-
-    @if(session('success'))
-      <div
-        class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg flex items-center gap-3 mb-6">
-        <span class="material-symbols-outlined">check_circle</span>
-        <p class="text-sm font-bold">{{ session('success') }}</p>
-      </div>
-    @endif
-
-    @if($errors->any())
-      <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg flex items-start gap-3 mb-6">
-        <span class="material-symbols-outlined mt-0.5">error</span>
-        <div>
-          <p class="text-sm font-bold">Terjadi kesalahan:</p>
-          <ul class="text-xs mt-1 list-disc list-inside opacity-90">
-            @foreach($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      </div>
-    @endif
-
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      <!-- Left Column: Profile Summary -->
-      <div class="lg:col-span-4 xl:col-span-3 space-y-6">
-        <div
-          class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-[#1a2234] dark:ring-slate-800">
-          <div class="relative h-24 bg-gradient-to-r from-blue-600 to-indigo-700">
-            <div class="absolute -bottom-10 left-1/2 -translate-x-1/2">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Profile Summary Column -->
+      <div class="col-md-3">
+        <div class="card card-primary card-outline shadow-sm">
+          <div class="card-body box-profile">
+            <div class="text-center mb-3">
               <div id="profile-preview-card"
-                class="h-20 w-20 rounded-full border-4 border-white bg-cover bg-center dark:border-[#1a2234] shadow-md overflow-hidden bg-white">
+                class="profile-user-img img-fluid img-circle shadow-sm overflow-hidden border-2"
+                style="width: 100px; height: 100px; padding: 0;">
                 @if($user->photo)
-                  <img src="{{ Storage::url($user->photo) }}" class="h-full w-full object-cover">
+                  <img src="{{ Storage::url($user->photo) }}" class="h-100 w-100 object-cover">
                 @else
                   <img
                     src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=128&background=EBF4FF&color=7F9CF5"
-                    class="h-full w-full object-cover">
+                    class="h-100 w-100 object-cover">
                 @endif
               </div>
             </div>
-          </div>
-          <div class="px-6 pb-6 pt-12 text-center">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ $user->name }}</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              {{ str_replace('_', ' ', $user->getRoleNames()->first()) }}</p>
-            <div class="mt-4 flex justify-center">
-              <span
-                class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                <span class="mr-1.5 h-2 w-2 rounded-full bg-green-600"></span>
-                Aktif
-              </span>
+            <h3 class="profile-username text-center font-weight-bold">{{ $user->name }}</h3>
+            <p class="text-muted text-center text-uppercase small font-weight-bold">
+              {{ str_replace('_', ' ', $user->getRoleNames()->first()) }}
+            </p>
+
+            <div class="text-center mt-2 mb-4">
+              <span class="badge badge-success px-3 py-1 shadow-sm"><i class="fas fa-check-circle mr-1"></i> Aktif</span>
             </div>
-            <div class="mt-6 border-t border-slate-100 pt-4 text-left dark:border-slate-800">
-              <div class="flex justify-between py-2 text-sm">
-                <span class="text-slate-500 dark:text-slate-400">Bergabung</span>
-                <span
-                  class="font-medium text-slate-900 dark:text-slate-200">{{ $user->created_at->format('d M Y') }}</span>
-              </div>
-              <div class="flex justify-between py-2 text-sm">
-                <span class="text-slate-500 dark:text-slate-400">Dinas</span>
-                <span class="font-medium text-slate-900 dark:text-slate-200 truncate max-w-[120px]"
-                  title="{{ $user->dinas->nama }}">{{ $user->dinas->nama }}</span>
-              </div>
-            </div>
+
+            <ul class="list-group list-group-unbordered mb-3">
+              <li class="list-group-item px-0 border-top-0">
+                <b>Bergabung</b> <a class="float-right text-dark">{{ $user->created_at->format('d M Y') }}</a>
+              </li>
+              <li class="list-group-item px-0">
+                <b>Dinas</b> <a class="float-right text-dark truncate d-inline-block" style="max-width: 150px;"
+                  title="{{ $user->dinas->nama }}">{{ $user->dinas->nama }}</a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div class="rounded-xl bg-blue-50 p-4 text-blue-900 dark:bg-blue-900/20 dark:text-blue-200">
-          <div class="flex items-start gap-3">
-            <span class="material-symbols-outlined mt-0.5 text-blue-600 dark:text-blue-400">security</span>
-            <div>
-              <h4 class="font-semibold text-sm">Status Keamanan</h4>
-              <p class="mt-1 text-xs opacity-80">Akun Anda dilindungi dengan sistem enkripsi standar dan kebijakan dinas.
-              </p>
+        <div class="card card-info shadow-sm bg-light-info border-0">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-start">
+              <i class="fas fa-shield-alt text-info mt-1 mr-3"></i>
+              <div>
+                <h6 class="font-weight-bold text-info mb-1">Status Keamanan</h6>
+                <p class="small text-muted mb-0">Akun Anda dilindungi dengan sistem enkripsi standar dan kebijakan dinas.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Settings Content -->
-      <div class="lg:col-span-8 xl:col-span-9 space-y-6">
-        <div class="rounded-xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-[#1a2234] dark:ring-slate-800">
-          <!-- In-Page Navigation / Tabs -->
-          <div class="border-b border-slate-200 px-2 dark:border-slate-700 overflow-x-auto">
-            <nav class="-mb-px flex space-x-6">
-              <button onclick="switchTab('tab-profile')" id="nav-profile"
-                class="tab-link border-b-2 border-primary px-3 py-4 text-sm font-bold text-primary transition-all">
-                Profil Saya
-              </button>
-              <button onclick="switchTab('tab-instansi')" id="nav-instansi"
-                class="tab-link border-b-2 border-transparent px-3 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-all">
-                Instansi & Aplikasi
-              </button>
-              <button onclick="switchTab('tab-security')" id="nav-security"
-                class="tab-link border-b-2 border-transparent px-3 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-all">
-                Keamanan
-              </button>
-              <button onclick="switchTab('tab-maintenance')" id="nav-maintenance"
-                class="tab-link border-b-2 border-transparent px-3 py-4 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-all">
-                Pemeliharaan
-              </button>
-            </nav>
+      <!-- Settings Content Column -->
+      <div class="col-md-9">
+        <div class="card card-primary card-outline card-tabs shadow-sm">
+          <div class="card-header p-0 pt-1 border-bottom-0">
+            <ul class="nav nav-tabs" id="settingTabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active font-weight-bold" id="tab-profile-link" data-toggle="pill" href="#tab-profile"
+                  role="tab">
+                  <i class="fas fa-user-circle mr-1"></i> Profil Saya
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link font-weight-bold" id="tab-instansi-link" data-toggle="pill" href="#tab-instansi"
+                  role="tab">
+                  <i class="fas fa-building mr-1"></i> Instansi & Aplikasi
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link font-weight-bold" id="tab-security-link" data-toggle="pill" href="#tab-security"
+                  role="tab">
+                  <i class="fas fa-lock mr-1"></i> Keamanan
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link font-weight-bold" id="tab-maintenance-link" data-toggle="pill" href="#tab-maintenance"
+                  role="tab">
+                  <i class="fas fa-tools mr-1"></i> Pemeliharaan
+                </a>
+              </li>
+            </ul>
           </div>
+          <div class="card-body">
+            <div class="tab-content" id="settingTabsContent">
 
-          <div class="p-6 md:p-8">
-            <!-- Tab Content: Profil -->
-            <div id="tab-profile" class="tab-content block">
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Profil Saya</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">Informasi dasar akun pengguna Anda.</p>
-
-              <form action="{{ route('super_admin.settings.profile.update') }}" method="POST"
-                enctype="multipart/form-data">
-                @csrf
-                <div class="grid gap-6">
-                  <div class="flex flex-col sm:flex-row items-center gap-6">
-                    <div class="relative group">
-                      <div id="profile-preview-container"
-                        class="size-24 rounded-full border-2 border-slate-200 overflow-hidden bg-slate-50">
-                        @if($user->photo)
-                          <img src="{{ Storage::url($user->photo) }}" class="h-full w-full object-cover">
-                        @else
-                          <img
-                            src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=128&background=EBF4FF&color=7F9CF5"
-                            class="h-full w-full object-cover">
-                        @endif
-                      </div>
-                      <label
-                        class="absolute bottom-0 right-0 p-1.5 bg-primary text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors cursor-pointer border-2 border-white dark:border-[#1a2234]">
-                        <span class="material-symbols-outlined text-xs">edit</span>
-                        <input type="file" name="photo" class="hidden" accept="image/*">
-                      </label>
-                    </div>
-                    <div class="flex-1 space-y-4 w-full">
-                      <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama
-                          Lengkap</label>
-                        <input type="text" name="name" value="{{ old('name', $user->name) }}"
-                          class="w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800/50 dark:border-slate-700 dark:text-white focus:border-primary focus:ring-primary text-sm"
-                          required>
-                      </div>
-                      <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                        <input type="email" name="email" value="{{ old('email', $user->email) }}"
-                          class="w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800/50 dark:border-slate-700 dark:text-white focus:border-primary focus:ring-primary text-sm"
-                          required>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex justify-end mt-4">
-                    <button type="submit"
-                      class="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
-                      <span class="material-symbols-outlined mr-2 text-[18px]">save</span>
-                      Simpan Profil
-                    </button>
-                  </div>
+              <!-- Profil Tab -->
+              <div class="tab-pane fade show active" id="tab-profile" role="tabpanel">
+                <div class="mb-4">
+                  <h4 class="font-weight-bold text-dark mb-1">Profil Saya</h4>
+                  <p class="text-muted small">Informasi dasar akun pengguna Anda.</p>
                 </div>
-              </form>
-            </div>
 
-            <!-- Tab Content: Instansi -->
-            <div id="tab-instansi" class="tab-content hidden">
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Instansi & Aplikasi</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">Konfigurasi branding untuk seluruh dashboard
-                dinas Anda.</p>
-
-              <form action="{{ route('super_admin.settings.app.update') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="space-y-6">
-                  <div class="grid md:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                      <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nama
-                          Aplikasi</label>
-                        <input type="text" name="app_name"
-                          value="{{ old('app_name', $dinas->app_name ?? 'Sistem Perizinan') }}"
-                          class="w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800/50 dark:border-slate-700 dark:text-white focus:border-primary focus:ring-primary text-sm"
+                <form action="{{ route('super_admin.settings.profile.update') }}" method="POST"
+                  enctype="multipart/form-data">
+                  @csrf
+                  <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                      <div class="position-relative d-inline-block">
+                        <div id="profile-preview-container"
+                          class="rounded-circle shadow-sm overflow-hidden border border-secondary bg-light mx-auto"
+                          style="width: 120px; height: 120px;">
+                          @if($user->photo)
+                            <img src="{{ Storage::url($user->photo) }}" class="h-100 w-100 object-cover">
+                          @else
+                            <img
+                              src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=128&background=EBF4FF&color=7F9CF5"
+                              class="h-100 w-100 object-cover">
+                          @endif
+                        </div>
+                        <label class="btn btn-sm btn-primary btn-circle position-absolute"
+                          style="bottom: 5px; right: 5px; width: 32px; height: 32px; padding: 6px 0;">
+                          <i class="fas fa-camera fa-sm"></i>
+                          <input type="file" name="photo" class="d-none" accept="image/*">
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-md-9">
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Nama Lengkap</label>
+                        <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control"
                           required>
                       </div>
-                      <div>
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Logo
-                          Instansi</label>
-                        <div class="flex items-center gap-4">
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Email Dinas</label>
+                        <input type="email" name="email" value="{{ old('email', $user->email) }}" class="form-control"
+                          required>
+                      </div>
+                      <div class="text-right mt-4">
+                        <button type="submit" class="btn btn-primary px-4 font-weight-bold">
+                          <i class="fas fa-save mr-1"></i> Simpan Perubahan
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Instansi Tab -->
+              <div class="tab-pane fade" id="tab-instansi" role="tabpanel">
+                <div class="mb-4">
+                  <h4 class="font-weight-bold text-dark mb-1">Instansi & Aplikasi</h4>
+                  <p class="text-muted small">Konfigurasi branding untuk seluruh dashboard dinas Anda.</p>
+                </div>
+
+                <form action="{{ route('super_admin.settings.app.update') }}" method="POST" enctype="multipart/form-data">
+                  @csrf
+                  <div class="row">
+                    <div class="col-md-6 border-right">
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Nama Aplikasi</label>
+                        <input type="text" name="app_name"
+                          value="{{ old('app_name', $dinas->app_name ?? 'Sistem Perizinan') }}" class="form-control"
+                          required>
+                      </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Logo Instansi</label>
+                        <div class="d-flex align-items-center bg-light p-2 rounded">
                           <div id="logo-preview-container"
-                            class="size-12 rounded border border-slate-200 bg-white flex items-center justify-center p-2">
+                            class="bg-white border text-center d-flex align-items-center justify-content-center mr-3 rounded overflow-hidden"
+                            style="width: 60px; height: 60px; padding: 5px;">
                             @if($dinas->logo)
-                              <img src="{{ Storage::url($dinas->logo) }}" class="max-h-full max-w-full object-contain">
+                              <img src="{{ Storage::url($dinas->logo) }}"
+                                style="max-width: 100%; max-height: 100%; object-fit: contain;">
                             @else
-                              <span class="material-symbols-outlined text-slate-300">image</span>
+                              <i class="fas fa-image text-light fa-2x"></i>
                             @endif
                           </div>
-                          <label class="cursor-pointer text-primary hover:underline text-sm font-semibold">
+                          <label class="btn btn-sm btn-link font-weight-bold mb-0 text-primary p-0">
                             Ganti Logo
-                            <input type="file" name="logo" class="hidden" accept="image/*">
+                            <input type="file" name="logo" class="d-none" accept="image/*">
+                          </label>
+                        </div>
+                      </div>
+                      <div class="form-group mb-0">
+                        <label class="small font-weight-bold text-muted text-uppercase">Stempel Digital (PNG)</label>
+                        <div class="d-flex align-items-center bg-light p-2 rounded">
+                          <div id="stempel-preview-container"
+                            class="bg-white border text-center d-flex align-items-center justify-content-center mr-3 rounded overflow-hidden"
+                            style="width: 60px; height: 60px; padding: 5px;">
+                            @if($dinas->stempel_img)
+                              <img src="{{ Storage::url($dinas->stempel_img) }}"
+                                style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                            @else
+                              <i class="fas fa-stamp text-light fa-2x"></i>
+                            @endif
+                          </div>
+                          <label class="btn btn-sm btn-link font-weight-bold mb-0 text-primary p-0">
+                            Ganti Stempel
+                            <input type="file" name="stempel_img" class="d-none" accept="image/png">
                           </label>
                         </div>
                       </div>
                     </div>
-                    <div>
-                      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teks Footer
-                        (Copyright)</label>
-                      <textarea name="footer_text" rows="4"
-                        class="w-full rounded-lg border-slate-300 bg-white dark:bg-slate-800/50 dark:border-slate-700 dark:text-white focus:border-primary focus:ring-primary text-sm">{{ old('footer_text', $dinas->footer_text) }}</textarea>
-                    </div>
-                  </div>
-                  <div class="flex justify-end mt-4">
-                    <button type="submit"
-                      class="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
-                      <span class="material-symbols-outlined mr-2 text-[18px]">save</span>
-                      Update Branding
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            <!-- Tab Content: Keamanan -->
-            <div id="tab-security" class="tab-content hidden">
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Ubah Password</h3>
-              <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">Pastikan password Anda kuat dan unik untuk
-                keamanan akun.</p>
-
-              <form action="{{ route('super_admin.settings.security.update') }}" method="POST">
-                @csrf
-                <div class="max-w-xl space-y-5">
-                  <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-                      for="current_password">Password Saat Ini</label>
-                    <input type="password" name="current_password"
-                      class="block w-full rounded-lg border-slate-300 bg-slate-50 p-2.5 text-sm dark:border-slate-600 dark:bg-slate-800/50 dark:text-white focus:ring-primary focus:border-primary"
-                      placeholder="••••••••" required>
-                  </div>
-                  <div class="grid gap-5 md:grid-cols-2">
-                    <div>
-                      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-                        for="password">Password Baru</label>
-                      <input type="password" name="password"
-                        class="block w-full rounded-lg border-slate-300 bg-white p-2.5 text-sm dark:border-slate-600 dark:bg-slate-800/50 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="••••••••" required>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
-                        for="password_confirmation">Konfirmasi Password</label>
-                      <input type="password" name="password_confirmation"
-                        class="block w-full rounded-lg border-slate-300 bg-white p-2.5 text-sm dark:border-slate-600 dark:bg-slate-800/50 dark:text-white focus:ring-primary focus:border-primary"
-                        placeholder="••••••••" required>
-                    </div>
-                  </div>
-                  <div class="flex justify-end pt-4">
-                    <button type="submit"
-                      class="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition-colors">
-                      <span class="material-symbols-outlined mr-2 text-[18px]">lock_reset</span>
-                      Ubah Password
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-                    <!-- Tab Content: Maintenance -->
-                    <div id="tab-maintenance" class="tab-content hidden">
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Pemeliharaan & Database</h3>
-                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-8">Peralatan untuk memastikan sistem berjalan dengan optimal dan manajemen basis data.</p>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <!-- Cache Management -->
-                            <div class="rounded-xl border border-slate-200 p-5 dark:border-slate-700">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="p-2 bg-purple-50 text-purple-600 rounded-lg dark:bg-purple-900/20">
-                                        <span class="material-symbols-outlined">cleaning_services</span>
-                                    </div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white">Bersihkan Cache</h4>
-                                </div>
-                                <p class="text-xs text-slate-500 mb-4">Hapus file cache sistem untuk menyegarkan tampilan atau konfigurasi terbaru.</p>
-                                <form action="{{ route('super_admin.settings.cache.clear') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="w-full py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors dark:bg-slate-800 dark:border-slate-600 dark:text-white">Jalankan Clear Cache</button>
-                                </form>
-                            </div>
-
-                            <!-- Database Backup -->
-                            <div class="rounded-xl border border-slate-200 p-5 dark:border-slate-700">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="p-2 bg-green-50 text-green-600 rounded-lg dark:bg-green-900/20">
-                                        <span class="material-symbols-outlined">database</span>
-                                    </div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white">Database Backup</h4>
-                                </div>
-                                <p class="text-xs text-slate-500 mb-4">Unduh salinan cadangan basis data (.sql) Anda untuk keperluan keamanan file.</p>
-                                <form action="{{ route('super_admin.settings.backup') }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-2">
-                                        <span class="material-symbols-outlined text-sm">download</span>
-                                        Download Backup (.sql)
-                                    </button>
-                                </form>
-                            </div>
-
-                            <!-- Database Restore (New) -->
-                            <div class="rounded-xl border border-dashed border-slate-300 p-5 dark:border-slate-700 col-span-1 md:col-span-2 bg-slate-50/30 dark:bg-transparent">
-                                <div class="flex items-center gap-3 mb-3">
-                                    <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-900/20">
-                                        <span class="material-symbols-outlined">upload_file</span>
-                                    </div>
-                                    <h4 class="font-bold text-slate-900 dark:text-white">Restore Database</h4>
-                                </div>
-                                <p class="text-xs text-slate-500 mb-4">Pulihkan data dari file .sql yang pernah Anda unduh. <span class="text-red-500 font-bold">Peringatan: Data saat ini akan ditimpa!</span></p>
-                                <form action="{{ route('super_admin.settings.restore') }}" method="POST" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-3">
-                                    @csrf
-                                    <input type="file" name="db_file" accept=".sql" class="flex-1 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-blue-700 cursor-pointer border border-slate-200 rounded-lg p-1 dark:border-slate-700 dark:text-slate-400" required>
-                                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin memulihkan database? Seluruh data saat ini akan hilang dan digantikan oleh isi file backup.')" class="bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors dark:bg-slate-700 dark:hover:bg-slate-600">Restore Sekarang</button>
-                                </form>
-                            </div>
+                    <div class="col-md-6">
+                      <div class="row">
+                        <div class="col-6 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Kode Surat</label>
+                          <input type="text" name="kode_surat" value="{{ old('kode_surat', $dinas->kode_surat) }}"
+                            class="form-control" placeholder="Ex: DISDIK" required>
                         </div>
+                        <div class="col-6 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Pangkat</label>
+                          <input type="text" name="pimpinan_pangkat"
+                            value="{{ old('pimpinan_pangkat', $dinas->pimpinan_pangkat) }}" class="form-control"
+                            placeholder="Ex: Pembina, IV/a">
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Nama Pejabat Penandatangan</label>
+                        <input type="text" name="pimpinan_nama" value="{{ old('pimpinan_nama', $dinas->pimpinan_nama) }}"
+                          class="form-control" placeholder="Nama Lengkap & Gelar" required>
+                      </div>
+                      <div class="row">
+                        <div class="col-6 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Jabatan</label>
+                          <input type="text" name="pimpinan_jabatan"
+                            value="{{ old('pimpinan_jabatan', $dinas->pimpinan_jabatan) }}" class="form-control"
+                            placeholder="Ex: Kepala Dinas" required>
+                        </div>
+                        <div class="col-6 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">NIP Pejabat</label>
+                          <input type="text" name="pimpinan_nip" value="{{ old('pimpinan_nip', $dinas->pimpinan_nip) }}"
+                            class="form-control" placeholder="18 digit NIP">
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Teks Footer (Copyright)</label>
+                        <textarea name="footer_text" rows="2"
+                          class="form-control">{{ old('footer_text', $dinas->footer_text) }}</textarea>
+                      </div>
+
+                      <hr class="my-4">
+                      <h6 class="font-weight-bold mb-3"><i class="fas fa-certificate text-primary mr-2"></i> Watermark
+                        Sertifikat</h6>
+
+                      <div class="bg-light p-3 rounded border">
+                        <div class="row">
+                          <div class="col-md-5">
+                            <div class="form-group mb-0">
+                              <label class="small font-weight-bold text-muted text-uppercase">Aset Watermark</label>
+                              <div class="d-flex align-items-center bg-white p-2 rounded border">
+                                <div id="watermark-preview-container"
+                                  class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 roundedoverflow-hidden"
+                                    style="width: 50px; height: 50px; padding: 5px;">
+                                    @if($dinas->watermark_img)
+                                      <img src="{{ Storage::url($dinas->watermark_img) }}"
+                                        style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                    @else
+                                      <i class="fas fa-tint text-muted"></i>
+                                    @endif
+                                  </div>
+                                  <label class="btn btn-xs btn-outline-primary mb-0">
+                                    Pilih File
+                                    <input type="file" name="watermark_img" class="d-none" accept="image/*">
+                                  </label>
+                                </div>
+                                <p class="x-small text-muted mt-1 mb-0">Gunakan latar belakang transparan (PNG).</p>
+                              </div>
+                            </div>
+                            <div class="col-md-7">
+                              <div class="form-group mb-2">
+                                <div class="custom-control custom-switch">
+                                  <input type="checkbox" name="watermark_enabled" class="custom-control-input"
+                                    id="watermarkEnabled" {{ ($dinas->watermark_enabled ?? true) ? 'checked' : '' }}>
+                                  <label class="custom-control-label small font-weight-bold" for="watermarkEnabled">Aktifkan
+                                    Watermark Otomatis</label>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-6">
+                                  <div class="form-group mb-0">
+                                    <label class="x-small font-weight-bold text-muted mb-1">Opacity (%)</label>
+                                    <input type="number" name="watermark_opacity" step="0.01" min="0.01" max="1"
+                                      value="{{ old('watermark_opacity', $dinas->watermark_opacity ?? 0.05) }}"
+                                      class="form-control form-control-sm">
+                                  </div>
+                                </div>
+                                <div class="col-6">
+                                  <div class="form-group mb-0">
+                                    <label class="x-small font-weight-bold text-muted mb-1">Size (px)</label>
+                                    <input type="number" name="watermark_size" min="50" max="1000"
+                                      value="{{ old('watermark_size', $dinas->watermark_size ?? 400) }}"
+                                      class="form-control form-control-sm">
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                    <div class="text-right mt-3">
+                      <button type="submit" class="btn btn-primary px-4 font-weight-bold">
+                        <i class="fas fa-check-circle mr-1"></i> Update Branding
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Keamanan Tab -->
+                <div class="tab-pane fade" id="tab-security" role="tabpanel">
+                  <div class="mb-4">
+                    <h4 class="font-weight-bold text-dark mb-1">Ubah Password</h4>
+                    <p class="text-muted small">Pastikan password Anda kuat dan unik untuk keamanan akun.</p>
+                  </div>
+
+                  <form action="{{ route('super_admin.settings.security.update') }}" method="POST">
+                    @csrf
+                    <div class="row">
+                      <div class="col-md-5">
+                        <div class="form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Password Saat Ini</label>
+                          <input type="password" name="current_password" class="form-control bg-light"
+                            placeholder="••••••••" required>
+                        </div>
+                        <hr class="my-4">
+                        <div class="form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Password Baru</label>
+                          <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <div class="form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Konfirmasi Password</label>
+                          <input type="password" name="password_confirmation" class="form-control" placeholder="••••••••"
+                            required>
+                        </div>
+                        <div class="mt-4">
+                          <button type="submit" class="btn btn-warning px-4 font-weight-bold">
+                            <i class="fas fa-lock mr-2"></i> Ubah Password
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col-md-6 offset-md-1 d-none d-md-block pt-4">
+                        <div class="p-4 bg-light rounded text-center">
+                          <i class="fas fa-user-shield text-muted fa-5x mb-3"></i>
+                          <p class="text-muted small font-italic mx-5">Gunakan kombinasi huruf, angka, dan karakter khusus
+                            untuk perlindungan maksimal.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Pemeliharaan Tab -->
+                <div class="tab-pane fade" id="tab-maintenance" role="tabpanel">
+                  <div class="mb-4">
+                    <h4 class="font-weight-bold text-dark mb-1">Pemeliharaan & Database</h4>
+                    <p class="text-muted small">Alat untuk memastikan sistem berjalan optimal dan manajemen data.</p>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="card card-outline card-secondary shadow-sm mb-3">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-3">
+                            <div class="bg-gray-light p-2 rounded-circle mr-3"
+                              style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                              <i class="fas fa-broom text-secondary"></i>
+                            </div>
+                            <h6 class="font-weight-bold mb-0 text-dark">Bersihkan Cache</h6>
+                          </div>
+                          <p class="small text-muted mb-4">Hapus file cache sistem untuk menyegarkan tampilan atau
+                            konfigurasi terbaru.</p>
+                          <form action="{{ route('super_admin.settings.cache.clear') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-block btn-outline-secondary btn-sm font-weight-bold">
+                              Jalankan Clear Cache
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card card-outline card-success shadow-sm mb-3">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success-soft p-2 rounded-circle mr-3"
+                              style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: rgba(40,167,69,0.1);">
+                              <i class="fas fa-database text-success"></i>
+                            </div>
+                            <h6 class="font-weight-bold mb-0 text-dark">Database Backup</h6>
+                          </div>
+                          <p class="small text-muted mb-4">Unduh salinan cadangan basis data (.sql) Anda untuk keperluan
+                            keamanan data.</p>
+                          <form action="{{ route('super_admin.settings.backup') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-block btn-success shadow-sm btn-sm font-weight-bold">
+                              <i class="fas fa-download mr-1"></i> Download Backup (.sql)
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="card card-outline card-primary shadow-sm border-dashed">
+                        <div class="card-body">
+                          <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary-soft p-2 rounded-circle mr-3"
+                              style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: rgba(0,123,255,0.1);">
+                              <i class="fas fa-upload text-primary"></i>
+                            </div>
+                            <h6 class="font-weight-bold mb-0 text-dark">Restore Database</h6>
+                          </div>
+                          <p class="small text-muted mb-4">Pulihkan data dari file .sql yang pernah Anda unduh. <span
+                              class="text-danger font-weight-bold"><i class="fas fa-exclamation-triangle"></i> Peringatan:
+                              Data saat ini akan ditimpa!</span></p>
+                          <form action="{{ route('super_admin.settings.restore') }}" method="POST"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <div class="row align-items-center">
+                              <div class="col-md-9 form-group mb-md-0">
+                                <div class="custom-file">
+                                  <input type="file" name="db_file" class="custom-file-input" id="dbFile" accept=".sql"
+                                    required>
+                                  <label class="custom-file-label" for="dbFile">Pilih file backup .sql</label>
+                                </div>
+                              </div>
+                              <div class="col-md-3 text-right text-md-center">
+                                <button type="submit"
+                                  onclick="return confirm('Apakah Anda yakin ingin memulihkan database? Seluruh data saat ini akan hilang.')"
+                                  class="btn btn-dark btn-block font-weight-bold shadow-sm px-4">
+                                  Restore Sekarang
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-@endsection
 
-@push('scripts')
-  <script>
-    function switchTab(tabId) {
-      // Hide all contents
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.add('hidden');
-        tab.classList.remove('block');
-      });
+    @push('scripts')
+      <script>
+        // Image Preview Logic
+        function setupImagePreview(inputName, previewId, cardId = null) {
+          const input = document.querySelector(`input[name="${inputName}"]`);
+          const preview = document.getElementById(previewId);
 
-      // Show target
-      document.getElementById(tabId).classList.remove('hidden');
-      document.getElementById(tabId).classList.add('block');
-
-      // Update nav styling
-      document.querySelectorAll('.tab-link').forEach(link => {
-        link.classList.remove('border-primary', 'text-primary', 'font-bold');
-        link.classList.add('border-transparent', 'text-slate-500', 'font-medium');
-      });
-
-      const activeLink = document.getElementById('nav-' + tabId.replace('tab-', ''));
-      activeLink.classList.add('border-primary', 'text-primary', 'font-bold');
-      activeLink.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
-    }
-
-    // Image Preview Logic
-    function setupImagePreview(inputName, previewId, cardId = null) {
-      const input = document.querySelector(`input[name="${inputName}"]`);
-      const preview = document.getElementById(previewId);
-
-      if (input && preview) {
-        input.addEventListener('change', function () {
-          const file = this.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-              let img = preview.querySelector('img');
-              if (!img) {
-                preview.innerHTML = '';
-                img = document.createElement('img');
-                preview.appendChild(img);
-              }
-              img.src = e.target.result;
-              img.className = previewId.includes('logo') ? 'max-h-full max-w-full object-contain' : 'h-full w-full object-cover';
-
-              if (cardId) {
-                const cardPreview = document.getElementById(cardId);
-                if (cardPreview) {
-                  let cardImg = cardPreview.querySelector('img');
-                  if (!cardImg) {
-                    cardPreview.innerHTML = '';
-                    cardImg = document.createElement('img');
-                    cardPreview.appendChild(cardImg);
+          if (input && preview) {
+            input.addEventListener('change', function () {
+              const file = this.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                  let img = preview.querySelector('img');
+                  if (!img) {
+                    preview.innerHTML = '';
+                    img = document.createElement('img');
+                    preview.appendChild(img);
                   }
-                  cardImg.src = e.target.result;
-                  cardImg.className = 'h-full w-full object-cover';
+                  img.src = e.target.result;
+                  if (previewId.includes('logo') || previewId.includes('stempel') || previewId.includes('watermark')) {
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    img.style.objectFit = 'contain';
+                  } else {
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                  }
+
+                  if (cardId) {
+                    const cardPreview = document.getElementById(cardId);
+                    if (cardPreview) {
+                      let cardImg = cardPreview.querySelector('img');
+                      if (!cardImg) {
+                        cardPreview.innerHTML = '';
+                        cardImg = document.createElement('img');
+                        cardPreview.appendChild(cardImg);
+                      }
+                      cardImg.src = e.target.result;
+                      cardImg.className = 'h-100 w-100 object-cover';
+                    }
+                  }
                 }
+                reader.readAsDataURL(file);
               }
-            }
-            reader.readAsDataURL(file);
+            });
+          }
+        }
+
+        $(document).ready(function () {
+          setupImagePreview('photo', 'profile-preview-container', 'profile-preview-card');
+          setupImagePreview('logo', 'logo-preview-container');
+          setupImagePreview('stempel_img', 'stempel-preview-container');
+          setupImagePreview('watermark_img', 'watermark-preview-container');
+
+          // BS Custom File Input (for restore database)
+          if (typeof bsCustomFileInput !== 'undefined') {
+            bsCustomFileInput.init();
           }
         });
-      }
-    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      setupImagePreview('photo', 'profile-preview-container', 'profile-preview-card');
-      setupImagePreview('logo', 'logo-preview-container');
-    });
-  </script>
-@endpush
+        // Auto-switch to tab if error exists or session specific
+        @if($errors->hasAny(['current_password', 'password']))
+          $('#tab-security-link').tab('show');
+        @endif
+      </script>
+    @endpush
+@endsection

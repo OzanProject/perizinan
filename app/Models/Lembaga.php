@@ -44,6 +44,11 @@ class Lembaga extends Model
     return $this->hasMany(User::class);
   }
 
+  public function getNamaAttribute()
+  {
+    return $this->nama_lembaga;
+  }
+
   public function perizinans()
   {
     return $this->hasMany(Perizinan::class);

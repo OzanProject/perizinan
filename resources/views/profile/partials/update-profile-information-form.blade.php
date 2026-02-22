@@ -1,35 +1,45 @@
 <section>
-    <header class="mb-6">
-        <p class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-2 px-1">
-            {{ __("Informasi Dasar Akun") }}
+    <div class="form-group mb-4">
+        <p class="text-sm text-muted font-italic mb-0">
+            {{ __("Perbarui informasi profil akun dan alamat email Anda.") }}
         </p>
-    </header>
+    </div>
 
-
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-4">
         @csrf
         @method('patch')
 
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)"
-                required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <div class="form-group">
+            <label for="name" class="small font-weight-bold text-uppercase text-muted">{{ __('Nama Lengkap') }}</label>
+            <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"
+                value="{{ old('name', $user->name) }}" required autofocus autocomplete="name">
+            @error('name')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
         </div>
 
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-
+        <div class="form-group">
+            <label for="email" class="small font-weight-bold text-uppercase text-muted">{{ __('Alamat Email') }}</label>
+            <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                value="{{ old('email', $user->email) }}" required autocomplete="username">
+            @error('email')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="d-flex align-items-center mt-4">
+            <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                <i class="fas fa-save mr-1"></i> {{ __('Simpan') }}
+            </button>
 
             @if (session('status') === 'profile-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-xs italic font-semibold text-emerald-500">{{ __('Perubahan berhasil disimpan.') }}</p>
+                <span class="ml-3 text-success font-weight-bold small animate__animated animate__fadeIn">
+                    <i class="fas fa-check-circle mr-1"></i> {{ __('Berhasil disimpan.') }}
+                </span>
             @endif
         </div>
     </form>

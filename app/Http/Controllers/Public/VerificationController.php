@@ -4,21 +4,46 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Perizinan;
+use App\Services\DocumentRenderService;
 use Illuminate\Http\Request;
 
 class VerificationController extends Controller
 {
-  /**
-   * Verifikasi keaslian perizinan.
-   */
-  public function verify(Perizinan $perizinan)
+  protected $renderService;
+
+  public function __construct(DocumentRenderService $renderService)
   {
-    // Muat relasi yang diperlukan
+    $this->renderService = $renderService;
+  }
+
+  /**
+   * Public Verification Page
+   */
+  public function verify($hash)
+  {
+    // Try to find by hash (Phase 5 requirement)
+    $perizinan = Perizinan::where('document_hash', $hash)->first();
+
+    if (!$perizinan) {
+      return view('public.verify', [
+        'success' => false,
+        'message' => 'Dokumen tidak ditemukan atau Hash tidak valid.',
+      ]);
+    }
+
+    // Recalculate hash on-the-fly to check for database tampering
+    $currentHash = $this->renderService->calculateHash($perizinan->snapshot_html);
+    $isValid = ($currentHash === $perizinan->document_hash);
+
+    // Load relations for display
     $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-    // Jika status belum selesai, sertifikat mungkin belum valid atau masih proses
-    $isValid = ($perizinan->status === \App\Enums\PerizinanStatus::SELESAI);
-
-    return view('public.verification.show', compact('perizinan', 'isValid'));
+    return view('public.verify', [
+      'success' => true,
+      'isValid' => $isValid,
+      'perizinan' => $perizinan,
+      'currentHash' => $currentHash,
+      'storedHash' => $perizinan->document_hash
+    ]);
   }
 }

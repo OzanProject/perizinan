@@ -1,168 +1,136 @@
 @extends('layouts.backend')
 
 @section('title', 'Manajemen Lembaga')
-@section('breadcrumb', 'Lembaga')
+@section('breadcrumb', 'Manajemen Lembaga')
 
 @section('content')
-  <!-- Page Header & Breadcrumbs -->
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-    <div>
-      <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight mb-1">Manajemen Lembaga</h1>
-      <p class="text-slate-500 text-sm">Kelola data lembaga pendidikan (TK, SD, SMP, SMA, SMK, PKBM, LKP) di wilayah dinas
-        Anda.</p>
-    </div>
-  </div>
-
-  <!-- Main Card -->
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-    <!-- Card Header -->
-    <div class="bg-slate-900 px-6 py-4 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
-      <h3 class="text-white text-lg font-semibold flex items-center gap-2">
-        <span class="material-symbols-outlined text-xl">corporate_fare</span>
-        Daftar Lembaga Pendidikan
-      </h3>
-      <div class="flex items-center gap-3">
-        <a href="{{ route('super_admin.lembaga.create') }}"
-          class="flex items-center gap-2 bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all shadow-sm">
-          <span class="material-symbols-outlined text-[20px]">add</span>
-          <span>Tambah Lembaga Baru</span>
-        </a>
-        <div class="h-6 w-px bg-slate-700 mx-1"></div>
-        <a href="{{ route('super_admin.lembaga.index') }}"
-          class="text-slate-300 hover:text-white transition-colors p-1 rounded" title="Refresh">
-          <span class="material-symbols-outlined text-xl">refresh</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- Card Body: Toolbar -->
-    <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-white">
-      <!-- Search & Filter -->
-      <form action="{{ route('super_admin.lembaga.index') }}" method="GET"
-        class="flex w-full sm:w-auto gap-3 flex-1 max-w-lg">
-        <div class="relative w-full">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
-          </div>
-          <input name="search" value="{{ request('search') }}"
-            class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-lg leading-5 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
-            placeholder="Cari nama lembaga atau NPSN..." type="text" />
-        </div>
-        <button type="submit"
-          class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">Cari</button>
-      </form>
-    </div>
-
-    <!-- Card Body: Table -->
-    <div class="overflow-x-auto custom-scrollbar">
-      <table class="min-w-full divide-y divide-slate-200">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-16">No</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-20">Logo</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nama Lembaga
-            </th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Jenjang</th>
-            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nama Admin</th>
-            <th class="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">Status
-            </th>
-            <th class="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-40">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-slate-200">
-          @forelse($lembagas as $index => $lembaga)
-            <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                {{ $lembagas->firstItem() + $index }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                @if($lembaga->logo)
-                  <img src="{{ asset('storage/' . $lembaga->logo) }}" alt="Logo {{ $lembaga->nama_lembaga }}"
-                    class="h-10 w-10 rounded-lg object-cover border border-slate-200 shadow-sm">
-                @else
-                  <div
-                    class="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
-                    {{ substr($lembaga->nama_lembaga, 0, 2) }}
-                  </div>
-                @endif
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex flex-col">
-                  <span class="text-sm font-semibold text-slate-900">{{ $lembaga->nama_lembaga }}</span>
-                  <span class="text-xs text-slate-500">NPSN: {{ $lembaga->npsn }}</span>
+<div class="container-fluid">
+    <!-- Stats Row (Optional, for better AdminLTE feel) -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title font-weight-bold"><i class="fas fa-university mr-2 text-primary"></i> Daftar Lembaga Pendidikan</h3>
+                    <div class="card-tools">
+                        <a href="{{ route('super_admin.lembaga.create') }}" class="btn btn-primary btn-sm shadow-sm">
+                            <i class="fas fa-plus-circle mr-1"></i> Tambah Lembaga
+                        </a>
+                        <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
                 </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 py-1 text-xs font-bold rounded bg-slate-100 text-slate-700 border border-slate-200">
-                  {{ $lembaga->jenjang ?? 'N/A' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
-                @php
-                  $admin = $lembaga->users->first();
-                @endphp
-                {{ $admin ? $admin->name : 'N/A' }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-center">
-                <span
-                  class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 border border-green-200">Active</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex items-center justify-end gap-2">
-                  <a href="{{ route('super_admin.lembaga.show', $lembaga) }}"
-                    class="text-primary hover:text-blue-900 p-1.5 hover:bg-blue-50 rounded-lg" title="Detail">
-                    <span class="material-symbols-outlined text-[20px]">visibility</span>
-                  </a>
+                <div class="card-body">
+                    <!-- Toolbar & Filter -->
+                    <div class="row mb-3">
+                        <div class="col-md-6 col-lg-4">
+                            <form action="{{ route('super_admin.lembaga.index') }}" method="GET">
+                                <div class="input-group">
+                                    <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Cari nama atau NPSN...">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
 
-                  @if(!$admin)
-                    <a href="{{ route('super_admin.users.index', ['role' => 'admin_lembaga', 'lembaga_id' => $lembaga->id, 'create' => 1]) }}"
-                      class="text-emerald-600 hover:text-emerald-900 p-1.5 hover:bg-emerald-50 rounded-lg"
-                      title="Buat Akun Login">
-                      <span class="material-symbols-outlined text-[20px]">person_add</span>
-                    </a>
-                  @endif
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped border">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="text-center" style="width: 50px;">No</th>
+                                    <th style="width: 80px;">Logo</th>
+                                    <th>Identitas Lembaga</th>
+                                    <th class="text-center">Jenjang</th>
+                                    <th>Admin Utama</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($lembagas as $index => $lembaga)
+                                    <tr>
+                                        <td class="text-center align-middle">{{ $lembagas->firstItem() + $index }}</td>
+                                        <td class="align-middle text-center">
+                                            @if($lembaga->logo)
+                                                <img src="{{ asset('storage/' . $lembaga->logo) }}" alt="Logo" class="img-thumbnail shadow-sm" style="width: 45px; height: 45px; object-fit: cover;">
+                                            @else
+                                                <div class="bg-light border rounded d-flex align-items-center justify-content-center mx-auto" style="width: 45px; height: 45px;">
+                                                    <i class="fas fa-school text-muted small"></i>
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="font-weight-bold text-primary">{{ $lembaga->nama_lembaga }}</div>
+                                            <div class="small text-muted"><i class="fas fa-id-card-alt mr-1"></i> NPSN: {{ $lembaga->npsn }}</div>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <span class="badge badge-secondary px-2 py-1 shadow-sm">{{ $lembaga->jenjang ?? 'N/A' }}</span>
+                                        </td>
+                                        <td class="align-middle">
+                                            @php $admin = $lembaga->users->first(); @endphp
+                                            @if($admin)
+                                                <div class="small"><i class="fas fa-user mr-1 text-muted"></i> {{ $admin->name }}</div>
+                                                <div class="extra-small text-muted">{{ $admin->email }}</div>
+                                            @else
+                                                <span class="text-danger small font-italic"><i class="fas fa-exclamation-circle mr-1"></i> Belum ada admin</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <span class="badge badge-success px-3 py-1">Aktif</span>
+                                        </td>
+                                        <td class="text-right align-middle">
+                                            <div class="btn-group">
+                                                <a href="{{ route('super_admin.lembaga.show', $lembaga) }}" class="btn btn-sm btn-info shadow-sm" title="Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                
+                                                @if(!$admin)
+                                                    <a href="{{ route('super_admin.users.index', ['role' => 'admin_lembaga', 'lembaga_id' => $lembaga->id, 'create' => 1]) }}" class="btn btn-sm btn-success shadow-sm" title="Buat Akun">
+                                                        <i class="fas fa-user-plus"></i>
+                                                    </a>
+                                                @endif
 
-                  <a href="{{ route('super_admin.lembaga.edit', $lembaga) }}"
-                    class="text-warning hover:text-yellow-600 p-1.5 hover:bg-yellow-50 rounded-lg" title="Edit">
-                    <span class="material-symbols-outlined text-[20px]">edit</span>
-                  </a>
-                  <form action="{{ route('super_admin.lembaga.destroy', $lembaga) }}" method="POST" class="inline"
-                    onsubmit="return confirm('Hapus lembaga ini?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-danger hover:text-red-900 p-1.5 hover:bg-red-50 rounded-lg"
-                      title="Hapus">
-                      <span class="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </form>
+                                                <a href="{{ route('super_admin.lembaga.edit', $lembaga) }}" class="btn btn-sm btn-warning shadow-sm" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('super_admin.lembaga.destroy', $lembaga) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus lembaga ini secara permanen?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger shadow-sm" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
+                                            <p class="mb-0">Tidak ada data lembaga ditemukan.</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="6" class="px-6 py-10 text-center text-slate-500 italic">
-                Tidak ada data lembaga ditemukan.
-              </td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Card Footer: Pagination -->
-    <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50">
-      <div class="flex-1 flex items-center justify-between">
-        <div>
-          <p class="text-sm text-slate-700">
-            Menampilkan <span class="font-medium">{{ $lembagas->firstItem() }}</span> sampai <span
-              class="font-medium">{{ $lembagas->lastItem() }}</span> dari <span
-              class="font-medium">{{ $lembagas->total() }}</span> data
-          </p>
+                <div class="card-footer bg-white border-top">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+                        <small class="text-muted mb-3 mb-md-0">
+                            Menampilkan <b>{{ $lembagas->firstItem() }}</b> - <b>{{ $lembagas->lastItem() }}</b> dari <b>{{ $lembagas->total() }}</b> lembaga
+                        </small>
+                        <div>
+                            {{ $lembagas->appends(request()->query())->links() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          {{ $lembagas->appends(request()->query())->links() }}
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 @endsection

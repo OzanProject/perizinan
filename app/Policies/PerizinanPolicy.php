@@ -38,6 +38,7 @@ class PerizinanPolicy
             in_array($perizinan->status, [
                 PerizinanStatus::DIAJUKAN->value,
                 PerizinanStatus::DISETUJUI->value,
+                PerizinanStatus::SIAP_DIAMBIL->value,
                 PerizinanStatus::SELESAI->value
             ]);
     }

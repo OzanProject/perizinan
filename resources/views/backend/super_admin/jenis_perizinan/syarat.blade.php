@@ -4,210 +4,189 @@
 @section('breadcrumb', 'Persyaratan: ' . $jenisPerizinan->nama)
 
 @section('content')
-  <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 -mt-2">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Persyaratan: {{ $jenisPerizinan->nama }}</h1>
-      <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Konfigurasi dokumen wajib dan opsional yang harus
-        diunggah oleh pemohon.</p>
-    </div>
-    <div class="flex gap-2">
-      <a href="{{ route('super_admin.jenis_perizinan.index') }}"
-        class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm">
-        <span class="material-symbols-outlined text-lg">arrow_back</span>
-        Kembali ke Daftar Izin
-      </a>
-      <button onclick="openModal('add')"
-        class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors shadow-md">
-        <span class="material-symbols-outlined text-lg">add_circle</span>
-        Tambah Persyaratan
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Content Card -->
-  <div
-    class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-16">No
-            </th>
-            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama
-              Dokumen</th>
-            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Format
-              File</th>
-            <th class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status
-              Wajib</th>
-            <th
-              class="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">
-              Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-          @forelse($syarats as $index => $syarat)
-            <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
-              <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{{ $index + 1 }}</td>
-              <td class="px-6 py-4">
-                <div class="text-sm font-semibold text-slate-900 dark:text-white">{{ $syarat->nama_dokumen }}</div>
-                <div class="text-xs text-slate-500">{{ $syarat->deskripsi ?? '-' }}</div>
-              </td>
-              <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                <span
-                  class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-xs font-medium uppercase">{{ $syarat->tipe_file }}</span>
-              </td>
-              <td class="px-6 py-4">
-                @if($syarat->is_required)
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    Wajib
-                  </span>
-                @else
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                    Opsional
-                  </span>
-                @endif
-              </td>
-              <td class="px-6 py-4 text-right">
-                <div class="flex justify-end gap-2">
-                  <button onclick="openModal('edit', {{ json_encode($syarat) }})"
-                    class="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded transition-colors"
-                    title="Edit">
-                    <span class="material-symbols-outlined text-lg leading-none">edit</span>
-                  </button>
-                  <form action="{{ route('super_admin.jenis_perizinan.syarat.destroy', [$jenisPerizinan, $syarat]) }}"
-                    method="POST" class="inline" onsubmit="return confirm('Hapus persyaratan ini?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                      class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-colors"
-                      title="Hapus">
-                      <span class="material-symbols-outlined text-lg leading-none">delete</span>
-                    </button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="5" class="px-6 py-10 text-center text-slate-400 italic">Belum ada persyaratan dokumen.</td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
-    <div
-      class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-      <span class="text-xs text-slate-500 font-medium">Menampilkan {{ $syarats->count() }} persyaratan dokumen</span>
-    </div>
-  </div>
-
-  <!-- Modal Tambah/Edit Persyaratan -->
-  <div id="modalSyarat"
-    class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div
-      class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in duration-200">
-      <div
-        class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
-        <h3 id="modalTitle" class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary">add_circle</span>
-          Tambah Persyaratan Dokumen
-        </h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-500">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+  <div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+      <div class="col-sm-7">
+        <h1 class="m-0 text-dark font-weight-bold"><i class="fas fa-clipboard-list mr-2 text-primary"></i> Persyaratan
+          Dokumen</h1>
+        <p class="text-muted small mt-1">Konfigurasi dokumen wajib dan opsional yang harus diunggah oleh pemohon untuk
+          <strong>{{ $jenisPerizinan->nama }}</strong>.</p>
       </div>
-      <form id="formSyarat" method="POST" class="p-6 space-y-5">
-        @csrf
-        <div id="methodContainer"></div>
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1" for="nama_dokumen">Nama
-            Dokumen <span class="text-rose-500">*</span></label>
-          <input required
-            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary placeholder:text-slate-400"
-            id="nama_dokumen" name="nama_dokumen" placeholder="Contoh: Sertifikat Tanah / IMB" type="text" />
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1" for="deskripsi">Deskripsi
-            Singkat</label>
-          <textarea
-            class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary placeholder:text-slate-400 resize-none"
-            id="deskripsi" name="deskripsi" placeholder="Jelaskan detail dokumen untuk membantu pemohon..."
-            rows="3"></textarea>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1" for="tipe_file">Tipe File
-              <span class="text-rose-500">*</span></label>
-            <select required
-              class="w-full px-4 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-primary"
-              id="tipe_file" name="tipe_file">
-              <option value="pdf">PDF Only</option>
-              <option value="image">Gambar (JPG, PNG)</option>
-              <option value="all">Semua Format</option>
-            </select>
-          </div>
-          <div class="flex flex-col justify-end">
-            <label class="relative inline-flex items-center cursor-pointer mb-2">
-              <input name="is_required" id="is_required" type="checkbox" checked class="sr-only peer" />
-              <div
-                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/10 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary">
-              </div>
-              <span class="ml-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Wajib Diunggah</span>
-            </label>
-          </div>
-        </div>
-        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex gap-3 justify-end">
-          <button type="button" onclick="closeModal()"
-            class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
-            Batal
-          </button>
-          <button type="submit"
-            class="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
-            Simpan Persyaratan
+      <div class="col-sm-5 text-right">
+        <div class="btn-group">
+          <a href="{{ route('super_admin.jenis_perizinan.index') }}"
+            class="btn btn-default btn-sm shadow-sm font-weight-bold mr-2">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali
+          </a>
+          <button type="button" onclick="openModal('add')" class="btn btn-primary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-plus-circle mr-1"></i> Tambah Persyaratan
           </button>
         </div>
-      </form>
+      </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="card card-outline card-primary shadow-sm border-0">
+      <div class="card-header bg-white py-3">
+        <h3 class="card-title font-weight-bold text-dark"><i class="fas fa-th-list mr-2 text-primary"></i> Daftar Dokumen
+          Persyaratan</h3>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="px-4 text-center" style="width: 60px;">No</th>
+                <th>Nama Dokumen</th>
+                <th class="text-center">Format File</th>
+                <th class="text-center">Sifat</th>
+                <th class="text-right px-4">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse($syarats as $index => $syarat)
+                <tr>
+                  <td class="text-center align-middle">{{ $index + 1 }}</td>
+                  <td class="align-middle">
+                    <div class="font-weight-bold text-dark">{{ $syarat->nama_dokumen }}</div>
+                    <div class="text-xs text-muted">{{ $syarat->deskripsi ?? '-' }}</div>
+                  </td>
+                  <td class="text-center align-middle">
+                    <span
+                      class="badge badge-info px-2 py-1 uppercase small font-weight-bold">{{ $syarat->tipe_file }}</span>
+                  </td>
+                  <td class="text-center align-middle">
+                    @if($syarat->is_required)
+                      <span class="badge badge-success px-3 py-1 rounded-pill small">
+                        <i class="fas fa-check-circle mr-1"></i> Wajib
+                      </span>
+                    @else
+                      <span class="badge badge-secondary px-3 py-1 rounded-pill small">
+                        <i class="fas fa-minus-circle mr-1"></i> Opsional
+                      </span>
+                    @endif
+                  </td>
+                  <td class="text-right align-middle px-4">
+                    <div class="btn-group">
+                      <button onclick="openModal('edit', {{ json_encode($syarat) }})"
+                        class="btn btn-warning btn-sm shadow-sm rounded-circle mr-2" title="Edit">
+                        <i class="fas fa-edit text-white"></i>
+                      </button>
+                      <form action="{{ route('super_admin.jenis_perizinan.syarat.destroy', [$jenisPerizinan, $syarat]) }}"
+                        method="POST" class="d-inline" onsubmit="return confirm('Hapus persyaratan ini?')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm shadow-sm rounded-circle" title="Hapus">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="5" class="py-5 text-center text-muted">
+                    <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-50"></i>
+                    Belum ada persyaratan dokumen yang dikonfigurasi.
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer bg-white py-2">
+        <span class="text-xs text-muted font-weight-bold text-uppercase">Total: {{ $syarats->count() }} Persyaratan</span>
+      </div>
     </div>
   </div>
 
-  <script>
-    function openModal(mode, data = null) {
-      const modal = document.getElementById('modalSyarat');
-      const form = document.getElementById('formSyarat');
-      const title = document.getElementById('modalTitle');
-      const methodContainer = document.getElementById('methodContainer');
+  <!-- Modal Tambah/Edit (Bootstrap 4) -->
+  <div class="modal fade" id="modalSyarat" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content shadow-lg border-0" style="border-radius: 12px;">
+        <div class="modal-header bg-light border-bottom-0 py-3">
+          <h5 class="modal-title font-weight-bold" id="modalTitle">
+            <i class="fas fa-plus-circle mr-2 text-primary"></i> Tambah Persyaratan
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="formSyarat" method="POST">
+          @csrf
+          <div id="methodContainer"></div>
+          <div class="modal-body p-4">
+            <div class="form-group">
+              <label class="small font-weight-bold text-uppercase text-muted">Nama Dokumen <span
+                  class="text-danger">*</span></label>
+              <input type="text" id="nama_dokumen" name="nama_dokumen" class="form-control font-weight-bold"
+                placeholder="Contoh: Sertifikat Tanah / IMB" required>
+            </div>
+            <div class="form-group">
+              <label class="small font-weight-bold text-uppercase text-muted">Deskripsi Singkat</label>
+              <textarea id="deskripsi" name="deskripsi" class="form-control" rows="3"
+                placeholder="Jelaskan detail dokumen untuk membantu pemohon..."></textarea>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group mb-0">
+                  <label class="small font-weight-bold text-uppercase text-muted">Tipe File <span
+                      class="text-danger">*</span></label>
+                  <select id="tipe_file" name="tipe_file" class="form-control custom-select" required>
+                    <option value="pdf">PDF Only</option>
+                    <option value="image">Gambar (JPG, PNG)</option>
+                    <option value="all">Semua Format</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6 d-flex align-items-end">
+                <div class="custom-control custom-switch mb-2">
+                  <input type="checkbox" name="is_required" id="is_required" value="1" class="custom-control-input"
+                    checked>
+                  <label class="custom-control-label small font-weight-bold text-uppercase text-muted cursor-pointer"
+                    for="is_required">Wajib Diunggah</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light border-top-0 py-3 mt-2">
+            <button type="button" class="btn btn-default font-weight-bold px-4 shadow-sm"
+              data-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary font-weight-bold px-4 shadow-sm">Simpan Persyaratan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-      modal.classList.remove('hidden');
+  @push('scripts')
+    <script>
+      function openModal(mode, data = null) {
+        const form = document.getElementById('formSyarat');
+        const title = document.getElementById('modalTitle');
+        const methodContainer = document.getElementById('methodContainer');
 
-      if (mode === 'edit') {
-        title.innerHTML = '<span class="material-symbols-outlined text-amber-500">edit_note</span> Edit Persyaratan Dokumen';
-        form.action = `/super-admin/jenis-perizinan/{{ $jenisPerizinan->id }}/syarat/${data.id}`;
-        methodContainer.innerHTML = '@method("PUT")';
+        if (mode === 'edit') {
+          title.innerHTML = '<i class="fas fa-edit mr-2 text-warning"></i> Edit Persyaratan Dokumen';
+          form.action = `/super-admin/jenis-perizinan/{{ $jenisPerizinan->id }}/syarat/${data.id}`;
+          methodContainer.innerHTML = '@method("PUT")';
 
-        document.getElementById('nama_dokumen').value = data.nama_dokumen;
-        document.getElementById('deskripsi').value = data.deskripsi || '';
-        document.getElementById('tipe_file').value = data.tipe_file;
-        document.getElementById('is_required').checked = data.is_required;
-      } else {
-        title.innerHTML = '<span class="material-symbols-outlined text-primary">add_circle</span> Tambah Persyaratan Dokumen';
-        form.action = "{{ route('super_admin.jenis_perizinan.syarat.store', $jenisPerizinan) }}";
-        methodContainer.innerHTML = '';
-        form.reset();
-        document.getElementById('is_required').checked = true;
+          document.getElementById('nama_dokumen').value = data.nama_dokumen;
+          document.getElementById('deskripsi').value = data.deskripsi || '';
+          document.getElementById('tipe_file').value = data.tipe_file;
+          document.getElementById('is_required').checked = data.is_required == 1;
+        } else {
+          title.innerHTML = '<i class="fas fa-plus-circle mr-2 text-primary"></i> Tambah Persyaratan Dokumen';
+          form.action = "{{ route('super_admin.jenis_perizinan.syarat.store', $jenisPerizinan) }}";
+          methodContainer.innerHTML = '';
+          form.reset();
+          document.getElementById('is_required').checked = true;
+        }
+
+        $('#modalSyarat').modal('show');
       }
-    }
-
-    function closeModal() {
-      document.getElementById('modalSyarat').classList.add('hidden');
-    }
-
-    // Close on backdrop click
-    document.getElementById('modalSyarat').addEventListener('click', function (e) {
-      if (e.target === this) closeModal();
-    });
-  </script>
+    </script>
+  @endpush
 @endsection

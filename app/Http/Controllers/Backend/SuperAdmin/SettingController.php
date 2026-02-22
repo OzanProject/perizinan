@@ -54,24 +54,55 @@ class SettingController extends Controller
 
     $request->validate([
       'app_name' => 'required|string|max:255',
+      'kode_surat' => 'required|string|max:50',
+      'pimpinan_nama' => 'required|string|max:255',
+      'pimpinan_jabatan' => 'required|string|max:255',
+      'pimpinan_pangkat' => 'nullable|string|max:255',
+      'pimpinan_nip' => 'nullable|string|max:255',
       'footer_text' => 'nullable|string',
       'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
+      'stempel_img' => 'nullable|image|mimes:png|max:2048', // PNG only for transparency
+      'watermark_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
+      'watermark_enabled' => 'nullable|string', // Checkbox
+      'watermark_opacity' => 'required|numeric|min:0.01|max:1',
+      'watermark_size' => 'required|integer|min:50|max:1000',
     ]);
 
     $dinas->app_name = $request->app_name;
+    $dinas->kode_surat = $request->kode_surat;
+    $dinas->pimpinan_nama = $request->pimpinan_nama;
+    $dinas->pimpinan_jabatan = $request->pimpinan_jabatan;
+    $dinas->pimpinan_pangkat = $request->pimpinan_pangkat;
+    $dinas->pimpinan_nip = $request->pimpinan_nip;
     $dinas->footer_text = $request->footer_text;
+    $dinas->watermark_enabled = $request->has('watermark_enabled');
+    $dinas->watermark_opacity = $request->watermark_opacity;
+    $dinas->watermark_size = $request->watermark_size;
 
     if ($request->hasFile('logo')) {
       // Hapus logo lama jika ada
       if ($dinas->logo) {
-        // Cek jika path mengandung 'public/' hapus prefixnya untuk kecocokan Storage::disk('public')
         $oldLogo = str_replace('public/', '', $dinas->logo);
         Storage::disk('public')->delete($oldLogo);
       }
-
-      // Store in 'logos' folder on 'public' disk
       $path = $request->file('logo')->store('logos', 'public');
       $dinas->logo = $path;
+    }
+
+    if ($request->hasFile('stempel_img')) {
+      if ($dinas->stempel_img) {
+        $oldStempel = str_replace('public/', '', $dinas->stempel_img);
+        Storage::disk('public')->delete($oldStempel);
+      }
+      $dinas->stempel_img = $request->file('stempel_img')->store('stempels', 'public');
+    }
+
+    if ($request->hasFile('watermark_img')) {
+      if ($dinas->watermark_img) {
+        $oldWatermark = str_replace('public/', '', $dinas->watermark_img);
+        Storage::disk('public')->delete($oldWatermark);
+      }
+      $dinas->watermark_img = $request->file('watermark_img')->store('watermarks', 'public');
     }
 
     $dinas->save();

@@ -4,361 +4,396 @@
 @section('breadcrumb', 'Verifikasi Administratif')
 
 @section('content')
-  <div class="px-6 py-4 flex flex-col gap-1 shrink-0 bg-background-light dark:bg-background-dark -mt-4 mb-6">
-    <div class="flex justify-between items-start">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Verifikasi Administratif</h1>
-        <p class="text-sm text-slate-500">Tinjau kelengkapan berkas untuk melanjutkan ke tahap verifikasi lapangan.</p>
-      </div>
-      @php
-        $statusEnum = \App\Enums\PerizinanStatus::from($perizinan->status);
-        $statusColor = $statusEnum->color();
-        $bgClasses = [
-          'warning' => 'bg-amber-100 text-amber-800 border-amber-200',
-          'success' => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-          'info' => 'bg-sky-100 text-sky-800 border-sky-200',
-          'primary' => 'bg-blue-100 text-blue-800 border-blue-200',
-          'danger' => 'bg-red-100 text-red-800 border-red-200',
-          'secondary' => 'bg-slate-100 text-slate-800 border-slate-200',
-          'dark' => 'bg-slate-800 text-white border-slate-900',
-        ];
-        $badgeClass = $bgClasses[$statusColor] ?? 'bg-slate-100 text-slate-800 border-slate-200';
-      @endphp
-      <div class="flex items-center gap-2 {{ $badgeClass }} px-3 py-1.5 rounded-full border">
-        <span class="material-symbols-outlined text-sm">
-          @if($statusColor == 'success' || $statusColor == 'dark') check_circle @elseif($statusColor == 'warning') history
-          @else schedule @endif
-        </span>
-        <span class="text-xs font-bold uppercase tracking-wide">{{ $statusEnum->label() }}</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="flex flex-col xl:flex-row gap-6 pb-24">
-    <!-- Left Column: Applicant Data -->
-    <div class="flex-1 flex flex-col gap-6 min-w-0">
-      <!-- Tabs -->
-      <div class="flex border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
-        <button class="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary whitespace-nowrap active-tab"
-          onclick="switchTab('data-lembaga')">
-          Data Lembaga
-        </button>
-        <button
-          class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 border-b-2 border-transparent hover:border-slate-300 transition-colors whitespace-nowrap"
-          onclick="switchTab('diskusi')">
-          Diskusi & Catatan
-        </button>
-      </div>
-
-      <!-- Tab Content: Data Lembaga -->
-      <div id="tab-data-lembaga" class="tab-content">
-        <div class="space-y-6">
-          <!-- Card: Identity -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-primary overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-slate-400">domain</span>
-                Identitas Lembaga
-              </h3>
-              <a href="{{ route('super_admin.lembaga.show', $perizinan->lembaga) }}"
-                class="text-xs text-primary hover:underline">Lihat Profil Lengkap</a>
-            </div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 text-sm">
-              <div>
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nama
-                  Lembaga</label>
-                <p class="font-medium text-slate-800">{{ $perizinan->lembaga->nama_lembaga }}</p>
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">NPSN</label>
-                <p class="font-medium text-slate-800">{{ $perizinan->lembaga->npsn }}</p>
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Jenis Izin</label>
-                <p class="font-medium text-slate-800">{{ $perizinan->jenisPerizinan->nama }}</p>
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Nomor
-                  Surat</label>
-                <p class="font-medium text-slate-800 font-mono">{{ $perizinan->nomor_surat ?? '-' }}</p>
-              </div>
-              <div class="md:col-span-2">
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Alamat
-                  Lengkap</label>
-                <p class="font-medium text-slate-800">{{ $perizinan->lembaga->alamat }}</p>
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Jenjang
-                  Pendidikan</label>
-                <p class="font-medium text-slate-800">{{ $perizinan->lembaga->jenjang }}</p>
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Tanggal
-                  Pengajuan</label>
-                <p class="font-medium text-slate-800">{{ $perizinan->created_at->format('d F Y, H:i') }}</p>
-              </div>
-            </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card card-primary card-outline card-tabs">
+          <div class="card-header p-0 pt-1 border-bottom-0">
+            <ul class="nav nav-tabs" id="perizinan-tabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active font-weight-bold" id="data-lembaga-tab" data-toggle="pill"
+                  href="#tab-data-lembaga" role="tab">
+                  <i class="fas fa-university mr-1"></i> Data Lembaga & Dokumen
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link font-weight-bold" id="diskusi-tab" data-toggle="pill" href="#tab-diskusi" role="tab">
+                  <i class="fas fa-comments mr-1"></i> Diskusi & Catatan
+                  @if($perizinan->discussions->count() > 0)
+                    <span class="badge badge-danger ml-1">{{ $perizinan->discussions->count() }}</span>
+                  @endif
+                </a>
+              </li>
+            </ul>
           </div>
-
-          <!-- Card: Documents Preview -->
-          <div class="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-info overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-slate-400">attach_file</span>
-                Dokumen Pendukung
-              </h3>
-            </div>
-            <div class="p-6">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                @forelse($perizinan->dokumens as $dokumen)
-                  <a href="{{ asset('storage/' . $dokumen->path) }}" target="_blank"
-                    class="border border-slate-200 rounded-xl p-4 hover:bg-slate-50 transition-colors group">
-                    <div class="flex items-start gap-3">
-                      <div class="h-10 w-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined">picture_as_pdf</span>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-slate-800 truncate group-hover:text-primary">
-                          {{ $dokumen->nama_file }}
-                        </p>
-                        <p class="text-[10px] text-slate-500 uppercase font-bold mt-0.5">Dokumen Digital</p>
-                      </div>
-                      <span
-                        class="material-symbols-outlined text-slate-300 group-hover:text-primary text-[20px]">open_in_new</span>
+          <div class="card-body">
+            <div class="tab-content">
+              <!-- Tab Content: Data Lembaga -->
+              <div class="tab-pane fade show active" id="tab-data-lembaga" role="tabpanel">
+                <div class="card card-info card-outline">
+                  <div class="card-header">
+                    <h3 class="card-title font-weight-bold"><i class="fas fa-id-card mr-2"></i> Identitas Pengajuan</h3>
+                    <div class="card-tools">
+                      <a href="{{ route('super_admin.lembaga.show', $perizinan->lembaga) }}"
+                        class="btn btn-tool btn-sm bg-light">
+                        <i class="fas fa-external-link-alt mr-1"></i> Profil Lembaga
+                      </a>
                     </div>
-                  </a>
-                @empty
-                  <div
-                    class="col-span-full py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-400 italic text-sm">
-                    Belum ada dokumen yang diunggah.
                   </div>
-                @endforelse
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-sm-6 mb-3">
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1">Nama Lembaga</label>
+                        <p class="mb-0 font-weight-bold text-dark h6">{{ $perizinan->lembaga->nama_lembaga }}</p>
+                      </div>
+                      <div class="col-sm-6 mb-3">
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1">NPSN</label>
+                        <p class="mb-0 font-weight-bold text-dark h6">{{ $perizinan->lembaga->npsn }}</p>
+                      </div>
+                      <div class="col-sm-6 mb-3">
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1">Jenis Izin</label>
+                        <p class="mb-0 font-weight-bold text-dark h6 text-primary">{{ $perizinan->jenisPerizinan->nama }}
+                        </p>
+                      </div>
+                      <div class="col-sm-6 mb-3">
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1">Nomor Surat</label>
+                        <p class="mb-0 font-weight-bold text-dark h6">{{ $perizinan->nomor_surat ?? '-' }}</p>
+                      </div>
+                      <div class="col-12 mb-3">
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1">Alamat Lengkap</label>
+                        <p class="mb-0 text-dark">{{ $perizinan->lembaga->alamat }}</p>
+                      </div>
+                      <div class="col-sm-6">
+                        <label class="text-muted small text-uppercase font-weight-bold mb-1">Jenjang & Tanggal</label>
+                        <p class="mb-0 text-dark">
+                          <span class="badge badge-secondary">{{ $perizinan->lembaga->jenjang }}</span>
+                          <span class="text-muted ml-2 small">{{ $perizinan->created_at->format('d F Y, H:i') }}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-      <!-- Tab Content: Diskusi -->
-      <div id="tab-diskusi" class="tab-content hidden">
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div class="p-4 border-b border-slate-100 bg-slate-50">
-            <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm">
-              <span class="material-symbols-outlined text-primary">chat</span>
-              Diskusi Perizinan
-            </h3>
-          </div>
-          <div class="p-6 h-[500px] overflow-y-auto custom-scrollbar space-y-4 bg-slate-50/50" id="chat-container">
-            @forelse($perizinan->discussions as $chat)
-              <div class="flex {{ $chat->user_id == auth()->id() ? 'justify-end' : 'justify-start' }}">
-                <div
-                  class="max-w-[80%] {{ $chat->user_id == auth()->id() ? 'bg-primary text-white' : 'bg-white border border-slate-200' }} p-3 rounded-2xl shadow-sm">
-                  <p
-                    class="text-[10px] font-bold uppercase {{ $chat->user_id == auth()->id() ? 'text-blue-100 text-right' : 'text-slate-400' }} mb-1">
-                    {{ $chat->user->name }} • {{ $chat->created_at->diffForHumans() }}
-                  </p>
-                  <p class="text-sm">{{ $chat->message }}</p>
+                <div class="card card-warning card-outline mt-4">
+                  <div class="card-header">
+                    <h3 class="card-title font-weight-bold"><i class="fas fa-file-alt mr-2"></i> Dokumen Persyaratan</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      @forelse($perizinan->dokumens as $dokumen)
+                        <div class="col-md-6 mb-3">
+                          <div class="info-box shadow-none border bg-light">
+                            <span class="info-box-icon bg-danger-gradient"><i class="fas fa-file-pdf"></i></span>
+                            <div class="info-box-content">
+                              <span
+                                class="info-box-text text-truncate font-weight-bold small">{{ $dokumen->nama_file }}</span>
+                              <span class="info-box-number mt-1">
+                                <a href="{{ asset('storage/' . $dokumen->path) }}" target="_blank"
+                                  class="btn btn-xs btn-primary px-3 shadow-sm font-weight-bold">
+                                  <i class="fas fa-external-link-alt mr-1"></i> Buka File
+                                </a>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      @empty
+                        <div class="col-12 text-center py-5 text-muted bg-light rounded"
+                          style="border: 2px dashed #dee2e6;">
+                          <i class="fas fa-cloud-upload-alt fa-3x mb-3 opacity-50"></i>
+                          <p class="mb-0 font-weight-bold">Belum ada dokumen yang diunggah.</p>
+                        </div>
+                      @endforelse
+                    </div>
+                  </div>
                 </div>
               </div>
-            @empty
-              <div class="text-center py-10 text-slate-400">
-                <span class="material-symbols-outlined text-4xl mb-2">forum</span>
-                <p class="italic">Belum ada diskusi untuk pengajuan ini.</p>
-              </div>
-            @endforelse
-          </div>
-          <div class="p-4 bg-white border-t border-slate-100">
-            <form action="{{ route('super_admin.perizinan.discussion.store', $perizinan) }}" method="POST">
-              @csrf
-              <div class="relative">
-                <input type="text" name="message"
-                  class="w-full pl-4 pr-12 py-3 bg-slate-100 border-none rounded-xl focus:ring-2 focus:ring-primary text-sm"
-                  placeholder="Ketik pesan perbaikan atau pertanyaan...">
-                <button type="submit"
-                  class="absolute right-2 top-2 p-1.5 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <span class="material-symbols-outlined">send</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Right Column: Verification Checklist Panel -->
-    <div class="w-full xl:w-96 shrink-0 flex flex-col gap-4">
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 sticky top-24 overflow-hidden">
-        <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
-          <h3 class="font-bold text-sm">Checklist Administratif</h3>
-          <span class="text-[10px] font-bold bg-white/20 px-2 py-1 rounded uppercase tracking-wider">Verifikator</span>
-        </div>
-        <div class="divide-y divide-slate-100">
-          @php $isApproved = $perizinan->status === \App\Enums\PerizinanStatus::DISETUJUI->value || $perizinan->status === \App\Enums\PerizinanStatus::SELESAI->value; @endphp
-          <div class="p-4 hover:bg-slate-50 transition-colors">
-            <div class="flex items-start gap-3">
-              <input type="checkbox" {{ $isApproved ? 'checked' : '' }}
-                class="h-5 w-5 text-success rounded border-slate-300 focus:ring-success cursor-pointer mt-0.5">
-              <div class="flex-1">
-                <label class="text-sm font-semibold text-slate-700 block">Validitas Identitas</label>
-                <p class="text-[11px] text-slate-500">Nama lembaga dan NPSN sesuai database referensi.</p>
-              </div>
-            </div>
-          </div>
-          <div class="p-4 hover:bg-slate-50 transition-colors">
-            <div class="flex items-start gap-3">
-              <input type="checkbox" {{ $isApproved ? 'checked' : '' }}
-                class="h-5 w-5 text-success rounded border-slate-300 focus:ring-success cursor-pointer mt-0.5">
-              <div class="flex-1">
-                <label class="text-sm font-semibold text-slate-700 block">Kesesuaian Lokasi</label>
-                <p class="text-[11px] text-slate-500">Alamat domisili lembaga jelas dan dapat diverifikasi.</p>
-              </div>
-            </div>
-          </div>
-          <div class="p-4 hover:bg-slate-50 transition-colors">
-            <div class="flex items-start gap-3">
-              <input type="checkbox" {{ $isApproved ? 'checked' : '' }}
-                class="h-5 w-5 text-success rounded border-slate-300 focus:ring-success cursor-pointer mt-0.5">
-              <div class="flex-1">
-                <label class="text-sm font-semibold text-slate-700 block">Kualitas Berkas</label>
-                <p class="text-[11px] text-slate-500">Scan dokumen asli, terbaca jelas, dan tidak manipulatif.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="p-4 bg-slate-50 border-t border-slate-100 text-center">
-          <p class="text-[11px] text-slate-500 italic">Gunakan panel ini sebagai alat bantu pemeriksaan berkas digital.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
+              <!-- Tab Content: Diskusi -->
+              <div class="tab-pane fade" id="tab-diskusi" role="tabpanel">
+                <div class="card direct-chat direct-chat-primary shadow-none border-0 mb-0">
+                  <div class="card-body">
+                    <div class="direct-chat-messages" id="chat-container" style="height: 400px !important;">
+                      @forelse($perizinan->discussions as $chat)
+                        <div class="direct-chat-msg {{ $chat->user_id == Auth::id() ? 'right' : '' }} mb-4">
+                          <div class="direct-chat-infos clearfix">
+                            <span
+                              class="direct-chat-name {{ $chat->user_id == Auth::id() ? 'float-right' : 'float-left' }} font-weight-bold small text-uppercase">{{ $chat->user->name }}</span>
+                            <span
+                              class="direct-chat-timestamp {{ $chat->user_id == Auth::id() ? 'float-left' : 'float-right' }} small">{{ $chat->created_at->format('H:i, d M') }}</span>
+                          </div>
+                          <div
+                            class="direct-chat-text shadow-sm border-0 py-2 px-3 {{ $chat->user_id == Auth::id() ? 'bg-primary text-white' : 'bg-white text-dark border' }}"
+                            style="border-radius: 12px;">
+                            {{ $chat->message }}
+                          </div>
+                        </div>
+                      @empty
+                        <div
+                          class="h-100 d-flex flex-column align-items-center justify-content-center opacity-25 italic py-5">
+                          <i class="fas fa-comments fa-4x mb-3"></i>
+                          <p class="font-weight-bold h5">Belum ada diskusi.</p>
+                        </div>
+                      @endforelse
+                    </div>
+                  </div>
+                  <div class="card-footer bg-white border-top px-0 pt-4 pb-0">
+                    <form action="{{ route('super_admin.perizinan.discussion.store', $perizinan) }}" method="POST">
+                      @csrf
+                      <div class="input-group">
+                        <input type="text" name="message" id="discussion-input"
+                          placeholder="Tulis catatan atau pertanyaan ke lembaga..."
+                          class="form-control form-control-lg border-primary" required>
+                        <span class="input-group-append">
+                          <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                            <i class="fas fa-paper-plane mr-1"></i> KIRIM
+                          </button>
+                        </span>
+                      </div>
+                    </form>
 
-  <!-- Sticky Bottom Action Bar -->
-  <div
-    class="fixed bottom-0 left-0 right-0 md:left-64 bg-white border-t border-slate-200 p-4 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-40 transition-all duration-300">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <button
-          class="text-slate-500 hover:text-primary text-xs font-bold flex items-center gap-2 uppercase tracking-tight"
-          onclick="window.print()">
-          <span class="material-symbols-outlined text-[18px]">print</span>
-          Cetak Draft
-        </button>
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                      <button type="button" onclick="insertQuickText('Dokumen tidak lengkap, mohon periksa kembali.')"
+                        class="btn btn-xs btn-outline-secondary mr-2 mb-2 px-3">Dokumen tidak lengkap</button>
+                      <button type="button" onclick="insertQuickText('File tidak terbaca / pecah, mohon unggah ulang.')"
+                        class="btn btn-xs btn-outline-secondary mr-2 mb-2 px-3">File tidak terbaca</button>
+                      <button type="button" onclick="insertQuickText('Mohon tunggu, proses verifikasi sedang berjalan.')"
+                        class="btn btn-xs btn-outline-secondary mr-2 mb-2 px-3">Sedang verifikasi</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="flex items-center gap-3 w-full sm:w-auto">
-        @if($perizinan->status === \App\Enums\PerizinanStatus::DIAJUKAN->value)
-          <button onclick="document.getElementById('modalRevision').classList.remove('hidden')"
-            class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl border-2 border-warning text-warning hover:bg-warning hover:text-white transition-all text-xs font-bold flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">assignment_return</span>
-            KEMBALIKAN PERBAIKAN
-          </button>
-          <form action="{{ route('super_admin.perizinan.approve', $perizinan) }}" method="POST" class="flex-1 sm:flex-none">
-            @csrf
-            <button type="submit" onclick="return confirm('Apakah Anda yakin dokumen sudah lengkap dan valid?')"
-              class="w-full px-8 py-2.5 rounded-xl bg-success text-white hover:bg-green-600 transition-all text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-500/30">
-              <span class="material-symbols-outlined text-[18px]">check_circle</span>
-              SETUJUI & LANJUTKAN
-            </button>
-          </form>
-        @else
-          <div class="flex items-center gap-3">
-            <div
-              class="flex items-center gap-3 px-6 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+
+      <!-- Sidebar Actions -->
+      <div class="col-md-4">
+        <div class="card card-{{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() }} card-outline shadow-sm">
+          <div class="card-header">
+            <h3 class="card-title font-weight-bold"><i class="fas fa-tasks mr-2"></i> Tindakan Verifikasi</h3>
+          </div>
+          <div class="card-body">
+            <div class="text-center mb-4 py-3 bg-light rounded border">
+              <label class="text-muted small text-uppercase font-weight-bold d-block mb-2">Status Saat Ini</label>
               <span
-                class="material-symbols-outlined text-[20px] {{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() == 'success' ? 'text-green-500' : 'text-slate-400' }}">info</span>
-              <span class="text-xs font-bold uppercase tracking-widest">Status
-                {{ \App\Enums\PerizinanStatus::from($perizinan->status)->label() }}</span>
+                class="badge badge-{{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() }} px-4 py-2 text-uppercase font-weight-bold"
+                style="font-size: 14px;">
+                <i class="fas fa-info-circle mr-1"></i>
+                {{ \App\Enums\PerizinanStatus::from($perizinan->status)->label() }}
+              </span>
             </div>
 
-            @php $canFinalize = in_array($perizinan->status, [\App\Enums\PerizinanStatus::DISETUJUI->value, \App\Enums\PerizinanStatus::SIAP_DIAMBIL->value, \App\Enums\PerizinanStatus::SELESAI->value]); @endphp
-            @if($canFinalize)
-              <a href="{{ route('super_admin.perizinan.finalisasi', $perizinan) }}"
-                class="px-8 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-hover transition-all text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/30">
-                <span class="material-symbols-outlined text-[18px]">verified_user</span>
-                {{ $perizinan->status === \App\Enums\PerizinanStatus::DISETUJUI->value ? 'LANJUT KE FINALISASI' : 'EDIT FINALISASI' }}
-              </a>
+            @if($perizinan->status === \App\Enums\PerizinanStatus::DIAJUKAN->value)
+              <div class="alert alert-info border-0 shadow-none small mb-4">
+                <i class="fas fa-info-circle mr-2"></i> Pengajuan ini menanti verifikasi administratif dari Anda.
+              </div>
+              <div class="space-y-3">
+                <form action="{{ route('super_admin.perizinan.approve', $perizinan) }}" method="POST" class="mb-2">
+                  @csrf
+                  <button type="submit" class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm"
+                    onclick="return confirm('Apakah Anda yakin dokumen sudah lengkap dan menyetujui pengajuan ini untuk diproses lebih lanjut?')">
+                    <i class="fas fa-check-double mr-2"></i> SETUJUI PENGAJUAN
+                  </button>
+                </form>
+
+                <button type="button" class="btn btn-warning btn-block font-weight-bold text-dark" data-toggle="modal"
+                  data-target="#modalRevision">
+                  <i class="fas fa-exclamation-triangle mr-2"></i> PERLU PERBAIKAN
+                </button>
+
+                <form action="{{ route('super_admin.perizinan.reject', $perizinan) }}" method="POST" class="mt-2">
+                  @csrf
+                  <button type="submit" class="btn btn-danger btn-block font-weight-bold"
+                    onclick="return confirm('Apakah Anda yakin ingin menolak pengajuan ini?')">
+                    <i class="fas fa-times-circle mr-2"></i> TOLAK PERIZINAN
+                  </button>
+                </form>
+              </div>
+            @else
+              @php $canFinalize = in_array($perizinan->status, [\App\Enums\PerizinanStatus::DISETUJUI->value, \App\Enums\PerizinanStatus::SIAP_DIAMBIL->value, \App\Enums\PerizinanStatus::SELESAI->value]); @endphp
+              @if($canFinalize)
+                <a href="{{ route('super_admin.perizinan.finalisasi', $perizinan) }}"
+                  class="btn btn-primary btn-lg btn-block font-weight-bold shadow-lg py-3">
+                  <i class="fas fa-file-signature mr-2"></i>
+                  {{ $perizinan->status === \App\Enums\PerizinanStatus::DISETUJUI->value ? 'LANJUT KE FINALISASI' : 'EDIT FINALISASI' }}
+                </a>
+
+                <button type="button" class="btn btn-outline-secondary btn-block mt-3" onclick="openPrintDraftModal()">
+                  <i class="fas fa-print mr-1"></i> Pratinjau Draft
+                </button>
+              @endif
+
+              <div class="mt-4 p-3 bg-light rounded small border">
+                <p class="mb-1 text-muted font-italic"><i class="fas fa-clock mr-1"></i> Riwayat Verifikasi:</p>
+                <span class="text-dark font-weight-bold">Diverifikasi oleh {{ Auth::user()->name }} pada
+                  {{ $perizinan->updated_at->format('d/m/y H:i') }}</span>
+              </div>
             @endif
           </div>
-        @endif
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Traditional Modal for Revision Catatan -->
-  <div id="modalRevision"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-bold text-slate-800">Catatan Perbaikan</h3>
-          <button onclick="document.getElementById('modalRevision').classList.add('hidden')"
-            class="text-slate-400 hover:text-slate-600">
-            <span class="material-symbols-outlined">close</span>
+  <!-- Modal Catatan Perbaikan -->
+  <div class="modal fade" id="modalRevision" tabindex="-1" role="dialog" aria-labelledby="modalRevisionLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content shadow-lg border-0" style="border-radius: 15px;">
+        <div class="modal-header bg-warning py-3">
+          <h5 class="modal-title font-weight-bold" id="modalRevisionLabel"><i class="fas fa-pen-nib mr-2"></i> Catatan
+            Perbaikan</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <form action="{{ route('super_admin.perizinan.revision', $perizinan) }}" method="POST">
           @csrf
-          <div class="mb-4">
-            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 block">Pesan untuk
-              Lembaga</label>
-            <textarea name="catatan" rows="5" required
-              class="w-full border-slate-200 rounded-xl focus:ring-primary focus:border-primary text-sm"
-              placeholder="Contoh: Lampiran Akta Notaris terpotong, mohon unggah ulang versi lengkap..."></textarea>
+          <div class="modal-body p-4">
+            <div class="form-group">
+              <label class="text-xs font-bold text-muted text-uppercase tracking-wider mb-2 d-block">Pesan untuk
+                Lembaga</label>
+              <textarea name="catatan" rows="5" class="form-control font-weight-bold"
+                placeholder="Contoh: Lampiran Akta Notaris terpotong, mohon unggah ulang versi lengkap..."
+                required></textarea>
+            </div>
+            <div class="alert alert-light border small text-muted px-3 py-2">
+              <i class="fas fa-info-circle mr-1"></i> Pesan ini akan langsung tampil di dashboard lembaga pemohon.
+            </div>
           </div>
-          <div class="flex gap-2">
-            <button type="button" onclick="document.getElementById('modalRevision').classList.add('hidden')"
-              class="flex-1 py-3 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">BATAL</button>
-            <button type="submit"
-              class="flex-1 py-3 bg-warning text-white rounded-xl shadow-lg shadow-yellow-500/20 font-bold text-sm">KIRIM
-              CATATAN</button>
+          <div class="modal-footer bg-light px-4">
+            <button type="button" class="btn btn-light font-weight-bold px-4" data-dismiss="modal">BATAL</button>
+            <button type="submit" class="btn btn-warning font-weight-bold px-4 text-dark shadow-sm">KIRIM CATATAN</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <style>
-    @media print {
+  <!-- Modal Print Draft -->
+  <div class="modal fade" id="modalPrintDraft" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+      <div class="modal-content bg-light">
+        <div class="modal-header bg-white shadow-sm py-3 px-4 position-sticky" style="top: 0; z-index: 10;">
+          <div>
+            <h5 class="modal-title font-weight-bold text-dark text-uppercase"><i
+                class="fas fa-print mr-2 text-primary"></i> Pratinjau Draft Sertifikat</h5>
+            <p class="mb-0 small text-muted font-weight-bold uppercase tracking-widest">Dokumen ini belum bersifat resmi
+              (Watermarked)</p>
+          </div>
+          <div class="ml-auto d-flex align-items-center">
+            <div class="btn-group mr-3 border rounded shadow-sm">
+              <button type="button" class="btn btn-light btn-sm" onclick="zoomDraft(-0.1)"><i
+                  class="fas fa-minus"></i></button>
+              <button type="button" class="btn btn-light btn-sm disabled font-weight-bold px-3"
+                id="draft-zoom-level">80%</button>
+              <button type="button" class="btn btn-light btn-sm" onclick="zoomDraft(0.1)"><i
+                  class="fas fa-plus"></i></button>
+            </div>
+            <button type="button" class="btn btn-primary font-weight-bold shadow-sm mr-2" onclick="window.print()">
+              <i class="fas fa-print mr-2"></i> Cetak
+            </button>
+            <button type="button" class="btn btn-tool" data-dismiss="modal">
+              <i class="fas fa-times fa-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="modal-body p-5 d-flex justify-content-center bg-gray-dark">
+          <div id="draft-preview-canvas" class="bg-white shadow-lg origin-top"
+            style="width: 794px; min-height: 1123px; transform: scale(0.8);">
+            <div class="p-5 position-relative overflow-hidden">
+              <div
+                class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center opacity-1 rotate-45 select-none pointer-events-none"
+                style="z-index: 99; color: rgba(200,200,200,0.1); font-size: 100px; font-weight: 900;">
+                WADAH DRAFT
+              </div>
+              {!! $perizinan->rendered_template !!}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      .fixed,
-      nav,
-      aside,
-      .sticky,
-      button,
-      form {
-        display: none !important;
+  @push('scripts')
+    <script>
+      let draftZoom = 0.8;
+
+      function insertQuickText(text) {
+        document.getElementById('discussion-input').value = text;
+        document.getElementById('discussion-input').focus();
       }
 
-      main {
-        padding: 0 !important;
+      function openPrintDraftModal() {
+        $('#modalPrintDraft').modal('show');
       }
 
-      .bg-white {
-        border: none !important;
+      function zoomDraft(delta) {
+        draftZoom = Math.min(Math.max(draftZoom + delta, 0.4), 1.5);
+        const canvas = document.getElementById('draft-preview-canvas');
+        canvas.style.transform = `scale(${draftZoom})`;
+        document.getElementById('draft-zoom-level').innerText = `${Math.round(draftZoom * 100)}%`;
       }
-    }
-  </style>
 
-  <script>
-    function switchTab(tabId) {
-      // Content switch
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById('tab-' + tabId).classList.remove('hidden');
-
-      // Button switch
-      document.querySelectorAll('button[onclick^="switchTab"]').forEach(btn => {
-        btn.classList.remove('text-primary', 'border-primary');
-        btn.classList.add('text-slate-500', 'border-transparent');
+      // Auto scroll chat
+      $(document).ready(function () {
+        var chatBox = document.getElementById('chat-container');
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
       });
-      const activeBtn = event.currentTarget;
-      activeBtn.classList.add('text-primary', 'border-primary');
-      activeBtn.classList.remove('text-slate-500', 'border-transparent');
-    }
+    </script>
+    <style>
+      .rotate-45 {
+        transform: rotate(-45deg);
+      }
 
-    // Scroll chat to bottom
-    const chatContainer = document.getElementById('chat-container');
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  </script>
+      #chat-container::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      #chat-container::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      #chat-container::-webkit-scrollbar-thumb {
+        background: #dee2e6;
+        border-radius: 10px;
+      }
+
+      @media print {
+
+        .main-header,
+        .main-sidebar,
+        .card-header,
+        .card-footer,
+        .btn,
+        .modal-header,
+        .card-tools {
+          display: none !important;
+        }
+
+        .content-wrapper {
+          margin-left: 0 !important;
+          padding: 0 !important;
+        }
+
+        #draft-preview-canvas {
+          transform: scale(1) !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+
+        .modal {
+          position: static !important;
+          overflow: visible !important;
+        }
+
+        .modal-dialog {
+          max-width: 100% !important;
+          margin: 0 !important;
+        }
+      }
+    </style>
+  @endpush
 @endsection

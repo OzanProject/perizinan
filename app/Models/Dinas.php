@@ -13,6 +13,7 @@ class Dinas extends Model
     'nama',
     'app_name',
     'logo',
+    'stempel_img',
     'kode_surat',
     'alamat',
     'provinsi',
@@ -23,6 +24,16 @@ class Dinas extends Model
     'pimpinan_nip',
     'kabupaten',
     'footer_text',
+    'watermark_img',
+    'watermark_enabled',
+    'watermark_opacity',
+    'watermark_size',
+  ];
+
+  protected $casts = [
+    'watermark_enabled' => 'boolean',
+    'watermark_opacity' => 'float',
+    'watermark_size' => 'integer',
   ];
 
   public function lembagas()

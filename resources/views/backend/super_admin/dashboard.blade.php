@@ -1,140 +1,166 @@
 @extends('layouts.backend')
 
 @section('title', 'Super Admin Dashboard')
-@section('breadcrumb', 'Dashboard')
 
 @section('content')
-  <!-- Page Title -->
-  <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-    <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Dashboard Dinas Pendidikan</h1>
-    <div class="flex gap-2">
-      <button
-        class="bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-50 shadow-sm flex items-center gap-2">
-        <span class="material-symbols-outlined text-[18px]">download</span> Export Laporan
-      </button>
+  <!-- Content Header (Page header) - Handled by layout, but title here if needed -->
+  <div class="row mb-4">
+    <div class="col-sm-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h3 font-weight-bold text-dark">Dashboard Dinas Pendidikan</h1>
+        <button class="btn btn-primary shadow-sm">
+          <i class="fas fa-download mr-1"></i> Export Laporan
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Info Boxes (Small Boxes) -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <!-- Box 1: Total Lembaga -->
-    <div class="bg-info rounded-lg shadow-card text-white overflow-hidden relative group">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-bold mb-1">{{ $stats['total_lembaga'] }}</h3>
-        <p class="text-sm font-medium opacity-90">Total Lembaga</p>
+  <!-- Small boxes (Stat box) -->
+  <div class="row">
+    <div class="col-lg-3 col-6">
+      <!-- small box -->
+      <div class="small-box bg-info shadow">
+        <div class="inner">
+          <h3>{{ $stats['total_lembaga'] }}</h3>
+          <p>Total Lembaga</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-university"></i>
+        </div>
+        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
       </div>
-      <div class="absolute right-2 top-2 text-black/10 group-hover:scale-110 transition-transform duration-300">
-        <span class="material-symbols-outlined text-[70px]">school</span>
-      </div>
-      <a class="block bg-black/10 hover:bg-black/20 text-center py-1 text-xs font-medium transition-colors flex items-center justify-center gap-1"
-        href="#">
-        More info <span class="material-symbols-outlined text-[14px]">arrow_circle_right</span>
-      </a>
     </div>
-
-    <!-- Box 2: Pending -->
-    <div class="bg-warning rounded-lg shadow-card text-slate-900 overflow-hidden relative group">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-bold mb-1">{{ $stats['pending'] }}</h3>
-        <p class="text-sm font-medium opacity-80">Pengajuan Pending</p>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+      <!-- small box -->
+      <div class="small-box bg-warning shadow">
+        <div class="inner">
+          <h3>{{ $stats['pending'] }}</h3>
+          <p>Pengajuan Pending</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <a href="{{ route('super_admin.perizinan.index') }}" class="small-box-footer">More info <i
+            class="fas fa-arrow-circle-right"></i></a>
       </div>
-      <div class="absolute right-2 top-2 text-black/10 group-hover:scale-110 transition-transform duration-300">
-        <span class="material-symbols-outlined text-[70px]">pending_actions</span>
-      </div>
-      <a class="block bg-black/10 hover:bg-black/20 text-center py-1 text-xs font-medium transition-colors flex items-center justify-center gap-1"
-        href="{{ route('super_admin.perizinan.index') }}">
-        More info <span class="material-symbols-outlined text-[14px]">arrow_circle_right</span>
-      </a>
     </div>
-
-    <!-- Box 3: Disetujui -->
-    <div class="bg-success rounded-lg shadow-card text-white overflow-hidden relative group">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-bold mb-1">{{ $stats['disetujui'] }}</h3>
-        <p class="text-sm font-medium opacity-90">Disetujui</p>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+      <!-- small box -->
+      <div class="small-box bg-success shadow">
+        <div class="inner">
+          <h3>{{ $stats['disetujui'] }}</h3>
+          <p>Izin Disetujui</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
       </div>
-      <div class="absolute right-2 top-2 text-black/10 group-hover:scale-110 transition-transform duration-300">
-        <span class="material-symbols-outlined text-[70px]">check_circle</span>
-      </div>
-      <a class="block bg-black/10 hover:bg-black/20 text-center py-1 text-xs font-medium transition-colors flex items-center justify-center gap-1"
-        href="#">
-        More info <span class="material-symbols-outlined text-[14px]">arrow_circle_right</span>
-      </a>
     </div>
-
-    <!-- Box 4: Need Revision (Perbaikan) -->
-    <div class="bg-danger rounded-lg shadow-card text-white overflow-hidden relative group">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-bold mb-1">{{ $stats['perbaikan'] }}</h3>
-        <p class="text-sm font-medium opacity-90">Perlu Perbaikan</p>
+    <!-- ./col -->
+    <div class="col-lg-3 col-6">
+      <!-- small box -->
+      <div class="small-box bg-danger shadow">
+        <div class="inner">
+          <h3>{{ $stats['perbaikan'] }}</h3>
+          <p>Perlu Perbaikan</p>
+        </div>
+        <div class="icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
       </div>
-      <div class="absolute right-2 top-2 text-black/10 group-hover:scale-110 transition-transform duration-300">
-        <span class="material-symbols-outlined text-[70px]">cancel</span>
-      </div>
-      <a class="block bg-black/10 hover:bg-black/20 text-center py-1 text-xs font-medium transition-colors flex items-center justify-center gap-1"
-        href="#">
-        More info <span class="material-symbols-outlined text-[14px]">arrow_circle_right</span>
-      </a>
     </div>
+    <!-- ./col -->
   </div>
+  <!-- /.row -->
 
-  <!-- Main Table Section -->
-  <div class="bg-white rounded-lg shadow-card border-t-[3px] border-t-primary mb-6">
-    <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-lg">
-      <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-        <span class="material-symbols-outlined text-gray-500">list_alt</span>
-        Pengajuan Terbaru
-      </h3>
-    </div>
-    <div class="p-0 overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-50 border-b border-gray-200">
-            <th class="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider w-16">No</th>
-            <th class="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Lembaga</th>
-            <th class="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Jenis Izin</th>
-            <th class="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal</th>
-            <th class="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          @forelse($pengajuanTerbaru as $index => $perizinan)
-            <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-5 py-4 text-sm text-gray-600">{{ $index + 1 }}</td>
-              <td class="px-5 py-4">
-                <div class="flex flex-col">
-                  <span class="font-semibold text-gray-800">{{ $perizinan->lembaga->nama_lembaga }}</span>
-                  <span class="text-xs text-gray-400">NPSN: {{ $perizinan->lembaga->npsn }}</span>
-                </div>
-              </td>
-              <td class="px-5 py-4 text-sm text-gray-600">{{ $perizinan->jenisPerizinan->nama_jenis }}</td>
-              <td class="px-5 py-4 text-sm text-gray-600">
-                <div class="flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[16px] text-gray-400">calendar_today</span>
-                  {{ $perizinan->created_at->format('d M Y') }}
-                </div>
-              </td>
-              <td class="px-5 py-4">
-                <span
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() }}-100 text-{{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() }}-800 border border-{{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() }}-200">
-                  {{ \App\Enums\PerizinanStatus::from($perizinan->status)->label() }}
-                </span>
-              </td>
-              <td class="px-5 py-4 text-right">
-                <a href="{{ route('super_admin.perizinan.show', $perizinan->id) }}"
-                  class="bg-primary hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded shadow-sm transition-colors">
-                  Detail
-                </a>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="6" class="px-5 py-8 text-center text-gray-500 italic">Belum ada pengajuan terbaru.</td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
+  <!-- Main row -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card card-outline card-primary shadow">
+        <div class="card-header border-transparent">
+          <h3 class="card-title font-weight-bold"><i class="fas fa-list mr-2"></i> Pengajuan Terbaru</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table m-0 table-hover">
+              <thead class="bg-light">
+                <tr>
+                  <th width="50">No</th>
+                  <th>Nama Lembaga</th>
+                  <th>Jenis Izin</th>
+                  <th>Tanggal</th>
+                  <th>Status</th>
+                  <th class="text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse($pengajuanTerbaru as $index => $perizinan)
+                  <tr>
+                    <td class="align-middle text-center">{{ $index + 1 }}</td>
+                    <td class="align-middle">
+                      <div class="d-flex flex-column">
+                        <span class="font-weight-bold">{{ $perizinan->lembaga->nama_lembaga }}</span>
+                        <small class="text-muted">NPSN: {{ $perizinan->lembaga->npsn }}</small>
+                      </div>
+                    </td>
+                    <td class="align-middle text-sm text-secondary">{{ $perizinan->jenisPerizinan->nama_jenis }}</td>
+                    <td class="align-middle text-sm">
+                      <span class="text-muted"><i class="far fa-calendar-alt mr-1"></i>
+                        {{ $perizinan->created_at->format('d M Y') }}</span>
+                    </td>
+                    <td class="align-middle">
+                      @php
+                        $statusEnum = \App\Enums\PerizinanStatus::from($perizinan->status);
+                        $statusColor = $statusEnum->color();
+                        $bsClasses = [
+                          'warning' => 'badge-warning',
+                          'success' => 'badge-success',
+                          'info' => 'badge-info',
+                          'primary' => 'badge-primary',
+                          'danger' => 'badge-danger',
+                          'secondary' => 'badge-secondary',
+                          'dark' => 'badge-dark',
+                        ];
+                        $badgeClass = $bsClasses[$statusColor] ?? 'badge-secondary';
+                      @endphp
+                      <span class="badge {{ $badgeClass }} p-2">{{ $statusEnum->label() }}</span>
+                    </td>
+                    <td class="align-middle text-right">
+                      <a href="{{ route('super_admin.perizinan.show', $perizinan->id) }}"
+                        class="btn btn-primary btn-sm px-3 shadow-sm rounded-pill">
+                        Detail <i class="fas fa-chevron-right ml-1" style="font-size: 10px;"></i>
+                      </a>
+                    </td>
+                  </tr>
+                @empty
+                  <tr>
+                    <td colspan="6" class="text-center py-5 text-muted italic">Belum ada pengajuan terbaru.</td>
+                  </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+          <!-- /.table-responsive -->
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer clearfix bg-white">
+          <a href="{{ route('super_admin.perizinan.index') }}"
+            class="btn btn-sm btn-outline-primary float-right rounded-pill px-4">Lihat Semua Pengajuan</a>
+        </div>
+        <!-- /.card-footer -->
+      </div>
+      <!-- /.card -->
     </div>
   </div>
 @endsection

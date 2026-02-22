@@ -41,4 +41,29 @@ class JenisPerizinan extends Model
   {
     return $this->hasMany(SyaratPerizinan::class);
   }
+
+  /**
+   * Validate that mandatory placeholders exist in the template
+   */
+  public function validateTemplate($html)
+  {
+    $mandatory = [
+      '[NOMOR_SURAT]' => 'Nomor Surat',
+      '[TANGGAL_TERBIT]' => 'Tanggal Terbit',
+      '[PIMPINAN_NAMA]' => 'Nama Pimpinan',
+    ];
+
+    $missing = [];
+    foreach ($mandatory as $placeholder => $label) {
+      if (!str_contains($html, $placeholder)) {
+        $missing[] = "{$label} ({$placeholder})";
+      }
+    }
+
+    if (!empty($missing)) {
+      throw new \Exception("Template tidak valid. Placeholder berikut wajib ada: " . implode(', ', $missing));
+    }
+
+    return true;
+  }
 }

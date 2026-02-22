@@ -6,16 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\Perizinan;
 use App\Enums\PerizinanStatus;
 use App\Services\PerizinanWorkflowService;
+use App\Services\NomorSuratService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PerizinanController extends Controller
 {
   protected $workflowService;
+  protected $nomorSuratService;
 
-  public function __construct(PerizinanWorkflowService $workflowService)
+  public function __construct(PerizinanWorkflowService $workflowService, NomorSuratService $nomorSuratService)
   {
     $this->workflowService = $workflowService;
+    $this->nomorSuratService = $nomorSuratService;
   }
 
   public function index(Request $request)
@@ -48,6 +52,7 @@ class PerizinanController extends Controller
     $this->authorize('verify', $perizinan);
 
     try {
+      $perizinan->update(['approved_at' => now()]);
       $this->workflowService->transitionTo($perizinan, PerizinanStatus::DISETUJUI, 'Disetujui oleh Dinas');
       return back()->with('success', 'Perizinan berhasil disetujui.');
     } catch (\Exception $e) {
@@ -77,9 +82,18 @@ class PerizinanController extends Controller
   {
     $this->authorize('verify', $perizinan);
 
-    if ($perizinan->status !== PerizinanStatus::DISETUJUI->value && $perizinan->status !== PerizinanStatus::SELESAI->value) {
+    if (
+      $perizinan->status !== PerizinanStatus::DISETUJUI->value &&
+      $perizinan->status !== PerizinanStatus::SELESAI->value &&
+      $perizinan->status !== PerizinanStatus::DIAJUKAN->value &&
+      $perizinan->status !== PerizinanStatus::SIAP_DIAMBIL->value
+    ) {
       return redirect()->route('super_admin.perizinan.show', $perizinan)
         ->with('warning', 'Pengajuan harus disetujui terlebih dahulu sebelum finalisasi.');
+    }
+
+    if (!$perizinan->nomor_surat) {
+      $perizinan->nomor_surat_auto = $this->nomorSuratService->generate($perizinan);
     }
 
     return view('backend.super_admin.perizinan.finalisasi', compact('perizinan'));
@@ -106,16 +120,61 @@ class PerizinanController extends Controller
     }
 
     try {
+      $data['approved_at'] = $perizinan->approved_at ?? now();
       $perizinan->update($data);
 
       if ($perizinan->status !== PerizinanStatus::SIAP_DIAMBIL->value) {
         $this->workflowService->transitionTo($perizinan, PerizinanStatus::SIAP_DIAMBIL, 'Sertifikat telah dirilis.');
       }
 
-      return redirect()->route('super_admin.perizinan.show', $perizinan)
+      return redirect()->route('super_admin.penerbitan.riwayat')
         ->with('success', 'Sertifikat perizinan berhasil dirilis ke lembaga.');
     } catch (\Exception $e) {
       return back()->with('error', $e->getMessage());
+    }
+  }
+
+  public function autoRelease(Perizinan $perizinan)
+  {
+    $this->authorize('verify', $perizinan);
+
+    if ($perizinan->status !== PerizinanStatus::DIAJUKAN->value && $perizinan->status !== PerizinanStatus::DISETUJUI->value) {
+      return back()->with('warning', 'Hanya pengajuan yang diajukan atau disetujui yang dapat diterbitkan otomatis.');
+    }
+
+    $dinas = Auth::user()->dinas;
+
+    try {
+      DB::beginTransaction();
+
+      // Generate Auto Number if not exists
+      if (!$perizinan->nomor_surat) {
+        $perizinan->nomor_surat = $this->nomorSuratService->generate($perizinan);
+      }
+
+      // Fill with Defaults
+      $perizinan->update([
+        'approved_at' => $perizinan->approved_at ?? now(),
+        'tanggal_terbit' => now(),
+        'pimpinan_nama' => $dinas->pimpinan_nama,
+        'pimpinan_jabatan' => $dinas->pimpinan_jabatan,
+        'pimpinan_pangkat' => $dinas->pimpinan_pangkat,
+        'pimpinan_nip' => $dinas->pimpinan_nip,
+        'stempel_img' => $dinas->stempel_img,
+      ]);
+
+      // Workflow Transition
+      if ($perizinan->status !== PerizinanStatus::SIAP_DIAMBIL->value) {
+        $this->workflowService->transitionTo($perizinan, PerizinanStatus::SIAP_DIAMBIL, 'Sertifikat otomatis diterbitkan oleh sistem.');
+      }
+
+      DB::commit();
+
+      return redirect()->route('super_admin.perizinan.show', $perizinan)
+        ->with('success', 'Sertifikat berhasil diterbitkan secara otomatis dengan data default.');
+    } catch (\Exception $e) {
+      DB::rollBack();
+      return back()->with('error', 'Gagal menerbitkan otomatis: ' . $e->getMessage());
     }
   }
 }

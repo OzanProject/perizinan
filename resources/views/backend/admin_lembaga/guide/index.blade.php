@@ -3,157 +3,197 @@
 @section('title', 'Panduan Sistem')
 
 @section('content')
-  <div class="space-y-8 pb-12">
+  <div class="container-fluid">
     <!-- Header Section -->
-    <div class="relative overflow-hidden bg-primary rounded-[2.5rem] p-10 text-white shadow-2xl group">
-      <div
-        class="absolute top-0 right-0 w-1/3 h-full bg-white/10 -skew-x-12 translate-x-1/2 group-hover:translate-x-1/3 transition-transform duration-1000">
-      </div>
-      <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
-        <div
-          class="size-24 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-          <span class="material-symbols-outlined text-5xl">help_center</span>
-        </div>
-        <div class="text-center md:text-left">
-          <h1 class="text-3xl font-black italic uppercase tracking-tight mb-2">Panduan Penggunaan Sistem</h1>
-          <p class="text-primary-100 font-medium text-lg max-w-2xl">Selamat datang di portal pelayanan perizinan. Ikuti
-            langkah-langkah di bawah ini untuk memulai pengajuan izin operasional Anda secara digital.</p>
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="card bg-gradient-primary shadow-lg border-0" style="border-radius: 1.5rem;">
+          <div class="card-body p-5">
+            <div class="row align-items-center">
+              <div class="col-md-2 text-center mb-4 mb-md-0">
+                <div
+                  class="bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg"
+                  style="width: 100px; height: 100px;">
+                  <i class="fas fa-question-circle fa-4x"></i>
+                </div>
+              </div>
+              <div class="col-md-10 text-center text-md-left">
+                <h1 class="font-weight-bold text-uppercase italic tracking-tight mb-2">Panduan Penggunaan Sistem</h1>
+                <p class="lead mb-0 opacity-75">Selamat datang di portal pelayanan perizinan. Ikuti langkah-langkah di
+                  bawah ini untuk memulai pengajuan izin operasional Anda secara digital.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Main Content: Vertical Timeline -->
-    <div class="max-w-4xl mx-auto px-4">
-      <div class="relative">
-        <!-- Vertical Line -->
-        <div
-          class="absolute left-4 md:left-1/2 top-4 bottom-4 w-1 bg-slate-100 dark:bg-slate-800 -translate-x-1/2 hidden md:block">
-        </div>
-
-        <div class="space-y-12">
+    <!-- Timeline Content -->
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="timeline">
           <!-- Step 1 -->
-          <div class="relative flex flex-col md:flex-row items-center group">
-            <div class="flex-1 md:text-right md:pr-12 mb-4 md:mb-0 order-2 md:order-1">
-              <div
-                class="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-soft border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all hover:-translate-y-1 relative group/card">
-                <h3 class="text-xl font-black text-slate-900 dark:text-white mb-3 italic uppercase tracking-tight">1.
-                  Lengkapi Profil Lembaga</h3>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">Sebelum melakukan pengajuan, pastikan data
-                  institusi Anda (NPSN, Alamat, SK Pendirian) sudah lengkap dan benar pada menu <a
-                    href="{{ route('admin_lembaga.profile.index') }}"
-                    class="text-primary hover:underline font-bold">Profil Lembaga</a>. Data ini akan ditarik secara
-                  otomatis ke dalam berkas sertifikat.</p>
-                <!-- Decorative number -->
-                <span
-                  class="absolute -top-4 -right-4 size-10 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 rounded-xl flex items-center justify-center font-black italic text-xl border border-slate-100 dark:border-slate-700 pointer-events-none transition-colors group-hover/card:text-primary group-hover/card:bg-primary/5">01</span>
+          <div class="time-label">
+            <span class="bg-primary px-3 shadow-sm">LANGKAH 1</span>
+          </div>
+          <div>
+            <i class="fas fa-university bg-primary shadow-sm"></i>
+            <div class="timeline-item shadow-sm border-0 rounded-lg">
+              <h3 class="timeline-header font-weight-bold text-primary border-0">Lengkapi Profil Lembaga</h3>
+              <div class="timeline-body py-3">
+                <p class="mb-0 text-muted">Sebelum melakukan pengajuan, pastikan data institusi Anda (NPSN, Alamat, SK
+                  Pendirian) sudah lengkap dan benar pada menu
+                  <a href="{{ route('admin_lembaga.profile.index') }}" class="font-weight-bold text-primary">Profil
+                    Lembaga</a>.
+                  Data ini akan ditarik secara otomatis ke dalam berkas sertifikat untuk memastikan keakuratan informasi.
+                </p>
               </div>
             </div>
-            <div
-              class="relative z-10 size-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 border-4 border-white dark:border-slate-950 order-1 md:order-2 mb-4 md:mb-0">
-              <span class="material-symbols-outlined text-[24px]">domain</span>
-            </div>
-            <div class="flex-1 md:pl-12 order-3 hidden md:block"></div>
           </div>
 
           <!-- Step 2 -->
-          <div class="relative flex flex-col md:flex-row items-center group">
-            <div class="flex-1 md:pr-12 order-3 hidden md:block"></div>
-            <div
-              class="relative z-10 size-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 border-4 border-white dark:border-slate-950 order-1 md:order-2 mb-4 md:mb-0">
-              <span class="material-symbols-outlined text-[24px]">add_circle</span>
-            </div>
-            <div class="flex-1 md:pl-12 order-2 md:order-3">
-              <div
-                class="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-soft border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all hover:-translate-y-1 relative group/card">
-                <h3 class="text-xl font-black text-slate-900 dark:text-white mb-3 italic uppercase tracking-tight">2. Buat
-                  Pengajuan Baru</h3>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">Klik tombol "Ajukan Izin Baru" pada
+          <div class="time-label">
+            <span class="bg-indigo px-3 shadow-sm" style="background-color: #6610f2 !important;">LANGKAH 2</span>
+          </div>
+          <div>
+            <i class="fas fa-plus-circle bg-indigo shadow-sm" style="background-color: #6610f2 !important;"></i>
+            <div class="timeline-item shadow-sm border-0 rounded-lg">
+              <h3 class="timeline-header font-weight-bold text-indigo border-0" style="color: #6610f2;">Buat Pengajuan
+                Baru</h3>
+              <div class="timeline-body py-3">
+                <p class="mb-0 text-muted">Klik tombol <span class="badge badge-primary">Ajukan Izin Baru</span> pada
                   dashboard. Pilih jenis perizinan yang sesuai dengan kebutuhan lembaga Anda. Sistem akan memandu Anda
-                  melalui beberapa tahapan pengisian data.</p>
-                <span
-                  class="absolute -top-4 -left-4 size-10 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 rounded-xl flex items-center justify-center font-black italic text-xl border border-slate-100 dark:border-slate-700 pointer-events-none transition-colors group-hover/card:text-indigo-500 group-hover/card:bg-indigo-500/5">02</span>
+                  melalui beberapa tahapan pengisian data yang intuitif.</p>
               </div>
             </div>
           </div>
 
           <!-- Step 3 -->
-          <div class="relative flex flex-col md:flex-row items-center group">
-            <div class="flex-1 md:text-right md:pr-12 mb-4 md:mb-0 order-2 md:order-1">
-              <div
-                class="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-soft border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all hover:-translate-y-1 relative group/card">
-                <h3 class="text-xl font-black text-slate-900 dark:text-white mb-3 italic uppercase tracking-tight">3.
-                  Unggah Dokumen Persyaratan</h3>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">Persiapkan dokumen fisik dalam format PDF
-                  atau Gambar. Unggah setiap dokumen sesuai dengan kategori yang diminta. Pastikan dokumen terbaca dengan
-                  jelas untuk mempercepat proses verifikasi oleh petugas.</p>
-                <span
-                  class="absolute -top-4 -right-4 size-10 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 rounded-xl flex items-center justify-center font-black italic text-xl border border-slate-100 dark:border-slate-700 pointer-events-none transition-colors group-hover/card:text-amber-500 group-hover/card:bg-amber-500/5">03</span>
+          <div class="time-label">
+            <span class="bg-warning px-3 shadow-sm">LANGKAH 3</span>
+          </div>
+          <div>
+            <i class="fas fa-file-upload bg-warning shadow-sm"></i>
+            <div class="timeline-item shadow-sm border-0 rounded-lg">
+              <h3 class="timeline-header font-weight-bold text-warning border-0">Unggah Dokumen Persyaratan</h3>
+              <div class="timeline-body py-3">
+                <p class="mb-0 text-muted">Persiapkan dokumen fisik dalam format PDF atau Gambar. Unggah setiap dokumen
+                  sesuai dengan kategori yang diminta. Pastikan dokumen terbaca dengan jelas untuk mempercepat proses
+                  verifikasi oleh petugas dinas pendidikan.</p>
               </div>
             </div>
-            <div
-              class="relative z-10 size-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 border-4 border-white dark:border-slate-950 order-1 md:order-2 mb-4 md:mb-0">
-              <span class="material-symbols-outlined text-[24px]">upload_file</span>
-            </div>
-            <div class="flex-1 md:pl-12 order-3 hidden md:block"></div>
           </div>
 
           <!-- Step 4 -->
-          <div class="relative flex flex-col md:flex-row items-center group">
-            <div class="flex-1 md:pr-12 order-3 hidden md:block"></div>
-            <div
-              class="relative z-10 size-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 border-4 border-white dark:border-slate-950 order-1 md:order-2 mb-4 md:mb-0">
-              <span class="material-symbols-outlined text-[24px]">order_approve</span>
-            </div>
-            <div class="flex-1 md:pl-12 order-2 md:order-3">
-              <div
-                class="bg-white dark:bg-slate-900 p-8 rounded-[2rem] shadow-soft border border-slate-100 dark:border-slate-800 hover:shadow-xl transition-all hover:-translate-y-1 relative group/card">
-                <h3 class="text-xl font-black text-slate-900 dark:text-white mb-3 italic uppercase tracking-tight">4.
-                  Pantau Status & Unduh Izin</h3>
-                <p class="text-sm text-slate-500 font-medium leading-relaxed">Setelah dikirim, ajuan Anda akan ditinjau.
-                  Anda dapat memantau statusnya secara real-time. Jika disetujui, sertifikat izin resmi dapat diunduh
-                  langsung dalam bentuk PDF melalui dashboard atau menu riwayat.</p>
-                <span
-                  class="absolute -top-4 -left-4 size-10 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 rounded-xl flex items-center justify-center font-black italic text-xl border border-slate-100 dark:border-slate-700 pointer-events-none transition-colors group-hover/card:text-emerald-500 group-hover/card:bg-emerald-500/5">04</span>
+          <div class="time-label">
+            <span class="bg-success px-3 shadow-sm">LANGKAH 4</span>
+          </div>
+          <div>
+            <i class="fas fa-check-double bg-success shadow-sm"></i>
+            <div class="timeline-item shadow-sm border-0 rounded-lg">
+              <h3 class="timeline-header font-weight-bold text-success border-0">Pantau Status & Unduh Izin</h3>
+              <div class="timeline-body py-3">
+                <p class="mb-0 text-muted">Setelah dikirim, ajuan Anda akan ditinjau. Anda dapat memantau statusnya secara
+                  real-time. Jika disetujui, sertifikat izin resmi dapat diunduh langsung dalam bentuk PDF melalui
+                  dashboard atau menu riwayat pengajuan.</p>
               </div>
             </div>
+          </div>
+
+          <div>
+            <i class="fas fa-flag-checkered bg-gray shadow-sm"></i>
           </div>
         </div>
       </div>
     </div>
 
     <!-- FAQ / Tip Section -->
-    <div
-      class="bg-slate-50 dark:bg-slate-800/40 rounded-[2.5rem] p-10 mt-12 border border-slate-100 dark:border-slate-800">
-      <h2
-        class="text-xl font-black text-slate-900 dark:text-white mb-8 italic uppercase tracking-tight flex items-center gap-3">
-        <span class="material-symbols-outlined text-primary text-3xl">info</span>
-        Tips Tambahan
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="flex gap-4">
-          <div
-            class="size-12 rounded-2xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center text-primary flex-shrink-0">
-            <span class="material-symbols-outlined">forum</span>
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="card card-outline card-primary shadow-sm border-0" style="border-radius: 1.25rem;">
+          <div class="card-header bg-transparent py-4">
+            <h3 class="card-title font-weight-bold text-dark h5 mb-0">
+              <i class="fas fa-lightbulb text-warning mr-2"></i> Tips Tambahan & Informasi Penting
+            </h3>
           </div>
-          <div>
-            <h4 class="font-bold text-slate-900 dark:text-white mb-1 uppercase tracking-wider text-xs">Diskusi & Komentar
-            </h4>
-            <p class="text-xs text-slate-500 font-medium leading-relaxed">Gunakan fitur diskusi pada detail pengajuan jika
-              ada instruksi perbaikan dari petugas dinas.</p>
-          </div>
-        </div>
-        <div class="flex gap-4">
-          <div
-            class="size-12 rounded-2xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center text-primary flex-shrink-0">
-            <span class="material-symbols-outlined">description</span>
-          </div>
-          <div>
-            <h4 class="font-bold text-slate-900 dark:text-white mb-1 uppercase tracking-wider text-xs">Format Dokumen</h4>
-            <p class="text-xs text-slate-500 font-medium leading-relaxed">Gunakan scannery asli (bukan fotokopi) untuk
-              memastikan keaslian data yang Anda kirimkan.</p>
+          <div class="card-body px-4 pb-5">
+            <div class="row">
+              <div class="col-md-6 mb-4 mb-md-0">
+                <div class="d-flex align-items-start p-3 bg-light rounded-lg h-100">
+                  <div class="bg-white p-3 rounded-circle shadow-sm mr-3">
+                    <i class="fas fa-comments text-primary h4 mb-0"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-weight-bold text-xs text-uppercase tracking-wider mb-2">Diskusi & Komentar</h4>
+                    <p class="small text-muted mb-0">Gunakan fitur diskusi pada detail pengajuan jika ada instruksi
+                      perbaikan dari petugas dinas. Komunikasi yang aktif akan mempercepat penyelesaian berkas Anda.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-start p-3 bg-light rounded-lg h-100">
+                  <div class="bg-white p-3 rounded-circle shadow-sm mr-3">
+                    <i class="fas fa-file-alt text-primary h4 mb-0"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-weight-bold text-xs text-uppercase tracking-wider mb-2">Format Berkas</h4>
+                    <p class="small text-muted mb-0">Gunakan hasil scan dokumen asli (bukan fotokopi) untuk memastikan
+                      keaslian data. Pastikan ukuran file tidak melebihi batas yang ditentukan sistem.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <style>
+    .bg-gradient-primary {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+
+    .timeline::before {
+      border-radius: 0.25rem;
+      background-color: #dee2e6;
+      bottom: 0;
+      content: "";
+      left: 31px;
+      margin: 0;
+      position: absolute;
+      top: 0;
+      width: 4px;
+    }
+
+    .timeline>div>i {
+      left: 18px;
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+      line-height: 30px;
+    }
+
+    .timeline .time-label {
+      margin-left: 10px;
+    }
+
+    @media (max-width: 767.98px) {
+      .timeline::before {
+        left: 18px;
+      }
+
+      .timeline>div>i {
+        left: 5px;
+      }
+
+      .timeline .time-label {
+        margin-left: 0;
+      }
+    }
+
+    .timeline-item {
+      margin-left: 60px !important;
+    }
+  </style>
 @endsection

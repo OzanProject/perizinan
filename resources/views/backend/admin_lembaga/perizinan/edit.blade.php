@@ -1,686 +1,705 @@
 @extends('layouts.admin_lembaga')
 
-@section('title', 'Upload Berkas Pengajuan')
+@section('title', 'Lengkapi Pengajuan - ' . $perizinan->jenisPerizinan->nama)
+
+@push('styles')
+<style>
+    .step-indicator {
+        position: relative;
+        z-index: 1;
+    }
+    .step-line {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #dee2e6;
+        z-index: 0;
+    }
+    .step-line-progress {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        height: 2px;
+        background: #007bff;
+        z-index: 0;
+        transition: width 0.5s ease;
+    }
+    .step-item {
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        outline: none !important;
+    }
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .active .step-circle {
+        background: #007bff;
+        border-color: #007bff;
+        color: #fff;
+    }
+    .completed .step-circle {
+        background: #28a745;
+        border-color: #28a745;
+        color: #fff;
+    }
+    [x-cloak] { display: none !important; }
+    
+    /* Direct Chat Extensions */
+    #chat-panel {
+        position: fixed;
+        right: -450px;
+        top: 0;
+        bottom: 0;
+        width: 450px;
+        z-index: 1050;
+        transition: right 0.4s ease;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    }
+    #chat-panel.open {
+        right: 0;
+    }
+    @media (max-width: 575.98px) {
+        #chat-panel { width: 100%; right: -100%; }
+        #chat-panel.open { right: 0; }
+    }
+</style>
+@endpush
 
 @section('content')
-  <main class="flex-1 w-full max-w-[1400px] mx-auto py-8">
-    <!-- Breadcrumbs & Header -->
-    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <nav aria-label="Breadcrumb" class="flex mb-2">
-          <ol class="inline-flex items-center space-x-1 md:space-x-3">
-            <li class="inline-flex items-center">
-              <a class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary dark:text-slate-400"
-                href="{{ route('admin_lembaga.dashboard') }}">
-                <span class="material-symbols-outlined text-[18px] mr-2">home</span>
-                Home
-              </a>
-            </li>
-            <li>
-              <div class="flex items-center">
-                <span class="material-symbols-outlined text-slate-400 text-[18px]">chevron_right</span>
-                <a class="ml-1 text-sm font-medium text-slate-500 hover:text-primary dark:text-slate-400 md:ml-2"
-                  href="{{ route('admin_lembaga.perizinan.index') }}">Lembaga</a>
-              </div>
-            </li>
-            <li aria-current="page">
-              <div class="flex items-center">
-                <span class="material-symbols-outlined text-slate-400 text-[18px]">chevron_right</span>
-                <span class="ml-1 text-sm font-medium text-slate-900 dark:text-white md:ml-2">Pengajuan Izin</span>
-              </div>
-            </li>
-          </ol>
-        </nav>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">Lengkapi Berkas Pengajuan
-        </h1>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Silakan unggah dokumen persyaratan untuk
-          {{ $perizinan->jenisPerizinan->nama }}.
-        </p>
-      </div>
-      <div class="flex gap-3">
-        <a href="{{ route('admin_lembaga.perizinan.index') }}"
-          class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-          <span class="material-symbols-outlined mr-2 text-[20px]">save</span>
-          Simpan Draft
-        </a>
-      </div>
-    </div>
-
-    <!-- Progress Stepper -->
-    <div class="mb-12">
-      <div
-        class="relative after:absolute after:inset-x-0 after:top-1/2 after:block after:h-0.5 after:-translate-y-1/2 after:rounded-lg after:bg-slate-200 dark:after:bg-slate-700">
-        <ol class="relative z-10 flex justify-between text-sm font-medium text-slate-500 dark:text-slate-400">
-          <li class="flex items-center gap-2 bg-background-light dark:bg-background-dark p-2">
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white ring-4 ring-background-light dark:ring-background-dark">
-              <span class="material-symbols-outlined text-[18px]">check</span>
-            </span>
-            <span class="hidden sm:inline text-primary font-bold">Info Umum</span>
-          </li>
-          <li class="flex items-center gap-2 bg-background-light dark:bg-background-dark p-2">
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white ring-4 ring-background-light dark:ring-background-dark ring-offset-2 ring-primary">
-              <span class="text-sm font-bold">2</span>
-            </span>
-            <span class="hidden sm:inline text-slate-900 dark:text-white font-bold">Upload Berkas</span>
-          </li>
-          <li class="flex items-center gap-2 bg-background-light dark:bg-background-dark p-2">
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-600 ring-4 ring-background-light dark:ring-slate-700 dark:text-slate-400 dark:ring-background-dark">
-              <span class="text-sm font-bold">3</span>
-            </span>
-            <span class="hidden sm:inline">Review & Submit</span>
-          </li>
-        </ol>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-      <!-- Main Form Column -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Section: Document Uploads -->
-        <div
-          class="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-          <div class="border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center">
-            <h2 class="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary">folder_open</span>
-              Dokumen Persyaratan
-            </h2>
-            <span
-              class="bg-blue-100 text-primary text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-900/30 dark:text-blue-300">Wajib
-              Diisi</span>
-          </div>
-          <div class="p-6 space-y-8">
-          <!-- Dynamic Form Fields from Super Admin config -->
-          @if($perizinan->jenisPerizinan->form_config)
-            <div
-              class="bg-blue-50/50 dark:bg-blue-900/10 rounded-xl p-6 border border-blue-100 dark:border-blue-900/30 mb-8">
-              <h3 class="text-sm font-black text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px]">edit_note</span>
-                Lengkapi Informasi Detail Pengajuan
-              </h3>
-              <form id="form-detail-pengajuan" action="{{ route('admin_lembaga.perizinan.update_data', $perizinan) }}"
-                method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @csrf
-                @foreach($perizinan->jenisPerizinan->form_config as $field)
-                  <div
-                    class="flex flex-col gap-2 group {{ ($field['type'] ?? 'text') == 'textarea' ? 'md:col-span-2' : '' }}">
-                    <label class="text-xs font-black text-slate-500 uppercase tracking-widest">
-                      {{ $field['label'] }} @if($field['required'] ?? false) <span class="text-red-500">*</span> @endif
-                    </label>
-                    <div class="relative">
-                      @if(($field['type'] ?? 'text') == 'textarea')
-                        <textarea name="data[{{ $field['name'] }}]"
-                          class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-4 py-3 text-sm font-bold transition-all focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none placeholder:text-slate-400/60 shadow-sm min-h-[100px]"
-                          placeholder="Masukkan {{ strtolower($field['label']) }}..." {{ ($field['required'] ?? false) ? 'required' : '' }}>{{ $perizinan->perizinan_data[$field['name']] ?? '' }}</textarea>
-                      @else
-                        <input type="{{ $field['type'] ?? 'text' }}" name="data[{{ $field['name'] }}]"
-                          class="w-full rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white px-4 py-3 text-sm font-bold transition-all focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none placeholder:text-slate-400/60 shadow-sm"
-                          placeholder="Masukkan {{ strtolower($field['label']) }}..."
-                          value="{{ $perizinan->perizinan_data[$field['name']] ?? '' }}" {{ ($field['required'] ?? false) ? 'required' : '' }}>
-                      @endif
-                    </div>
-                  </div>
-                @endforeach
-                <div class="md:col-span-2 flex justify-end">
-                  <button type="submit"
-                    class="bg-primary text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-blue-700 transition-all flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[20px]">task_alt</span>
-                    Simpan Perubahan Detail
-                  </button>
-                </div>
-              </form>
-            </div>
-            <hr class="border-slate-100 dark:border-slate-700/50 mb-8" />
-          @endif
-
-          @foreach($syarats as $syarat)
-            @php $dokumen = $uploadedDokumens->get($syarat->id); @endphp
-            <div class="grid sm:grid-cols-12 gap-6 items-center">
-              <div class="sm:col-span-4">
-                <label class="block text-sm font-bold text-slate-900 dark:text-white mb-1">
-                  {{ $syarat->nama_dokumen }}
-                  @if($syarat->is_required) <span class="text-red-500">*</span> @endif
-                </label>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                  {{ $syarat->deskripsi ?? 'Format PDF/JPG, Max 5MB.' }}
-                </p>
-
-                <div onclick="document.getElementById('file-input-{{ $syarat->id }}').click()"
-                  class="relative flex items-center justify-center rounded-lg border-2 border-dashed border-slate-300 px-4 py-8 text-center hover:border-primary hover:bg-slate-50 dark:border-slate-600 dark:hover:border-primary dark:hover:bg-slate-800/50 transition-all cursor-pointer group">
-                  <div class="space-y-2">
-                    <span
-                      class="material-symbols-outlined text-4xl text-slate-400 group-hover:text-primary transition-colors">
-                      {{ $dokumen ? 'check_circle' : 'cloud_upload' }}
-                    </span>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">
-                      <span class="font-semibold text-primary">{{ $dokumen ? 'Ganti File' : 'Klik untuk upload' }}</span>
-                    </div>
-                  </div>
-                  <input id="file-input-{{ $syarat->id }}" type="file" class="hidden"
-                    onchange="handleFileUpload(event, {{ $syarat->id }})" accept=".pdf,.jpg,.jpeg,.png">
-                </div>
-              </div>
-
-              <div class="sm:col-span-8">
-                <div id="preview-{{ $syarat->id }}" class="{{ $dokumen ? '' : 'hidden' }}">
-                  <label class="block text-sm font-medium text-slate-900 dark:text-white mb-1">Preview File</label>
-                  <div
-                    class="mt-1 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50 flex items-start gap-4">
-                    <div
-                      class="flex h-12 w-12 flex-none items-center justify-center rounded bg-white shadow-sm dark:bg-slate-700">
-                      <span class="material-symbols-outlined text-3xl text-primary">
-                        @if($dokumen && str_ends_with($dokumen->path, '.pdf')) picture_as_pdf @else image @endif
-                      </span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-sm font-medium text-slate-900 truncate dark:text-white filename">
-                        {{ $dokumen->nama_file ?? '' }}
-                      </p>
-                      <p class="text-xs text-slate-500">Terunggah pada
-                        {{ $dokumen ? $dokumen->created_at->format('d M Y') : '' }}
-                      </p>
-                      <div class="mt-2 h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-700">
-                        <div class="h-1.5 rounded-full bg-green-500" style="width: 100%"></div>
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <button
-                        onclick="openFilePreview('{{ $dokumen ? Storage::url($dokumen->path) : '#' }}', '{{ $dokumen->nama_file ?? 'Dokumen' }}')"
-                        class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
-                        title="Lihat File">
-                        <span class="material-symbols-outlined">visibility</span>
-                      </button>
-                      <button id="btn-delete-{{ $syarat->id }}"
-                        onclick="deleteFile({{ $perizinan->id }}, {{ $dokumen->id ?? 'null' }}, {{ $syarat->id }})"
-                        class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        title="Hapus File">
-                        <span class="material-symbols-outlined">delete</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div id="empty-{{ $syarat->id }}"
-                  class="{{ $dokumen ? 'hidden' : '' }} flex items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30 text-slate-400 border-dashed min-h-[120px]">
-                  <span class="text-sm italic">Belum ada file dipilih</span>
-                </div>
-
-                <div id="loading-{{ $syarat->id }}"
-                  class="hidden flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30 min-h-[120px] gap-2">
-                  <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <span class="text-xs font-bold text-primary">Sedang Mengunggah...</span>
-                </div>
-              </div>
-            </div>
-            @if(!$loop->last)
-            <hr class="border-slate-100 dark:border-slate-700/50" /> @endif
-          @endforeach
+<div class="container-fluid py-4" x-data="wizard({{ $initialStep }})">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-9">
+            <h1 class="h3 font-weight-bold text-dark mb-1">Proses Pengajuan Izin</h1>
+            <p class="text-muted small mb-0">Silakan ikuti langkah-langkah di bawah untuk melengkapi berkas pengajuan <strong>{{ $perizinan->jenisPerizinan->nama }}</strong>.</p>
         </div>
-
-        <!-- Form Actions -->
-        <div
-          class="bg-slate-50 dark:bg-[#16202e] px-6 py-5 flex items-center justify-between border-t border-slate-200 dark:border-slate-700">
-          <a href="{{ route('admin_lembaga.perizinan.index') }}"
-            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-            <span class="material-symbols-outlined mr-2 text-[18px]">arrow_back</span>
-            Batal
-          </a>
-          <button onclick="checkRequirementsAndProceed()"
-            class="inline-flex items-center rounded-lg bg-primary px-8 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all transform hover:-translate-y-0.5">
-            Lanjut ke Review
-            <span class="material-symbols-outlined ml-2 text-[18px]">arrow_forward</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sidebar: Checklist & Helpers -->
-    <div class="lg:col-span-1 space-y-6">
-      <div
-        class="bg-white dark:bg-[#1e293b] rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sticky top-24">
-        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary">fact_check</span>
-          Kelengkapan Berkas
-        </h3>
-
-        @php
-          $requiredCount = $syarats->where('is_required', true)->count();
-          $uploadedCount = $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count();
-          $percentage = $requiredCount > 0 ? round(($uploadedCount / $requiredCount) * 100) : 100;
-        @endphp
-
-        <div class="mb-6">
-          <div class="flex justify-between mb-2">
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Progress Wajib</span>
-            <span id="overall-percentage" class="text-sm font-black text-primary">{{ $percentage }}%</span>
-          </div>
-          <div class="w-full bg-slate-200 rounded-full h-2.5 dark:bg-slate-700">
-            <div id="progress-bar" class="bg-primary h-2.5 rounded-full transition-all duration-700"
-              style="width: {{ $percentage }}%"></div>
-          </div>
-        </div>
-
-        <ul class="space-y-4" id="document-checklist">
-          @foreach($syarats as $syarat)
-            @php $isUploaded = $uploadedDokumens->has($syarat->id); @endphp
-            <li class="flex items-start gap-3 {{ $isUploaded ? '' : 'opacity-60' }}" id="checklist-item-{{ $syarat->id }}">
-              <div
-                class="flex-none rounded-full {{ $isUploaded ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'border-2 border-slate-300 dark:border-slate-600' }} p-1 transition-colors duration-500">
-                <span
-                  class="material-symbols-outlined text-[16px] block font-bold {{ $isUploaded ? '' : 'invisible' }}">check</span>
-              </div>
-              <div class="flex-1">
-                <p
-                  class="text-sm font-bold text-slate-900 dark:text-white {{ $isUploaded ? 'line-through decoration-slate-400 decoration-2' : '' }} transition-all duration-500 name-label">
-                  {{ $syarat->nama_dokumen }}
-                </p>
-                <p class="text-[10px] uppercase font-black tracking-widest text-slate-500 status-label">
-                  {{ $isUploaded ? 'Terunggah' : 'Menunggu upload...' }}
-                </p>
-              </div>
-            </li>
-          @endforeach
-        </ul>
-
-        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
-          <div
-            class="flex gap-3 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
-            <span class="material-symbols-outlined text-primary text-[24px]">info</span>
-            <div>
-              <h4 class="text-sm font-bold text-slate-900 dark:text-white">Butuh Bantuan?</h4>
-              <p class="mt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                Pastikan semua dokumen hasil scan terbaca dengan jelas. Jika file PDF > 5MB, silakan kompres terlebih
-                dahulu.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
-
-    <!-- Review Modal / Step 3 Simulation -->
-    <div id="review-modal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title"
-      role="dialog" aria-modal="true">
-      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"
-          onclick="closeReview()"></div>
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <div
-          class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full border border-slate-200 dark:border-slate-700">
-          <div class="px-8 pt-8 pb-6">
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined text-3xl">task_alt</span>
-              </div>
-              <div>
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Review & Konfirmasi Akhir</h3>
-                <p class="text-sm text-slate-500">Pastikan data yang Anda masukkan sudah benar.</p>
-              </div>
-            </div>
-
-            <div
-              class="space-y-6 bg-slate-50 dark:bg-slate-900/40 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Perizinan</p>
-                  <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $perizinan->jenisPerizinan->nama }}</p>
-                </div>
-              </div>
-              <div class="space-y-3">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Dokumen</p>
-                <div id="modal-checklist" class="space-y-2">
-                  <!-- Filled by JS -->
-                </div>
-              </div>
-            </div>
-
-            <div
-              class="mt-6 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/30 flex items-start gap-3">
-              <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">shield_check</span>
-              <p class="text-xs text-emerald-800 dark:text-emerald-400 font-medium">
-                Dengan menekan tombol "Ajukan Sekarang", Anda menyatakan bahwa data dan dokumen yang diunggah adalah sah
-                dan benar.
-              </p>
-            </div>
-          </div>
-          <div
-            class="px-8 py-6 bg-slate-50 dark:bg-slate-800 flex flex-col sm:flex-row-reverse gap-3 border-t border-slate-200 dark:border-slate-700">
-            <form action="{{ route('admin_lembaga.perizinan.submit', $perizinan) }}" method="POST">
-              @csrf
-              <button type="submit"
-                class="w-full inline-flex justify-center items-center rounded-xl bg-primary px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-primary/20 hover:bg-blue-700 focus:outline-none transition-all transform hover:-translate-y-0.5">
-                Ajukan Sekarang <span class="material-symbols-outlined ml-2">rocket_launch</span>
-              </button>
-            </form>
-            <button onclick="closeReview()"
-              class="w-full inline-flex justify-center rounded-xl border border-slate-300 bg-white px-8 py-3.5 text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none transition-colors">
-              Kembali Periksa
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
-  <!-- Floating Chat Button -->
-  <button onclick="toggleChat()"
-    class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-all z-[60] group">
-    <span class="material-symbols-outlined text-2xl group-hover:rotate-12">forum</span>
-    <span
-      class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 {{ $perizinan->discussions->count() > 0 ? '' : 'hidden' }}"></span>
-  </button>
-
-  <!-- Slide-over Chat Panel -->
-  <div id="chat-panel"
-    class="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white dark:bg-slate-800 shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 ease-in-out border-l border-slate-200 dark:border-slate-700">
-    <div class="flex flex-col h-full">
-      <div
-        class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-primary">forum</span>
-          <h3 class="font-bold text-slate-800 dark:text-white">Diskusi 2 Arah</h3>
-        </div>
-        <button onclick="toggleChat()" class="text-slate-400 hover:text-slate-600 transition-colors">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/30 dark:bg-slate-900/20" id="chat-box">
-        @forelse($perizinan->discussions as $discussion)
-          <div class="flex flex-col {{ $discussion->user_id == Auth::id() ? 'items-end' : 'items-start' }} gap-1">
-            <div
-              class="max-w-[85%] px-4 py-2.5 rounded-2xl {{ $discussion->user_id == Auth::id() ? 'bg-primary text-white rounded-br-none' : 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white border border-slate-100 dark:border-slate-600 rounded-bl-none shadow-sm' }}">
-              <p class="text-[10px] font-black mb-1 opacity-70">{{ $discussion->user->name }}</p>
-              <p class="text-sm leading-relaxed">{{ $discussion->message }}</p>
-            </div>
-            <span class="text-[10px] text-slate-400 font-medium px-1">{{ $discussion->created_at->format('H:i') }}</span>
-          </div>
-        @empty
-          <div class="flex flex-col items-center justify-center h-full opacity-30 gap-2">
-            <span class="material-symbols-outlined text-5xl">chat_bubble</span>
-            <p class="text-sm font-bold italic">Belum ada diskusi.</p>
-          </div>
-        @endforelse
-      </div>
-
-      <div class="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
-        <form action="{{ route('admin_lembaga.perizinan.discussion.store', $perizinan) }}" method="POST" class="relative">
-          @csrf
-          <input type="text" name="message" placeholder="Tulis pesan ke dinas..."
-            class="w-full pl-4 pr-12 py-3 bg-slate-100 dark:bg-slate-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary transition-all shadow-inner"
-            required>
-          <button type="submit"
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:scale-110 transition-transform">
-            <span class="material-symbols-outlined">send</span>
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- File Preview Modal -->
-  <div id="file-preview-modal" class="fixed inset-0 z-[110] hidden overflow-y-auto" aria-labelledby="modal-title"
-    role="dialog" aria-modal="true">
-    <div class="flex items-center justify-center min-h-screen p-4">
-      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" aria-hidden="true"
-        onclick="closeFilePreview()"></div>
-      <div
-        class="relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl transform transition-all w-full max-w-5xl h-[85vh] flex flex-col border border-slate-200 dark:border-slate-700">
-        <div
-          class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">visibility</span>
-            <span id="preview-filename">Pratinjau Dokumen</span>
-          </h3>
-          <div class="flex items-center gap-2">
-            <a id="preview-download-link" href="#" target="_blank"
-              class="p-2 text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all">
-              <span class="material-symbols-outlined">download</span>
+        <div class="col-md-3 text-md-right mt-3 mt-md-0">
+            <a href="{{ route('admin_lembaga.perizinan.index') }}" class="btn btn-outline-secondary px-4 shadow-sm">
+                <i class="fas fa-sign-out-alt mr-2"></i> Keluar Editor
             </a>
-            <button onclick="closeFilePreview()"
-              class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-              <span class="material-symbols-outlined">close</span>
-            </button>
-          </div>
         </div>
-        <div class="flex-1 bg-slate-100 dark:bg-slate-900 overflow-hidden relative">
-          <iframe id="preview-iframe" src="" class="w-full h-full border-none"></iframe>
-          <div id="preview-image-container" class="hidden w-full h-full flex items-center justify-center p-4">
-            <img id="preview-image" src="" class="max-w-full max-h-full object-contain shadow-lg">
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+
+    <!-- Stepper -->
+    <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+        <div class="card-body p-4">
+            <div class="row position-relative px-lg-5">
+                <div class="step-line"></div>
+                <div class="step-line-progress" :style="'width: ' + progressWidth + '%'"></div>
+                
+                <!-- Step 1 -->
+                <div class="col-4 text-center">
+                    <button @click="goToStep(1)" class="step-item d-inline-flex flex-column align-items-center mx-auto" :class="step >= 1 ? (step > 1 ? 'completed' : 'active') : ''">
+                        <div class="step-circle mb-2">
+                           <template x-if="step > 1"><i class="fas fa-check"></i></template>
+                           <template x-if="step <= 1"><span>1</span></template>
+                        </div>
+                        <span class="small font-weight-bold text-uppercase d-none d-sm-block" :class="step >= 1 ? 'text-dark' : 'text-muted'">Info Detail</span>
+                    </button>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="col-4 text-center">
+                    <button @click="goToStep(2)" class="step-item d-inline-flex flex-column align-items-center mx-auto" :class="step >= 2 ? (step > 2 ? 'completed' : 'active') : ''">
+                        <div class="step-circle mb-2">
+                            <template x-if="step > 2"><i class="fas fa-check"></i></template>
+                            <template x-if="step <= 2"><span>2</span></template>
+                        </div>
+                        <span class="small font-weight-bold text-uppercase d-none d-sm-block" :class="step >= 2 ? 'text-dark' : 'text-muted'">Upload Berkas</span>
+                    </button>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="col-4 text-center">
+                    <button @click="goToStep(3)" class="step-item d-inline-flex flex-column align-items-center mx-auto" :class="step >= 3 ? 'active' : ''">
+                        <div class="step-circle mb-2">
+                            <span>3</span>
+                        </div>
+                        <span class="small font-weight-bold text-uppercase d-none d-sm-block" :class="step >= 3 ? 'text-dark' : 'text-muted'">Review & Kirim</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Form Column -->
+        <div class="col-lg-8">
+            
+            <!-- STEP 1: INFORMASI DETAIL -->
+            <div x-show="step === 1" class="mb-4">
+                <div class="card card-outline card-primary shadow-sm">
+                    <div class="card-header bg-white">
+                        <h3 class="card-title font-weight-bold text-dark">
+                            <i class="fas fa-edit text-primary mr-2"></i> Lengkapi Informasi Pengajuan
+                        </h3>
+                    </div>
+                    <form id="form-data-perizinan" action="{{ route('admin_lembaga.perizinan.update_data', $perizinan) }}" method="POST">
+                        @csrf
+                        <div class="card-body p-4">
+                            <p class="text-muted small mb-4">Informasi di bawah ini akan digunakan sebagai data identitas pada sertifikat izin Anda.</p>
+                            
+                            <div class="row">
+                                @if($perizinan->jenisPerizinan->form_config)
+                                    @foreach($perizinan->jenisPerizinan->form_config as $field)
+                                        <div class="col-md-{{ ($field['type'] ?? 'text') == 'textarea' ? '12' : '6' }} mb-3">
+                                            <div class="form-group">
+                                                <label class="text-uppercase small font-weight-bold text-muted mb-2 tracking-wider">
+                                                    {{ $field['label'] }} @if($field['required'] ?? false) <span class="text-danger">*</span> @endif
+                                                </label>
+                                                @if(($field['type'] ?? 'text') == 'textarea')
+                                                    <textarea name="data[{{ $field['name'] }}]" class="form-control form-control-lg font-weight-bold" rows="3" required>{{ $perizinan->perizinan_data[$field['name']] ?? '' }}</textarea>
+                                                @else
+                                                    <input type="{{ $field['type'] ?? 'text' }}" name="data[{{ $field['name'] }}]" value="{{ $perizinan->perizinan_data[$field['name']] ?? '' }}" class="form-control form-control-lg font-weight-bold" required>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="col-12 text-center py-5">
+                                        <i class="fas fa-info-circle text-muted fa-3x mb-3"></i>
+                                        <p class="text-muted font-italic">Tidak ada data tambahan yang diperlukan untuk jenis izin ini.</p>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light px-4 py-3 text-right">
+                            <button type="button" @click="submitStep1()" class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm">
+                                Simpan & Lanjut <i class="fas fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- STEP 2: UPLOAD BERKAS -->
+            <div x-show="step === 2" class="mb-4" x-cloak>
+                <div class="card card-outline card-primary shadow-sm">
+                    <div class="card-header bg-white">
+                        <h3 class="card-title font-weight-bold text-dark">
+                            <i class="fas fa-cloud-upload-alt text-primary mr-2"></i> Unggah Dokumen Persyaratan
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-4">Pastikan dokumen hasil scan jelas dan terbaca. Format: PDF, JPG, PNG.</p>
+                        
+                        <div class="list-group list-group-flush border-top border-bottom">
+                            @foreach($syarats as $syarat)
+                                @php $dokumen = $uploadedDokumens->get($syarat->id); @endphp
+                                <div class="list-group-item px-0 py-4 border-light">
+                                    <div class="row align-items-start">
+                                        <div class="col-md-8">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <h6 class="font-weight-bold mb-0 mr-2">{{ $syarat->nama_dokumen }}</h6>
+                                                @if($syarat->is_required)
+                                                    <span class="badge badge-danger text-uppercase p-1 px-2" style="font-size: 9px;">Wajib</span>
+                                                @endif
+                                            </div>
+                                            <p class="text-muted small mb-3">{{ $syarat->deskripsi ?? 'Silakan unggah dokumen yang sah untuk persyaratan ini.' }}</p>
+
+                                            @if($dokumen)
+                                                <div class="d-flex align-items-center p-3 rounded bg-light border border-success-light">
+                                                    <div class="bg-white rounded p-2 mr-3 border shadow-sm">
+                                                        <i class="fas fa-file-pdf text-danger fa-lg"></i>
+                                                    </div>
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <span class="d-block font-weight-bold text-truncate small">{{ $dokumen->nama_file }}</span>
+                                                        <span class="text-success small font-weight-bold"><i class="fas fa-check-circle mr-1"></i> Terunggah</span>
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <button @click="openFilePreview('{{ Storage::url($dokumen->path) }}', '{{ $dokumen->nama_file }}')" class="btn btn-sm btn-light border" title="Lihat">
+                                                            <i class="fas fa-eye text-muted"></i>
+                                                        </button>
+                                                        <button @click="deleteFile({{ $perizinan->id }}, {{ $dokumen->id }}, {{ $syarat->id }})" class="btn btn-sm btn-light border ml-1" title="Hapus">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                                            <input type="file" id="file-{{ $syarat->id }}" class="d-none" @change="uploadFile($event, {{ $syarat->id }})">
+                                            <button type="button" @click="document.getElementById('file-{{ $syarat->id }}').click()" 
+                                                class="btn btn-sm font-weight-bold text-uppercase px-3 py-2 shadow-sm"
+                                                :class="{{ $dokumen ? 'btn-outline-secondary' : 'btn-primary' }}">
+                                                <i class="fas {{ $dokumen ? 'fa-sync-alt' : 'fa-upload' }} mr-2"></i> {{ $dokumen ? 'Ganti' : 'Unggah' }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light px-4 py-3 d-flex justify-content-between">
+                        <button type="button" @click="goToStep(1)" class="btn btn-outline-secondary font-weight-bold px-4">
+                            <i class="fas fa-arrow-left mr-2"></i> Kembali
+                        </button>
+                        <button type="button" @click="validateStep2()" class="btn btn-primary px-5 py-2 font-weight-bold shadow-sm">
+                            Lanjut ke Review <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: REVIEW & SUBMIT -->
+            <div x-show="step === 3" class="mb-4" x-cloak>
+                <div class="card card-outline card-success shadow-sm">
+                    <div class="card-header bg-white">
+                        <h3 class="card-title font-weight-bold text-dark">
+                            <i class="fas fa-check-circle text-success mr-2"></i> Review & Konfirmasi Akhir
+                        </h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-4">Pastikan seluruh data dan berkas yang Anda unggah sudah benar dan sesuai asli.</p>
+                        
+                        <!-- Summary Detail -->
+                        <div class="card bg-light border shadow-none mb-4">
+                            <div class="card-body p-3">
+                                <div class="row">
+                                    @if($perizinan->jenisPerizinan->form_config)
+                                        @foreach($perizinan->jenisPerizinan->form_config as $field)
+                                            <div class="col-md-6 mb-3">
+                                                <label class="text-uppercase small font-weight-bold text-muted mb-1">{{ $field['label'] }}</label>
+                                                <div class="font-weight-bold text-dark">{{ $perizinan->perizinan_data[$field['name']] ?? '-' }}</div>
+                                            </div>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Document Status -->
+                        <div class="mb-4">
+                            <h6 class="text-uppercase small font-weight-bold text-muted mb-3">Ringkasan Dokumen</h6>
+                            <div class="list-group list-group-sm rounded border">
+                                @foreach($syarats as $syarat)
+                                    @php $dokumen = $uploadedDokumens->get($syarat->id); @endphp
+                                    <div class="list-group-item d-flex align-items-center justify-content-between py-2">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas {{ $dokumen ? 'fa-check-circle text-success' : 'fa-times-circle text-danger' }} mr-2"></i>
+                                            <span class="small font-weight-bold">{{ $syarat->nama_dokumen }}</span>
+                                        </div>
+                                        <span class="badge font-weight-bold text-uppercase {{ $dokumen ? 'text-success' : 'text-danger' }}" style="font-size: 8px;">
+                                            {{ $dokumen ? 'Terlampir' : 'Kosong' }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning border shadow-none small d-flex align-items-start">
+                            <i class="fas fa-exclamation-triangle mt-1 mr-3"></i>
+                            <div>
+                                Dengan menekan tombol <strong>Ajukan Sekarang</strong>, data akan dikirim ke sistem verifikasi Super Admin dan tidak dapat diubah hingga ada catatan perbaikan.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light px-4 py-4 d-flex flex-column flex-sm-row justify-content-between">
+                        <button type="button" @click="goToStep(2)" class="btn btn-outline-secondary font-weight-bold px-4 mb-3 mb-sm-0">
+                            Periksa Ulang Berkas
+                        </button>
+                        <form action="{{ route('admin_lembaga.perizinan.submit', $perizinan) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success btn-lg px-5 font-weight-bold shadow-lg">
+                                <i class="fas fa-paper-plane mr-2"></i> AJUKAN SEKARANG
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Components -->
+        <div class="col-lg-4">
+            <!-- Progress Circle Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white">
+                    <h3 class="card-title font-weight-bold small text-uppercase tracking-wider">
+                        <i class="fas fa-chart-pie text-primary mr-2"></i> Progres Persiapan
+                    </h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    @php
+                        $requiredCount = $syarats->where('is_required', true)->count();
+                        $uploadedCount = $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count();
+                        $percentage = $requiredCount > 0 ? round(($uploadedCount / $requiredCount) * 100) : 100;
+                    @endphp
+
+                    <div class="position-relative d-inline-block mb-3">
+                        <div class="progress-circle shadow-sm" style="width: 120px; height: 120px;">
+                            <svg viewBox="0 0 36 36" class="w-100 h-100 rotate-n90">
+                                <circle cx="18" cy="18" r="16" fill="none" class="stroke-light" stroke-width="3"></circle>
+                                <circle cx="18" cy="18" r="16" fill="none" class="stroke-primary" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="{{ 100 - $percentage }}" style="transition: stroke-dashoffset 1s ease;"></circle>
+                            </svg>
+                            <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="top:0; left:0;">
+                                <span class="h4 font-weight-bold mb-0">{{ $percentage }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row text-center mt-3">
+                        <div class="col-6 border-right">
+                            <div class="text-muted small uppercase font-weight-bold mb-1">Terunggah</div>
+                            <div class="h6 font-weight-bold mb-0">{{ $uploadedCount }} Berkas</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted small uppercase font-weight-bold mb-1">Kekurangan</div>
+                            <div class="h6 font-weight-bold text-danger mb-0">{{ $requiredCount - $uploadedCount }} Berkas</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button @click="document.getElementById('chat-panel').classList.toggle('open')" class="btn btn-info btn-block py-2 font-weight-bold shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span><i class="fas fa-comments mr-2"></i> BUKA DISKUSI</span>
+                            @if($perizinan->discussions->count() > 0)
+                                <span class="badge badge-light text-info">{{ $perizinan->discussions->count() }}</span>
+                            @else
+                                <i class="fas fa-chevron-right small"></i>
+                            @endif
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Guidelines Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 pb-0">
+                    <h3 class="card-title font-weight-bold small text-uppercase">Tips Pengajuan</h3>
+                </div>
+                <div class="card-body p-4 pt-2">
+                    <ul class="list-unstyled small space-y-3">
+                        <li class="d-flex align-items-start border-bottom pb-2 mb-2">
+                            <i class="fas fa-lightbulb text-warning mr-3 mt-1"></i>
+                            <span>Gunakan file PDF hasil scan asli, bukan foto kamera HP jika memungkinkan agar lebih profesional.</span>
+                        </li>
+                        <li class="d-flex align-items-start border-bottom pb-2 mb-2">
+                            <i class="fas fa-file-contract text-info mr-3 mt-1"></i>
+                            <span>Satu jenis berkas harus digabung ke dalam satu file PDF jika terdiri dari beberapa halaman.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Panel -->
+    <div id="chat-panel" class="card direct-chat direct-chat-primary h-100 rounded-0 border-0">
+        <div class="card-header rounded-0 bg-primary d-flex align-items-center py-3">
+            <h3 class="card-title font-weight-bold text-white"><i class="fas fa-comments mr-2"></i> Pusat Diskusi</h3>
+            <div class="card-tools ml-auto">
+                <button type="button" class="btn btn-tool text-white" @click="document.getElementById('chat-panel').classList.remove('open')">
+                    <i class="fas fa-times fa-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body bg-light p-0">
+            <div class="direct-chat-messages h-100 p-4" id="chat-box" style="height: calc(100vh - 150px) !important;">
+                @forelse($perizinan->discussions as $chat)
+                    <div class="direct-chat-msg {{ $chat->user_id == Auth::id() ? 'right' : '' }} mb-4">
+                        <div class="direct-chat-infos clearfix mb-1">
+                            <span class="direct-chat-name {{ $chat->user_id == Auth::id() ? 'float-right' : 'float-left' }} font-weight-bold small uppercase">{{ $chat->user->name }}</span>
+                            <span class="direct-chat-timestamp {{ $chat->user_id == Auth::id() ? 'float-left' : 'float-right' }} small">{{ $chat->created_at->format('H:i, d M') }}</span>
+                        </div>
+                        <div class="direct-chat-text shadow-sm border-0 py-2 px-3 {{ $chat->user_id == Auth::id() ? 'bg-primary text-white' : 'bg-white text-dark' }}" style="border-radius: 12px; font-size: 13px;">
+                            {{ $chat->message }}
+                        </div>
+                    </div>
+                @empty
+                    <div class="h-100 d-flex flex-column align-items-center justify-content-center opacity-25 italic py-5">
+                        <i class="fas fa-comment-dots fa-4x mb-3"></i>
+                        <p class="font-weight-bold h5">Belum ada diskusi.</p>
+                        <p class="small">Tanyakan kendala pengajuan Anda di sini.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+        <div class="card-footer bg-white border-top p-4">
+            <form action="{{ route('admin_lembaga.perizinan.discussion.store', $perizinan) }}" method="POST">
+                @csrf
+                <div class="input-group">
+                    <input type="text" name="message" placeholder="Tanyakan kendala Anda..." class="form-control form-control-lg border-light bg-light" required>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-paper-plane px-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rotate-n90 { transform: rotate(-90deg); }
+    .stroke-light { stroke: #f4f6f9; }
+    .stroke-primary { stroke: #007bff; }
+    .progress-circle svg { width: 100%; height: 100%; }
+    .direct-chat-text:after, .direct-chat-text:before { border-right-color: transparent !important; border-left-color: transparent !important; }
+    body.chat-open { overflow: hidden; }
+</style>
+
+<!-- Add AlpineJS -->
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<script>
+    function wizard(initialStep) {
+        return {
+            step: initialStep,
+            progressWidth: 0,
+            init() {
+                this.updateProgress();
+                // Scroll to bottom of chat if open or after load
+                const chatBox = document.getElementById('chat-box');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            },
+            goToStep(n) {
+                if (n < this.step) {
+                    this.step = n;
+                    this.updateProgress();
+                    const url = new URL(window.location);
+                    url.searchParams.set('step', n);
+                    window.history.pushState({}, '', url);
+                } else if (n === 2) {
+                    this.step = 2;
+                    this.updateProgress();
+                } else if (n === 3) {
+                    this.step = 3;
+                    this.updateProgress();
+                }
+            },
+            updateProgress() {
+                this.progressWidth = ((this.step - 1) / 2) * 100;
+            },
+            submitStep1() {
+                const form = document.getElementById('form-data-perizinan');
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }).then(() => {
+                    window.location.href = `{{ route('admin_lembaga.perizinan.edit', $perizinan) }}?step=2`;
+                });
+            },
+            validateStep2() {
+                this.step = 3;
+                this.updateProgress();
+                const url = new URL(window.location);
+                url.searchParams.set('step', 3);
+                window.history.pushState({}, '', url);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            uploadFile(event, syaratId) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('syarat_id', syaratId);
+                formData.append('_token', '{{ csrf_token() }}');
+                const btn = event.target.nextElementSibling;
+                const originalContent = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> ...';
+                fetch(`{{ route('admin_lembaga.perizinan.upload_dokumen', $perizinan) }}`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }).then(async res => {
+                    if (!res.ok) throw new Error('Gagal mengunggah file.');
+                    return res.json();
+                }).then(data => {
+                    if (data.success) window.location.reload();
+                    else { alert(data.message); btn.disabled = false; btn.innerHTML = originalContent; }
+                }).catch(err => {
+                    alert('Error: ' + err.message);
+                    btn.disabled = false; btn.innerHTML = originalContent;
+                });
+            },
+            deleteFile(pId, dId, sId) {
+                if (!confirm('Hapus dokumen ini?')) return;
+                fetch(`/admin-lembaga/perizinan/${pId}/dokumen/${dId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).then(async res => {
+                    if (res.ok) window.location.reload();
+                    else alert('Gagal menghapus dokumen.');
+                });
+            },
+            openFilePreview(url, filename) {
+                window.open(url, '_blank');
+            }
+        }
+    }
+</script>
 @endsection
 
-@push('scripts')
+  <!-- Add AlpineJS for wizard logic -->
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
   <script>
-    const syarats = @json($syarats);
-    let uploadedCount = {{ $uploadedCount }};
-    const requiredCount = {{ $requiredCount }};
-
-    function handleFileUpload(event, syaratId) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      // UI State: Loading
-      document.getElementById(`empty-${syaratId}`).classList.add('hidden');
-      document.getElementById(`preview-${syaratId}`).classList.add('hidden');
-      document.getElementById(`loading-${syaratId}`).classList.remove('hidden');
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('syarat_id', syaratId);
-      formData.append('_token', '{{ csrf_token() }}');
-
-      fetch(`{{ route('admin_lembaga.perizinan.upload_dokumen', $perizinan) }}`, {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById(`loading-${syaratId}`).classList.add('hidden');
-
-          if (data.success) {
-            // Update Preview Card
-            const preview = document.getElementById(`preview-${syaratId}`);
-            preview.classList.remove('hidden');
-            preview.querySelector('.filename').textContent = file.name;
-
-            // Update Preview & Delete Buttons
-            const viewBtn = preview.querySelector('button[title="Lihat File"]');
-            viewBtn.setAttribute('onclick', `openFilePreview('${data.path}', '${file.name}')`);
-
-            const deleteBtn = document.getElementById(`btn-delete-${syaratId}`);
-            deleteBtn.setAttribute('onclick', `deleteFile({{ $perizinan->id }}, ${data.id}, ${syaratId})`);
-
-            // Update Sidebar Checklist
-            const item = document.getElementById(`checklist-item-${syaratId}`);
-            item.classList.remove('opacity-60');
-            const badge = item.querySelector('.flex-none');
-            badge.classList.remove('border-2', 'border-slate-300', 'dark:border-slate-600');
-            badge.classList.add('bg-green-100', 'text-green-600', 'dark:bg-green-900/30', 'dark:text-green-400');
-            badge.querySelector('.material-symbols-outlined').classList.remove('invisible');
-            item.querySelector('.name-label').classList.add('line-through', 'decoration-slate-400', 'decoration-2');
-            item.querySelector('.status-label').textContent = 'Terunggah';
-
-            // Update Progress Calculation if it was required and not yet counted
-            // This is a simple client-side update, true state is in DB
-            updateProgress();
-
-            // Show toast or snackbar
-            alert('Berhasil mengunggah dokumen.');
-          } else {
-            document.getElementById(`empty-${syaratId}`).classList.remove('hidden');
-            alert(data.message || 'Gagal mengunggah dokumen.');
+    function wizard(initialStep) {
+      return {
+        step: initialStep,
+        progressWidth: 0,
+        init() {
+          this.updateProgress();
+        },
+        goToStep(n) {
+          if (n < this.step) {
+            this.step = n;
+            this.updateProgress();
+            // Update URL without reload for manual step clicks
+            const url = new URL(window.location);
+            url.searchParams.set('step', n);
+            window.history.pushState({}, '', url);
+          } else if (n === 2) {
+            this.step = 2;
+            this.updateProgress();
+          } else if (n === 3) {
+            this.step = 3;
+            this.updateProgress();
           }
-        })
-        .catch(error => {
-          document.getElementById(`loading-${syaratId}`).classList.add('hidden');
-          document.getElementById(`empty-${syaratId}`).classList.remove('hidden');
-          console.error('Error:', error);
-          alert('Terjadi kesalahan saat mengunggah.');
-        });
-    }
+        },
+        updateProgress() {
+          this.progressWidth = ((this.step - 1) / 2) * 100;
+        },
+        submitStep1() {
+          const form = document.getElementById('form-data-perizinan');
+          const formData = new FormData(form);
 
-    function updateProgress() {
-      // Simple client-side progress estimation
-      const items = document.querySelectorAll('#document-checklist li');
-      let currentUploaded = 0;
-      let currentRequired = 0;
+          fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          }).then(() => {
+            // Navigate to step 2 WITH reload to refresh information
+            window.location.href = `{{ route('admin_lembaga.perizinan.edit', $perizinan) }}?step=2`;
+          });
+        },
+        validateStep2() {
+          // Navigate to step 3
+          this.step = 3;
+          this.updateProgress();
+          const url = new URL(window.location);
+          url.searchParams.set('step', 3);
+          window.history.pushState({}, '', url);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        uploadFile(event, syaratId) {
+          const file = event.target.files[0];
+          if (!file) return;
 
-      syarats.forEach(s => {
-        if (s.is_required) {
-          currentRequired++;
-          const item = document.getElementById(`checklist-item-${s.id}`);
-          if (item.querySelector('.material-symbols-outlined').classList.contains('invisible') === false) {
-            currentUploaded++;
-          }
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('syarat_id', syaratId);
+          formData.append('_token', '{{ csrf_token() }}');
+
+          // Simple UX feedback - find the button which is the next sibling
+          const btn = event.target.nextElementSibling;
+          const originalContent = btn.innerHTML;
+          btn.disabled = true;
+          btn.innerHTML = '<span class="animate-spin material-symbols-outlined text-[18px]">sync</span> Uploading...';
+
+          fetch(`{{ route('admin_lembaga.perizinan.upload_dokumen', $perizinan) }}`, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          })
+            .then(async res => {
+              if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.message || 'Gagal mengunggah file.');
+              }
+              return res.json();
+            })
+            .then(data => {
+              if (data.success) {
+                // Reload current step to refresh file list
+                window.location.reload();
+              } else {
+                alert(data.message);
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+              }
+            })
+            .catch(err => {
+              alert('Error: ' + err.message);
+              btn.disabled = false;
+              btn.innerHTML = originalContent;
+            });
+        },
+        deleteFile(pId, dId, sId) {
+          if (!confirm('Hapus dokumen ini?')) return;
+          fetch(`/admin-lembaga/perizinan/${pId}/dokumen/${dId}`, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRF-TOKEN': '{{ csrf_token() }}',
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json'
+            }
+          })
+            .then(async res => {
+              if (res.ok) {
+                window.location.reload();
+              } else {
+                const data = await res.json();
+                alert(data.message || 'Gagal menghapus dokumen.');
+              }
+            });
+        },
+        toggleChat() {
+          const panel = document.getElementById('chat-panel');
+          panel.classList.toggle('translate-x-full');
+        },
+        openFilePreview(url, filename) {
+          // Use a simple window open for preview for now or custom modal if needed
+          window.open(url, '_blank');
         }
-      });
-
-      const percentage = currentRequired > 0 ? Math.round((currentUploaded / currentRequired) * 100) : 100;
-      document.getElementById('overall-percentage').textContent = percentage + '%';
-      document.getElementById('progress-bar').style.width = percentage + '%';
-    }
-
-    function checkRequirementsAndProceed() {
-      // Validate required documents
-      let missing = [];
-      syarats.forEach(s => {
-        if (s.is_required) {
-          const item = document.getElementById(`checklist-item-${s.id}`);
-          if (item.querySelector('.material-symbols-outlined').classList.contains('invisible')) {
-            missing.push(s.nama_dokumen);
-          }
-        }
-      });
-
-      if (missing.length > 0) {
-        alert('Mohon lengkapi dokumen wajib berikut:\n- ' + missing.join('\n- '));
-        return;
       }
-
-      openReview();
-    }
-
-    function openReview() {
-      const modal = document.getElementById('review-modal');
-      const list = document.getElementById('modal-checklist');
-      list.innerHTML = '';
-
-      syarats.forEach(s => {
-        const item = document.getElementById(`checklist-item-${s.id}`);
-        const isUploaded = !item.querySelector('.material-symbols-outlined').classList.contains('invisible');
-
-        const div = document.createElement('div');
-        div.className = 'flex items-center justify-between text-sm py-1';
-        div.innerHTML = `
-                        <span class="text-slate-600 dark:text-slate-300 font-medium">${s.nama_dokumen}</span>
-                        <span class="flex items-center gap-1 font-bold ${isUploaded ? 'text-emerald-500' : 'text-slate-400'}">
-                            <span class="material-symbols-outlined text-[18px]">${isUploaded ? 'check_circle' : 'pending'}</span>
-                            ${isUploaded ? 'Siap' : 'Belum Ada'}
-                        </span>
-                    `;
-        list.appendChild(div);
-      });
-
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeReview() {
-      document.getElementById('review-modal').classList.add('hidden');
-      document.body.style.overflow = 'auto';
-    }
-
-    function toggleChat() {
-      const panel = document.getElementById('chat-panel');
-      const isHidden = panel.classList.contains('translate-x-full');
-
-      if (isHidden) {
-        panel.classList.remove('translate-x-full');
-        const chatBox = document.getElementById('chat-box');
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } else {
-        panel.classList.add('translate-x-full');
-      }
-    }
-
-    function openFilePreview(url, filename) {
-      const modal = document.getElementById('file-preview-modal');
-      const iframe = document.getElementById('preview-iframe');
-      const imgContainer = document.getElementById('preview-image-container');
-      const img = document.getElementById('preview-image');
-      const filenameDisplay = document.getElementById('preview-filename');
-      const downloadLink = document.getElementById('preview-download-link');
-
-      filenameDisplay.textContent = filename;
-      downloadLink.href = url;
-
-      if (url.toLowerCase().endsWith('.pdf')) {
-        iframe.classList.remove('hidden');
-        imgContainer.classList.add('hidden');
-        iframe.src = url;
-      } else {
-        iframe.classList.add('hidden');
-        imgContainer.classList.remove('hidden');
-        img.src = url;
-        iframe.src = '';
-      }
-
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeFilePreview() {
-      const modal = document.getElementById('file-preview-modal');
-      const iframe = document.getElementById('preview-iframe');
-      iframe.src = '';
-      modal.classList.add('hidden');
-      document.body.style.overflow = 'auto';
-    }
-
-    function deleteFile(perizinanId, dokumenId, syaratId) {
-      if (!dokumenId) return;
-      if (!confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) return;
-
-      fetch(`/admin-lembaga/perizinan/${perizinanId}/dokumen/${dokumenId}`, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // UI Update
-            document.getElementById(`preview-${syaratId}`).classList.add('hidden');
-            document.getElementById(`empty-${syaratId}`).classList.remove('hidden');
-
-            // Update Badge Checkmark
-            const item = document.getElementById(`checklist-item-${syaratId}`);
-            item.classList.add('opacity-60');
-            const badge = item.querySelector('.flex-none');
-            badge.classList.add('border-2', 'border-slate-300', 'dark:border-slate-600');
-            badge.classList.remove('bg-green-100', 'text-green-600', 'dark:bg-green-900/30', 'dark:text-green-400');
-            badge.querySelector('.material-symbols-outlined').classList.add('invisible');
-            item.querySelector('.name-label').classList.remove('line-through', 'decoration-slate-400', 'decoration-2');
-            item.querySelector('.status-label').textContent = 'Menunggu upload...';
-
-            updateProgress();
-            alert('Dokumen berhasil dihapus.');
-          } else {
-            alert(data.message || 'Gagal menghapus dokumen.');
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          alert('Terjadi kesalahan saat menghapus.');
-        });
     }
   </script>
-@endpush
+
+  <style>
+    [x-cloak] {
+      display: none !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+@endsection

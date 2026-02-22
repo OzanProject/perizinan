@@ -1,21 +1,42 @@
-<!-- Navbar -->
-<header class="bg-white shadow-header h-14 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0">
-  <div class="flex items-center gap-4">
-    <button class="text-gray-500 hover:text-gray-700 focus:outline-none md:hidden" onclick="toggleSidebar()">
-      <span class="material-symbols-outlined">menu</span>
-    </button>
-    <div class="hidden sm:flex text-sm text-gray-500 items-center gap-2">
-      <a class="hover:text-primary transition-colors" href="{{ route('dashboard') }}">Home</a>
-      <span class="text-gray-300">/</span>
-      <span class="text-gray-800 font-medium">@yield('breadcrumb', 'Dashboard')</span>
-    </div>
-  </div>
-  <div class="flex items-center gap-3 sm:gap-5">
-    <!-- User Info -->
-    <div class="hidden md:flex flex-col items-end">
-      <span class="text-sm font-bold text-gray-700 leading-none">{{ Auth::user()->name }}</span>
-      <span
-        class="text-[10px] text-gray-400 uppercase tracking-wider text-right">{{ str_replace('_', ' ', Auth::user()->getRoleNames()->first()) }}</span>
-    </div>
-  </div>
-</header>
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+  <!-- Left navbar links -->
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+    </li>
+    <li class="nav-item d-none d-sm-inline-block">
+      <a href="{{ route('super_admin.dashboard') }}" class="nav-link">Home</a>
+    </li>
+  </ul>
+
+  <!-- Right navbar links -->
+  <ul class="navbar-nav ml-auto">
+    <!-- Notifications Dropdown Menu -->
+    <li class="nav-item dropdown">
+      <a class="nav-link" data-toggle="dropdown" href="#">
+        <i class="far fa-user"></i>
+        <span class="d-none d-md-inline ml-1">{{ Auth::user()->name }}</span>
+      </a>
+      <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+        <span
+          class="dropdown-item dropdown-header">{{ str_replace('_', ' ', Auth::user()->getRoleNames()->first()) }}</span>
+        <div class="dropdown-divider"></div>
+        <a href="{{ route('super_admin.settings.index') }}" class="dropdown-item">
+          <i class="fas fa-user-cog mr-2"></i> Profil & Pengaturan
+        </a>
+        <div class="dropdown-divider"></div>
+        <form action="{{ route('logout') }}" method="POST">
+          @csrf
+          <button type="submit" class="dropdown-item dropdown-footer text-danger">
+            <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+          </button>
+        </form>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+        <i class="fas fa-expand-arrows-alt"></i>
+      </a>
+    </li>
+  </ul>
+</nav>

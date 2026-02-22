@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('dinas', function (Blueprint $table) {
+            $table->string('watermark_img')->nullable()->after('logo');
+            $table->boolean('watermark_enabled')->default(true)->after('watermark_img');
+            $table->decimal('watermark_opacity', 3, 2)->default(0.05)->after('watermark_enabled');
+            $table->integer('watermark_size')->default(400)->after('watermark_opacity');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('dinas', function (Blueprint $table) {
+            $table->dropColumn(['watermark_img', 'watermark_enabled', 'watermark_opacity', 'watermark_size']);
+        });
+    }
+};

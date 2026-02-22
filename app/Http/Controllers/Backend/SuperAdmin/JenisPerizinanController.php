@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JenisPerizinan;
+use App\Services\CertificateTemplateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -71,7 +72,11 @@ class JenisPerizinanController extends Controller
 
     public function template(JenisPerizinan $jenisPerizinan)
     {
-        return view('backend.super_admin.jenis_perizinan.template', compact('jenisPerizinan'));
+        $presets = CertificateTemplateService::getPresets();
+        $dinas = \App\Models\Dinas::first();
+        $logoUrl = $dinas && $dinas->logo ? asset('storage/' . $dinas->logo) : null;
+
+        return view('backend.super_admin.jenis_perizinan.template', compact('jenisPerizinan', 'presets', 'logoUrl'));
     }
 
     public function updateTemplate(Request $request, JenisPerizinan $jenisPerizinan)
@@ -80,11 +85,39 @@ class JenisPerizinanController extends Controller
             'template_html' => 'required|string',
         ]);
 
+        try {
+            $jenisPerizinan->validateTemplate($request->template_html);
+
+            $jenisPerizinan->update([
+                'template_html' => $request->template_html,
+            ]);
+
+            return redirect()->route('super_admin.jenis_perizinan.index')
+                ->with('success', 'Template sertifikat berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function formConfig(JenisPerizinan $jenisPerizinan)
+    {
+        return view('backend.super_admin.jenis_perizinan.form', compact('jenisPerizinan'));
+    }
+
+    public function updateFormConfig(Request $request, JenisPerizinan $jenisPerizinan)
+    {
+        $request->validate([
+            'fields' => 'required|array',
+            'fields.*.name' => 'required|string|alpha_dash',
+            'fields.*.label' => 'required|string',
+            'fields.*.type' => 'required|in:text,number,date,textarea',
+        ]);
+
         $jenisPerizinan->update([
-            'template_html' => $request->template_html,
+            'form_config' => $request->fields,
         ]);
 
         return redirect()->route('super_admin.jenis_perizinan.index')
-            ->with('success', 'Template sertifikat berhasil diperbarui.');
+            ->with('success', 'Konfigurasi formulir berhasil diperbarui.');
     }
 }

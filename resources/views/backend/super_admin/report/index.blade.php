@@ -1,299 +1,268 @@
 @extends('layouts.backend')
 
 @section('title', 'Laporan & Statistik')
-@section('breadcrumb', 'Laporan')
 
 @section('content')
-  <!-- Page Header -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-    <div>
-      <h2 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Laporan & Statistik Perizinan</h2>
-      <p class="text-slate-500 text-sm mt-1">Monitoring data pengajuan izin lintas lembaga secara real-time.</p>
-    </div>
-    <div class="flex items-center gap-2">
-      <button
-        class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all">
-        <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-        {{ now()->translatedFormat('d F Y') }}
-      </button>
-    </div>
-  </div>
-
-  <!-- Summary Widgets (AdminLTE Style Boxes) -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-    <!-- Total Pengajuan -->
-    <div class="bg-primary text-white rounded-lg overflow-hidden relative shadow-md min-h-[140px]">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-black">{{ number_format($stats['total']) }}</h3>
-        <p class="text-sm font-medium opacity-90 mt-1 uppercase tracking-wide">Total Pengajuan</p>
+  <div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4 align-items-center">
+      <div class="col-sm-6">
+        <h1 class="m-0 text-dark font-weight-bold"><i class="fas fa-chart-line mr-2 text-primary"></i> Laporan & Statistik
+        </h1>
+        <p class="text-muted small mt-1">Monitoring data pengajuan izin lintas lembaga secara real-time.</p>
       </div>
-      <span
-        class="material-symbols-outlined absolute right-4 top-4 text-7xl text-black/15 pointer-events-none">description</span>
-      <a class="absolute bottom-0 left-0 right-0 bg-black/10 py-1.5 text-center text-xs font-semibold hover:bg-black/20 transition-colors flex items-center justify-center gap-1"
-        href="{{ route('super_admin.perizinan.index') }}">
-        Selengkapnya <span class="material-symbols-outlined text-xs">arrow_forward</span>
-      </a>
-    </div>
-
-    <!-- Pengajuan Disetujui -->
-    <div class="bg-emerald-600 text-white rounded-lg overflow-hidden relative shadow-md min-h-[140px]">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-black">{{ number_format($stats['approved']) }}</h3>
-        <p class="text-sm font-medium opacity-90 mt-1 uppercase tracking-wide">Pengajuan Disetujui</p>
-      </div>
-      <span
-        class="material-symbols-outlined absolute right-4 top-4 text-7xl text-black/15 pointer-events-none">check_circle</span>
-      <a class="absolute bottom-0 left-0 right-0 bg-black/10 py-1.5 text-center text-xs font-semibold hover:bg-black/20 transition-colors flex items-center justify-center gap-1"
-        href="{{ route('super_admin.perizinan.index', ['status' => 'disetujui']) }}">
-        Selengkapnya <span class="material-symbols-outlined text-xs">arrow_forward</span>
-      </a>
-    </div>
-
-    <!-- Pengajuan Ditolak -->
-    <div class="bg-rose-600 text-white rounded-lg overflow-hidden relative shadow-md min-h-[140px]">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-black">{{ number_format($stats['rejected']) }}</h3>
-        <p class="text-sm font-medium opacity-90 mt-1 uppercase tracking-wide">Pengajuan Ditolak</p>
-      </div>
-      <span
-        class="material-symbols-outlined absolute right-4 top-4 text-7xl text-black/15 pointer-events-none">cancel</span>
-      <a class="absolute bottom-0 left-0 right-0 bg-black/10 py-1.5 text-center text-xs font-semibold hover:bg-black/20 transition-colors flex items-center justify-center gap-1"
-        href="{{ route('super_admin.perizinan.index', ['status' => 'ditolak']) }}">
-        Selengkapnya <span class="material-symbols-outlined text-xs">arrow_forward</span>
-      </a>
-    </div>
-
-    <!-- Sedang Diproses -->
-    <div class="bg-amber-500 text-white rounded-lg overflow-hidden relative shadow-md min-h-[140px]">
-      <div class="p-4 relative z-10">
-        <h3 class="text-3xl font-black">{{ number_format($stats['processing']) }}</h3>
-        <p class="text-sm font-medium opacity-90 mt-1 uppercase tracking-wide">Sedang Diproses</p>
-      </div>
-      <span
-        class="material-symbols-outlined absolute right-4 top-4 text-7xl text-black/15 pointer-events-none">sync</span>
-      <a class="absolute bottom-0 left-0 right-0 bg-black/10 py-1.5 text-center text-xs font-semibold hover:bg-black/20 transition-colors flex items-center justify-center gap-1"
-        href="{{ route('super_admin.perizinan.index', ['status' => 'diajukan']) }}">
-        Selengkapnya <span class="material-symbols-outlined text-xs">arrow_forward</span>
-      </a>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-    <!-- Filter Card -->
-    <div
-      class="lg:col-span-1 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden h-fit">
-      <div
-        class="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">filter_alt</span>
-          <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-xs tracking-wider">Filter Laporan</h3>
-        </div>
-      </div>
-      <div class="p-5">
-        <form action="{{ route('super_admin.laporan.index') }}" method="GET" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Mulai</label>
-            <div class="relative">
-              <span
-                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">event</span>
-              <input name="start_date" value="{{ request('start_date') }}"
-                class="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                type="date" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Selesai</label>
-            <div class="relative">
-              <span
-                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">event</span>
-              <input name="end_date" value="{{ request('end_date') }}"
-                class="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-lg text-sm focus:ring-primary focus:border-primary"
-                type="date" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Lembaga</label>
-            <div class="relative">
-              <span
-                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">school</span>
-              <select name="lembaga_id"
-                class="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-lg text-sm focus:ring-primary focus:border-primary appearance-none">
-                <option value="">Semua Lembaga</option>
-                @foreach($listLembaga as $l)
-                  <option value="{{ $l->id }}" {{ request('lembaga_id') == $l->id ? 'selected' : '' }}>{{ $l->nama_lembaga }}
-                  </option>
-                @endforeach
-              </select>
-            </div>
-          </div>
-          <div class="flex flex-col gap-2 pt-2">
-            <button type="submit"
-              class="w-full bg-primary text-white font-bold py-2.5 rounded-lg text-sm hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-[18px]">search</span>
-              Terapkan Filter
-            </button>
-            @if(request()->anyFilled(['start_date', 'end_date', 'lembaga_id']))
-              <a href="{{ route('super_admin.laporan.index') }}"
-                class="w-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold py-2 rounded-lg text-xs hover:bg-slate-200 flex items-center justify-center gap-1 transition-all">
-                <span class="material-symbols-outlined text-[16px]">restart_alt</span>
-                Reset Filter
-              </a>
-            @endif
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Chart Card -->
-    <div
-      class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col min-h-[400px]">
-      <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">show_chart</span>
-          <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase text-xs tracking-wider">Tren Pengajuan Bulanan
-          </h3>
-        </div>
-      </div>
-      <div class="p-6 flex-1 relative flex items-end gap-3 min-h-[300px]">
-        @php
-          $maxTrend = $monthlyTrend->max() ?: 1;
-        @endphp
-        @foreach($monthlyTrend as $month => $total)
-          <div class="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-            <div
-              class="w-full bg-primary/10 hover:bg-primary/30 rounded-t-lg transition-all relative border-t border-transparent group-hover:border-primary"
-              style="height: {{ ($total / $maxTrend) * 90 }}%">
-              <div
-                class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded hidden group-hover:block whitespace-nowrap z-20">
-                {{ $total }} Izin
-              </div>
-            </div>
-            <span class="text-[10px] font-bold text-slate-400 uppercase">{{ $month }}</span>
-          </div>
-        @endforeach
-
-        <!-- Grid Lines Layer -->
-        <div
-          class="absolute left-0 right-0 top-0 bottom-[20px] pointer-events-none flex flex-col justify-between opacity-5 px-6">
-          <div class="border-t border-slate-900 dark:border-slate-100 w-full"></div>
-          <div class="border-t border-slate-900 dark:border-slate-100 w-full"></div>
-          <div class="border-t border-slate-900 dark:border-slate-100 w-full"></div>
-          <div class="border-t border-slate-900 dark:border-slate-100 w-full"></div>
-        </div>
-      </div>
-      <div
-        class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 rounded-b-xl flex items-center justify-center gap-6">
-        <div class="flex items-center gap-2">
-          <span class="size-3 rounded-sm bg-primary/20"></span>
-          <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Pengajuan
-            Masuk</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="size-3 rounded-sm bg-primary h-0.5 mt-0.5"></span>
-          <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Aktivitas
-            Periode Ini</span>
+      <div class="col-sm-6 text-right">
+        <div class="btn btn-white shadow-sm btn-sm font-weight-bold">
+          <i class="far fa-calendar-alt mr-2 text-primary"></i> {{ now()->translatedFormat('d F Y') }}
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Main Data Table Card -->
-  <div
-    class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden border-t-4 border-t-primary">
-    <div
-      class="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary text-[24px]">analytics</span>
-        <h3 class="font-bold text-slate-800 dark:text-slate-200 text-lg">Statistik Aktivitas Lembaga</h3>
+    <!-- Summary Widgets (AdminLTE Small Boxes) -->
+    <div class="row">
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary shadow-sm">
+          <div class="inner">
+            <h3>{{ number_format($stats['total']) }}</h3>
+            <p class="font-weight-bold text-uppercase small">Total Pengajuan</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <a href="{{ route('super_admin.perizinan.index') }}" class="small-box-footer">
+            Selengkapnya <i class="fas fa-arrow-circle-right ml-1"></i>
+          </a>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <a href="{{ route('super_admin.laporan.export_excel') }}"
-          class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all">
-          <span class="material-symbols-outlined text-[18px]">table_view</span>
-          Export Excel
-        </a>
-        <a href="{{ route('super_admin.laporan.export_pdf') }}"
-          class="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold hover:bg-rose-700 shadow-lg shadow-rose-600/20 transition-all">
-          <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-          Cetak PDF
-        </a>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-success shadow-sm">
+          <div class="inner">
+            <h3>{{ number_format($stats['approved']) }}</h3>
+            <p class="font-weight-bold text-uppercase small">Disetujui</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <a href="{{ route('super_admin.perizinan.index', ['status' => 'disetujui']) }}" class="small-box-footer">
+            Selengkapnya <i class="fas fa-arrow-circle-right ml-1"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger shadow-sm">
+          <div class="inner">
+            <h3>{{ number_format($stats['rejected']) }}</h3>
+            <p class="font-weight-bold text-uppercase small">Ditolak</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <a href="{{ route('super_admin.perizinan.index', ['status' => 'ditolak']) }}" class="small-box-footer">
+            Selengkapnya <i class="fas fa-arrow-circle-right ml-1"></i>
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning shadow-sm">
+          <div class="inner">
+            <h3>{{ number_format($stats['processing']) }}</h3>
+            <p class="font-weight-bold text-uppercase small text-dark">Sedang Diproses</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-sync-alt"></i>
+          </div>
+          <a href="{{ route('super_admin.perizinan.index', ['status' => 'diajukan']) }}"
+            class="small-box-footer text-dark">
+            Selengkapnya <i class="fas fa-arrow-circle-right ml-1 text-dark"></i>
+          </a>
+        </div>
       </div>
     </div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-slate-50 dark:bg-slate-800/50">
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest w-12">
-              No</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Nama
-              Lembaga</th>
-            <th
-              class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">
-              Total Pengajuan</th>
-            <th
-              class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">
-              Selesai</th>
-            <th
-              class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">
-              Dalam Proses</th>
-            <th class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-              Persentase Kelulusan</th>
-            <th
-              class="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">
-              Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-          @foreach($lembagaStats as $index => $lembaga)
-            @php
-              $persentase = $lembaga->total_pengajuan > 0
-                ? round(($lembaga->selesai / $lembaga->total_pengajuan) * 100, 1)
-                : 0;
-            @endphp
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-              <td class="px-6 py-4 text-sm font-medium text-slate-500">{{ $lembagaStats->firstItem() + $index }}</td>
-              <td class="px-6 py-4">
-                <div class="font-bold text-slate-800 dark:text-slate-200 text-sm">{{ $lembaga->nama_lembaga }}</div>
-                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{{ $lembaga->jenjang }}</div>
-              </td>
-              <td class="px-6 py-4 text-center font-semibold text-slate-700 dark:text-slate-300">
-                {{ number_format($lembaga->total_pengajuan) }}
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span
-                  class="inline-flex items-center justify-center size-8 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-xs rounded-full">{{ $lembaga->selesai }}</span>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <span
-                  class="inline-flex items-center justify-center size-8 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-bold text-xs rounded-full">{{ $lembaga->proses }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="w-full space-y-1.5">
-                  <div class="flex items-center justify-between">
-                    <span
-                      class="text-xs font-bold {{ $persentase > 50 ? 'text-emerald-600' : 'text-rose-600' }}">{{ $persentase }}%</span>
+
+    <div class="row">
+      <!-- Filter Card -->
+      <div class="col-lg-4">
+        <div class="card card-outline card-primary shadow-sm border-0">
+          <div class="card-header bg-white">
+            <h3 class="card-title font-weight-bold"><i class="fas fa-filter mr-2 text-primary"></i> Filter Laporan</h3>
+          </div>
+          <div class="card-body">
+            <form action="{{ route('super_admin.laporan.index') }}" method="GET">
+              <div class="form-group">
+                <label class="small font-weight-bold text-muted text-uppercase">Tanggal Mulai</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-calendar"></i></span>
                   </div>
-                  <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                    <div class="h-1.5 rounded-full {{ $persentase > 50 ? 'bg-emerald-500' : 'bg-rose-500' }}"
-                      style="width: {{ $persentase }}%"></div>
+                  <input name="start_date" value="{{ request('start_date') }}" class="form-control border-left-0"
+                    type="date" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="small font-weight-bold text-muted text-uppercase">Tanggal Selesai</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-calendar"></i></span>
+                  </div>
+                  <input name="end_date" value="{{ request('end_date') }}" class="form-control border-left-0"
+                    type="date" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="small font-weight-bold text-muted text-uppercase">Lembaga</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-school"></i></span>
+                  </div>
+                  <select name="lembaga_id" class="form-control border-left-0 custom-select">
+                    <option value="">Semua Lembaga</option>
+                    @foreach($listLembaga as $l)
+                      <option value="{{ $l->id }}" {{ request('lembaga_id') == $l->id ? 'selected' : '' }}>
+                        {{ $l->nama_lembaga }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block font-weight-bold shadow-sm mt-4">
+                <i class="fas fa-search mr-2"></i> Terapkan Filter
+              </button>
+              @if(request()->anyFilled(['start_date', 'end_date', 'lembaga_id']))
+                <a href="{{ route('super_admin.laporan.index') }}"
+                  class="btn btn-default btn-block btn-sm mt-2 font-weight-bold">
+                  <i class="fas fa-undo mr-1"></i> Reset Filter
+                </a>
+              @endif
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Card -->
+      <div class="col-lg-8">
+        <div class="card card-outline card-primary shadow-sm border-0 h-100">
+          <div class="card-header bg-white">
+            <h3 class="card-title font-weight-bold"><i class="fas fa-chart-bar mr-2 text-primary"></i> Tren Pengajuan
+              Bulanan</h3>
+          </div>
+          <div class="card-body pb-0">
+            <div class="chart-container d-flex align-items-end justify-content-between h-100"
+              style="min-height: 250px; padding-bottom: 30px;">
+              @php $maxTrend = $monthlyTrend->max() ?: 1; @endphp
+              @foreach($monthlyTrend as $month => $total)
+                <div class="flex-grow-1 text-center px-1" title="{{ $total }} Izin">
+                  <div class="bg-primary rounded-top mx-auto hover-opacity shadow-sm"
+                    style="height: {{ ($total / $maxTrend) * 200 }}px; width: 80%; max-width: 40px; transition: height 0.3s ease-in-out;">
+                    <span class="small font-weight-bold text-white d-block pt-1">{{ $total > 0 ? $total : '' }}</span>
+                  </div>
+                  <div class="small font-weight-bold text-muted mt-2 text-uppercase" style="font-size: 10px;">{{ $month }}
                   </div>
                 </div>
-              </td>
-              <td class="px-6 py-4 text-center">
-                <a href="{{ route('super_admin.perizinan.index', ['search' => $lembaga->nama_lembaga]) }}"
-                  class="bg-primary/10 hover:bg-primary hover:text-white text-primary p-2 rounded-lg transition-all inline-block">
-                  <span class="material-symbols-outlined text-[18px]">visibility</span>
-                </a>
-              </td>
-            </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
-    @if($lembagaStats->hasPages())
-      <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
-        {{ $lembagaStats->links() }}
+              @endforeach
+            </div>
+          </div>
+          <div class="card-footer bg-light border-0 py-2">
+            <div class="d-flex justify-content-center small font-weight-bold text-muted">
+              <span class="mr-3"><i class="fas fa-square text-primary mr-1"></i> Pengajuan Masuk</span>
+            </div>
+          </div>
+        </div>
       </div>
-    @endif
+    </div>
+
+    <!-- Main Data Table Card -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card card-outline card-primary shadow-sm border-0">
+          <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+            <h3 class="card-title font-weight-bold text-dark"><i class="fas fa-table mr-2 text-primary"></i> Statistik
+              Aktivitas Lembaga</h3>
+            <div class="card-tools">
+              <a href="{{ route('super_admin.laporan.export_excel') }}"
+                class="btn btn-success btn-sm shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-file-excel mr-1"></i> Excel
+              </a>
+              <a href="{{ route('super_admin.laporan.export_pdf') }}"
+                class="btn btn-danger btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-file-pdf mr-1"></i> PDF
+              </a>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="border-top-0 px-4 text-center" style="width: 50px;">No</th>
+                    <th class="border-top-0">Nama Lembaga</th>
+                    <th class="border-top-0 text-center">Total Pengajuan</th>
+                    <th class="border-top-0 text-center">Selesai</th>
+                    <th class="border-top-0 text-center">Proses</th>
+                    <th class="border-top-0" style="width: 250px;">Kelulusan (%)</th>
+                    <th class="border-top-0 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @foreach($lembagaStats as $index => $lembaga)
+                    @php
+                      $persentase = $lembaga->total_pengajuan > 0 ? round(($lembaga->selesai / $lembaga->total_pengajuan) * 100, 1) : 0;
+                    @endphp
+                    <tr>
+                      <td class="text-center">{{ $lembagaStats->firstItem() + $index }}</td>
+                      <td>
+                        <div class="font-weight-bold">{{ $lembaga->nama_lembaga }}</div>
+                        <div class="text-xs text-muted font-weight-bold uppercase">{{ $lembaga->jenjang }}</div>
+                      </td>
+                      <td class="text-center font-weight-bold">{{ number_format($lembaga->total_pengajuan) }}</td>
+                      <td class="text-center">
+                        <span class="badge badge-success px-2 py-1 rounded-pill">{{ $lembaga->selesai }}</span>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge badge-warning px-2 py-1 rounded-pill">{{ $lembaga->proses }}</span>
+                      </td>
+                      <td class="align-middle">
+                        <div class="progress progress-sm shadow-sm" style="height: 10px; border-radius: 10px;">
+                          <div
+                            class="progress-bar {{ $persentase > 50 ? 'bg-success' : 'bg-danger' }} progress-bar-striped progress-bar-animated"
+                            role="progressbar" style="width: {{ $persentase }}%" aria-valuenow="{{ $persentase }}"
+                            aria-valuemin="0" aria-valuemax="100">
+                          </div>
+                        </div>
+                        <div
+                          class="text-right small font-weight-bold mt-1 {{ $persentase > 50 ? 'text-success' : 'text-danger' }}">
+                          {{ $persentase }}%
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <a href="{{ route('super_admin.perizinan.index', ['search' => $lembaga->nama_lembaga]) }}"
+                          class="btn btn-primary btn-sm rounded-circle shadow-sm" title="Lihat Detail">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                      </td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+          </div>
+          @if($lembagaStats->hasPages())
+            <div class="card-footer bg-white py-2">
+              <div class="float-right">
+                {{ $lembagaStats->links() }}
+              </div>
+            </div>
+          @endif
+        </div>
+      </div>
+    </div>
   </div>
+
+  <style>
+    .hover-opacity:hover {
+      opacity: 0.8 !important;
+    }
+
+    .progress {
+      background-color: #f4f6f9;
+    }
+  </style>
 @endsection

@@ -122,9 +122,10 @@ class PerizinanController extends Controller
     return view('backend.admin_lembaga.perizinan.show', compact('perizinan', 'statusValue'));
   }
 
-  public function edit(Perizinan $perizinan)
+  public function edit(Request $request, Perizinan $perizinan)
   {
     $this->authorize('update', $perizinan);
+    $initialStep = $request->query('step', 1);
 
     // Eager load everything needed for the multi-step form
     $perizinan->load(['jenisPerizinan.syarats', 'dokumens.syarat']);
@@ -132,7 +133,7 @@ class PerizinanController extends Controller
     $syarats = $perizinan->jenisPerizinan->syarats;
     $uploadedDokumens = $perizinan->dokumens->keyBy('syarat_perizinan_id');
 
-    return view('backend.admin_lembaga.perizinan.edit', compact('perizinan', 'syarats', 'uploadedDokumens'));
+    return view('backend.admin_lembaga.perizinan.edit', compact('perizinan', 'syarats', 'uploadedDokumens', 'initialStep'));
   }
 
   public function uploadDokumen(Request $request, Perizinan $perizinan)
@@ -153,11 +154,12 @@ class PerizinanController extends Controller
       $oldDokumen->delete();
     }
 
-    $path = $request->file('file')->store('perizinan/' . $perizinan->id, 'public');
+    $file = $request->file('file');
+    $path = $file->store('perizinan/' . $perizinan->id, 'public');
 
     $perizinan->dokumens()->create([
       'syarat_perizinan_id' => $syarat->id,
-      'nama_file' => $syarat->nama_dokumen,
+      'nama_file' => $file->getClientOriginalName(),
       'path' => $path,
     ]);
 

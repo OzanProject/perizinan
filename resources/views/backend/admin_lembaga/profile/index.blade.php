@@ -3,201 +3,217 @@
 @section('title', 'Konfigurasi Data Lembaga')
 
 @section('content')
-  <div class="space-y-6">
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-black text-slate-900 dark:text-white italic tracking-tight uppercase">Data Profil Lembaga
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-sm-6">
+        <h1 class="m-0 text-dark font-weight-bold"><i class="fas fa-university mr-2 text-primary"></i> Data Profil Lembaga
         </h1>
-        <p class="text-sm text-slate-500 font-medium">Lengkapi data di bawah ini untuk kebutuhan sinkronisasi otomatis ke
-          sertifikat perizinan.</p>
+        <p class="text-muted small mt-1">Lengkapi data di bawah ini untuk kebutuhan sinkronisasi otomatis ke sertifikat
+          perizinan.</p>
       </div>
-      <div class="flex items-center gap-3">
-        <button type="submit" form="profile-form"
-          class="bg-primary text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2">
-          <span class="material-symbols-outlined text-[18px]">save</span>
-          Simpan Perubahan
+      <div class="col-sm-6 text-right">
+        <button type="submit" form="profile-form" class="btn btn-primary shadow-sm px-4">
+          <i class="fas fa-save mr-1"></i> Simpan Perubahan
         </button>
       </div>
     </div>
 
-    <form action="{{ route('admin_lembaga.profile.update') }}" method="POST" enctype="multipart/form-data"
-      id="profile-form" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      @csrf
-
-      <!-- Left Column: Main Form -->
-      <div class="lg:col-span-2 space-y-8">
-        <!-- Section: Identitas Utama (Main Identity) -->
-        <div
-          class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
-          <div class="flex items-center gap-3 border-b border-slate-50 dark:border-slate-800 pb-4 mb-2">
-            <span class="material-symbols-outlined text-primary">domain</span>
-            <h2 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Identitas Satuan
-              Pendidikan</h2>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Nama Lembaga</label>
-              <input type="text" name="nama_lembaga" value="{{ old('nama_lembaga', $lembaga->nama_lembaga) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                required placeholder="Contoh: PKBM Harapan Bangsa">
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">NPSN</label>
-              <input type="text" name="npsn" value="{{ old('npsn', $lembaga->npsn) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner font-mono"
-                required placeholder="8 Digit Angka">
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Status
-                Kepemilikan</label>
-              <select name="status_kepemilikan"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner">
-                <option value="Yayasan" {{ $lembaga->status_kepemilikan == 'Yayasan' ? 'selected' : '' }}>Yayasan</option>
-                <option value="Negeri" {{ $lembaga->status_kepemilikan == 'Negeri' ? 'selected' : '' }}>Negeri</option>
-                <option value="Swasta" {{ $lembaga->status_kepemilikan == 'Swasta' ? 'selected' : '' }}>Swasta</option>
-                <option value="Lainnya" {{ $lembaga->status_kepemilikan == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
-              </select>
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Akreditasi</label>
-              <select name="akreditasi"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner">
-                <option value="">Belum Terakreditasi</option>
-                <option value="A" {{ $lembaga->akreditasi == 'A' ? 'selected' : '' }}>Grade A</option>
-                <option value="B" {{ $lembaga->akreditasi == 'B' ? 'selected' : '' }}>Grade B</option>
-                <option value="C" {{ $lembaga->akreditasi == 'C' ? 'selected' : '' }}>Grade C</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section: Pimpinan & Legalitas -->
-        <div
-          class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
-          <div class="flex items-center gap-3 border-b border-slate-50 dark:border-slate-800 pb-4 mb-2">
-            <span class="material-symbols-outlined text-indigo-500">description</span>
-            <h2 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Legalitas & SK
-              Pendirian</h2>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">SK Pendirian
-                Lembaga</label>
-              <input type="text" name="sk_pendirian" value="{{ old('sk_pendirian', $lembaga->sk_pendirian) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                placeholder="Nomor SK Pendirian">
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Tanggal SK
-                Pendirian</label>
-              <input type="date" name="tanggal_sk_pendirian"
-                value="{{ old('tanggal_sk_pendirian', $lembaga->tanggal_sk_pendirian ? $lembaga->tanggal_sk_pendirian->format('Y-m-d') : '') }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner">
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">SK Izin
-                Operasional</label>
-              <input type="text" name="sk_izin_operasional"
-                value="{{ old('sk_izin_operasional', $lembaga->sk_izin_operasional) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                placeholder="Nomor SK Izin Operasional">
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Masa Berlaku Izin</label>
-              <input type="date" name="masa_berlaku_izin"
-                value="{{ old('masa_berlaku_izin', $lembaga->masa_berlaku_izin ? $lembaga->masa_berlaku_izin->format('Y-m-d') : '') }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner">
-            </div>
-          </div>
-        </div>
-
-        <!-- Section: Visi & Misi -->
-        <div
-          class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
-          <div class="flex items-center gap-3 border-b border-slate-50 dark:border-slate-800 pb-4 mb-2">
-            <span class="material-symbols-outlined text-amber-500">lightbulb</span>
-            <h2 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Visi Lembaga</h2>
-          </div>
-          <div class="space-y-2">
-            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Kalimat Visi</label>
-            <textarea name="visi" rows="3"
-              class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-medium italic focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-              placeholder="Contoh: Menjadi lembaga pendidikan yang unggul dan inklusif di masa depan.">{{ old('visi', $lembaga->visi) }}</textarea>
-          </div>
-        </div>
+    @if(session('success'))
+      <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close text-white" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+    @endif
 
-      <!-- Right Column: Contacts & Media -->
-      <div class="space-y-8">
-        <!-- Section: Branding (Logo) -->
-        <div
-          class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8 text-center">
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] mb-6">Logo Institusi Resmi</p>
-          <div class="relative inline-block group mb-6">
-            <div
-              class="size-32 rounded-3xl bg-slate-100 dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-700 shadow-xl overflow-hidden flex items-center justify-center p-2 transition-transform group-hover:scale-105 duration-500">
-              @if($lembaga->logo)
-                <img src="{{ Storage::url($lembaga->logo) }}" id="logo-preview"
-                  class="max-w-full max-h-full object-contain">
-              @else
-                <span class="material-symbols-outlined text-4xl text-slate-300 italic">school</span>
-              @endif
+    <form action="{{ route('admin_lembaga.profile.update') }}" method="POST" enctype="multipart/form-data"
+      id="profile-form">
+      @csrf
+      <div class="row">
+        <!-- Left Column: Branding & Contacts -->
+        <div class="col-md-4">
+          <!-- Logo Card -->
+          <div class="card card-primary card-outline shadow-sm mb-4">
+            <div class="card-body box-profile">
+              <p class="text-center font-weight-bold text-muted text-uppercase small mb-3">Logo Institusi Resmi</p>
+              <div class="text-center mb-4">
+                <div
+                  class="profile-user-img img-fluid img-circle shadow-sm overflow-hidden border-2 d-flex align-items-center justify-content-center bg-light"
+                  style="width: 150px; height: 150px; padding: 10px; margin: 0 auto; cursor: pointer;"
+                  onclick="document.getElementById('logo-input').click()">
+                  @if($lembaga->logo)
+                    <img src="{{ Storage::url($lembaga->logo) }}" id="logo-preview" class="mw-100 mh-100 object-contain">
+                  @else
+                    <i class="fas fa-school fa-3x text-muted opacity-50"></i>
+                  @endif
+                  <div class="position-absolute bg-primary text-white p-2 rounded-circle shadow"
+                    style="bottom: 0; right: 25px;">
+                    <i class="fas fa-camera"></i>
+                  </div>
+                </div>
+                <input type="file" name="logo" id="logo-input" class="d-none"
+                  onchange="previewImage(this, 'logo-preview')">
+              </div>
+              <p class="text-center text-muted x-small font-italic">Klik gambar untuk mengubah logo. Rekomendasi format
+                PNG/JPG dengan latar belakang transparan.</p>
             </div>
-            <label
-              class="absolute -bottom-2 -right-2 bg-primary text-white size-10 rounded-xl shadow-xl flex items-center justify-center cursor-pointer hover:bg-primary-hover transition-all active:scale-95 group/upload">
-              <span
-                class="material-symbols-outlined text-[18px] group-hover/upload:rotate-12 transition-transform">photo_camera</span>
-              <input type="file" name="logo" class="hidden" onchange="previewImage(this, 'logo-preview')">
-            </label>
           </div>
-          <p class="text-[9px] font-bold text-slate-400 leading-tight uppercase tracking-wider">Rekomendasi format
-            PNG/JPG<br>dengan latar belakang transparan.</p>
+
+          <!-- Contact Card -->
+          <div class="card card-outline card-success shadow-sm">
+            <div class="card-header border-0 bg-transparent">
+              <h3 class="card-title font-weight-bold"><i class="fas fa-address-book mr-2 text-success"></i> Kontak &
+                Lokasi</h3>
+            </div>
+            <div class="card-body pt-0">
+              <div class="form-group">
+                <label class="small font-weight-bold text-uppercase text-muted">Nomor Telepon</label>
+                <input type="text" name="telepon" value="{{ old('telepon', $lembaga->telepon) }}" class="form-control"
+                  placeholder="02xxx-xxx-xxx">
+              </div>
+              <div class="form-group">
+                <label class="small font-weight-bold text-uppercase text-muted">Email Resmi</label>
+                <input type="email" name="email" value="{{ old('email', $lembaga->email) }}" class="form-control"
+                  placeholder="admin@domain.sch.id">
+              </div>
+              <div class="form-group">
+                <label class="small font-weight-bold text-uppercase text-muted">Website</label>
+                <input type="url" name="website" value="{{ old('website', $lembaga->website) }}" class="form-control"
+                  placeholder="https://pkbm.sch.id">
+              </div>
+              <div class="form-group">
+                <label class="small font-weight-bold text-uppercase text-muted">Alamat Lengkap</label>
+                <textarea name="alamat" rows="4" class="form-control"
+                  placeholder="Jl. Raya Garut - Tasikmalaya No. 123, Garut"
+                  required>{{ old('alamat', $lembaga->alamat) }}</textarea>
+                <small class="text-muted font-italic">Alamat ini akan dicetak langsung pada sertifikat izin.</small>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Section: Kontak & Lokasi -->
-        <div
-          class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-slate-200 dark:border-slate-800 p-8 space-y-6">
-          <div class="flex items-center gap-3 border-b border-slate-50 dark:border-slate-800 pb-4 mb-2">
-            <span class="material-symbols-outlined text-emerald-500">contact_page</span>
-            <h2 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">Kontak & Lokasi</h2>
+        <!-- Right Column: Identity & Legalities -->
+        <div class="col-md-8">
+          <!-- Main Identity Card -->
+          <div class="card card-outline card-primary shadow-sm mb-4">
+            <div class="card-header border-bottom-0 bg-transparent">
+              <h3 class="card-title font-weight-bold"><i class="fas fa-id-card mr-2 text-primary"></i> Identitas Satuan
+                Pendidikan</h3>
+            </div>
+            <div class="card-body pt-0">
+              <div class="row">
+                <div class="col-md-8 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">Nama Lembaga</label>
+                  <input type="text" name="nama_lembaga" value="{{ old('nama_lembaga', $lembaga->nama_lembaga) }}"
+                    class="form-control font-weight-bold" required placeholder="Contoh: PKBM Harapan Bangsa">
+                </div>
+                <div class="col-md-4 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">NPSN</label>
+                  <input type="text" name="npsn" value="{{ old('npsn', $lembaga->npsn) }}"
+                    class="form-control font-weight-bold" required placeholder="8 Digit Angka">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">Status Kepemilikan</label>
+                  <select name="status_kepemilikan" class="form-control custom-select">
+                    <option value="Yayasan" {{ $lembaga->status_kepemilikan == 'Yayasan' ? 'selected' : '' }}>Yayasan
+                    </option>
+                    <option value="Negeri" {{ $lembaga->status_kepemilikan == 'Negeri' ? 'selected' : '' }}>Negeri</option>
+                    <option value="Swasta" {{ $lembaga->status_kepemilikan == 'Swasta' ? 'selected' : '' }}>Swasta</option>
+                    <option value="Lainnya" {{ $lembaga->status_kepemilikan == 'Lainnya' ? 'selected' : '' }}>Lainnya
+                    </option>
+                  </select>
+                </div>
+                <div class="col-md-6 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">Akreditasi</label>
+                  <select name="akreditasi" class="form-control custom-select">
+                    <option value="">Belum Terakreditasi</option>
+                    <option value="A" {{ $lembaga->akreditasi == 'A' ? 'selected' : '' }}>Grade A</option>
+                    <option value="B" {{ $lembaga->akreditasi == 'B' ? 'selected' : '' }}>Grade B</option>
+                    <option value="C" {{ $lembaga->akreditasi == 'C' ? 'selected' : '' }}>Grade C</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Nomor Telepon</label>
-              <input type="text" name="telepon" value="{{ old('telepon', $lembaga->telepon) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                placeholder="02xxx-xxx-xxx">
+          <!-- Legalities Card -->
+          <div class="card card-outline card-indigo shadow-sm mb-4" style="border-top-color: #6610f2;">
+            <div class="card-header border-bottom-0 bg-transparent">
+              <h3 class="card-title font-weight-bold"><i class="fas fa-file-signature mr-2 text-indigo"></i> Legalitas &
+                SK Pendirian</h3>
             </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Email Resmi</label>
-              <input type="email" name="email" value="{{ old('email', $lembaga->email) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                placeholder="admin@domain.sch.id">
+            <div class="card-body pt-0">
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">SK Pendirian Lembaga</label>
+                  <input type="text" name="sk_pendirian" value="{{ old('sk_pendirian', $lembaga->sk_pendirian) }}"
+                    class="form-control" placeholder="Nomor SK Pendirian">
+                </div>
+                <div class="col-md-6 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">Tanggal SK Pendirian</label>
+                  <input type="date" name="tanggal_sk_pendirian"
+                    value="{{ old('tanggal_sk_pendirian', $lembaga->tanggal_sk_pendirian ? $lembaga->tanggal_sk_pendirian->format('Y-m-d') : '') }}"
+                    class="form-control">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">SK Izin Operasional</label>
+                  <input type="text" name="sk_izin_operasional"
+                    value="{{ old('sk_izin_operasional', $lembaga->sk_izin_operasional) }}" class="form-control"
+                    placeholder="Nomor SK Izin Operasional">
+                </div>
+                <div class="col-md-6 form-group">
+                  <label class="small font-weight-bold text-uppercase text-muted">Masa Berlaku Izin</label>
+                  <input type="date" name="masa_berlaku_izin"
+                    value="{{ old('masa_berlaku_izin', $lembaga->masa_berlaku_izin ? $lembaga->masa_berlaku_izin->format('Y-m-d') : '') }}"
+                    class="form-control">
+                </div>
+              </div>
             </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Website</label>
-              <input type="url" name="website" value="{{ old('website', $lembaga->website) }}"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                placeholder="https://pkbm.sch.id">
+          </div>
+
+          <!-- Vision Card -->
+          <div class="card card-outline card-warning shadow-sm">
+            <div class="card-header border-bottom-0 bg-transparent">
+              <h3 class="card-title font-weight-bold"><i class="fas fa-lightbulb mr-2 text-warning"></i> Visi Lembaga</h3>
             </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] ml-1">Alamat Lengkap</label>
-              <textarea name="alamat" rows="4"
-                class="w-full bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-inner"
-                required
-                placeholder="Jl. Raya Garut - Tasikmalaya No. 123, Garut">{{ old('alamat', $lembaga->alamat) }}</textarea>
-              <p class="text-[9px] font-bold text-slate-400 px-2 italic uppercase tracking-wider">Alamat ini akan dicetak
-                langsung pada sertifikat izin.</p>
+            <div class="card-body pt-0">
+              <div class="form-group">
+                <label class="small font-weight-bold text-uppercase text-muted">Kalimat Visi</label>
+                <textarea name="visi" rows="3" class="form-control font-italic font-weight-bold"
+                  placeholder="Contoh: Menjadi lembaga pendidikan yang unggul dan inklusif di masa depan.">{{ old('visi', $lembaga->visi) }}</textarea>
+                <small class="text-muted">Visi ini mencerminkan orientasi masa depan lembaga Anda.</small>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </form>
   </div>
+
+  <style>
+    .x-small {
+      font-size: 0.75rem;
+    }
+
+    .text-indigo {
+      color: #6610f2;
+    }
+
+    .card-indigo {
+      border-top-color: #6610f2 !important;
+    }
+
+    .profile-user-img:hover {
+      background-color: #f8f9fa !important;
+      transform: scale(1.02);
+      transition: all 0.2s ease-in-out;
+    }
+  </style>
 @endsection
 
 @push('scripts')
@@ -206,14 +222,13 @@
       if (input.files && input.files[0]) {
         var reader = new FileReader();
         reader.onload = function (e) {
-          const img = document.getElementById(previewId);
-          if (img) {
-            img.src = e.target.result;
-            img.classList.remove('hidden');
+          const preview = document.getElementById(previewId);
+          if (preview) {
+            preview.src = e.target.result;
           } else {
-            // If no img tag (first time), create it
-            const container = input.closest('.relative').querySelector('.size-32');
-            container.innerHTML = `<img src="${e.target.result}" id="${previewId}" class="max-w-full max-h-full object-contain">`;
+            // Handle initial display if icon was present
+            const container = input.closest('.box-profile').querySelector('.profile-user-img');
+            container.innerHTML = `<img src="${e.target.result}" id="${previewId}" class="mw-100 mh-100 object-contain">`;
           }
         }
         reader.readAsDataURL(input.files[0]);
