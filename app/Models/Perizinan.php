@@ -171,9 +171,9 @@ class Perizinan extends Model
       '[PIMPINAN_JABATAN]' => $this->pimpinan_jabatan ?: ($dinas->pimpinan_jabatan ?: 'KEPALA DINAS PENDIDIKAN'),
       '[PIMPINAN_PANGKAT]' => $this->pimpinan_pangkat ?: ($dinas->pimpinan_pangkat ?? ''),
       '[PIMPINAN_NIP]' => $this->pimpinan_nip ?: ($dinas->pimpinan_nip ?: '............................'),
-      '[LOGO_DINAS]' => $toBase64($dinas->logo),
-      '[WATERMARK_LOGO]' => $toBase64($dinas->watermark_img ?: $dinas->logo),
-      '[STEMPEL_DINAS]' => $toBase64($this->stempel_img ?? $dinas->stempel_img),
+      '[LOGO_DINAS]' => '<img src="' . $toBase64($dinas->logo) . '" width="70" height="70" style="display:block;">',
+      '[WATERMARK_LOGO]' => '<img src="' . $toBase64($dinas->watermark_img ?: $dinas->logo) . '" width="70" height="70">',
+      '[STEMPEL_DINAS]' => '<img src="' . $toBase64($this->stempel_img ?? $dinas->stempel_img) . '" width="80" height="80">',
     ];
 
     // Helper: Build dynamic TTL if exists in data

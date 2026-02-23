@@ -93,24 +93,24 @@
           <div id="editor-canvas" contenteditable="true"
             class="a4-paper font-serif-doc shadow-lg mx-auto p-5 bg-white border">
             {!! $jenisPerizinan->template_html ?? '
-                          <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                              <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                              <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                              <p style="font-style: italic; font-size: 14px;">Jl. Jendral Sudirman No. 123, Kota Suka Maju, Telp. (021) 12345678</p>
-                          </div>
-                          <div class="text-center" style="margin-bottom: 30px;">
-                              <h1 style="font-weight: bold; text-decoration: underline; text-transform: uppercase;">Surat Izin Operasional</h1>
-                              <p>Nomor: <span class="badge border border-primary text-primary" contenteditable="false">[NOMOR_SURAT]</span></p>
-                          </div>
-                          <div style="text-align: justify;">
-                              <p>Berdasarkan peraturan yang berlaku, memberikan Izin Operasional kepada:</p>
-                              <table style="width:100%; margin-top: 20px;">
-                                  <tr><td style="width: 150px;">Nama Lembaga</td><td>:</td><td style="font-weight: bold;"><span class="badge border border-primary text-primary" contenteditable="false">[NAMA_LEMBAGA]</span></td></tr>
-                                  <tr><td>NPSN</td><td>:</td><td><span class="badge border border-primary text-primary" contenteditable="false">[NPSN]</span></td></tr>
-                                  <tr><td>Alamat</td><td>:</td><td><span class="badge border border-primary text-primary" contenteditable="false">[ALAMAT_LEMBAGA]</span></td></tr>
-                              </table>
-                          </div>
-                      ' !!}
+                            <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                <p style="font-style: italic; font-size: 14px;">Jl. Jendral Sudirman No. 123, Kota Suka Maju, Telp. (021) 12345678</p>
+                            </div>
+                            <div class="text-center" style="margin-bottom: 30px;">
+                                <h1 style="font-weight: bold; text-decoration: underline; text-transform: uppercase;">Surat Izin Operasional</h1>
+                                <p>Nomor: [NOMOR_SURAT]</p>
+                            </div>
+                            <div style="text-align: justify;">
+                                <p>Berdasarkan peraturan yang berlaku, memberikan Izin Operasional kepada:</p>
+                                <table style="width:100%; margin-top: 20px;">
+                                    <tr><td style="width: 150px;">Nama Lembaga</td><td>:</td><td style="font-weight: bold;">[NAMA_LEMBAGA]</td></tr>
+                                    <tr><td>NPSN</td><td>:</td><td>[NPSN]</td></tr>
+                                    <tr><td>Alamat</td><td>:</td><td>[ALAMAT_LEMBAGA]</td></tr>
+                                </table>
+                            </div>
+                        ' !!}
           </div>
         </form>
       </div>
@@ -145,6 +145,17 @@
             @endif
 
             <div class="mb-4">
+              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Identitas Lembaga</label>
+              <div class="d-flex flex-wrap">
+                <button onclick="insertVar('[NAMA_LEMBAGA]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Nama
+                  Lembaga</button>
+                <button onclick="insertVar('[NPSN]')" class="btn btn-outline-primary btn-xs m-1 var-btn">NPSN</button>
+                <button onclick="insertVar('[ALAMAT_LEMBAGA]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Alamat
+                  Lembaga</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
               <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Identitas Izin</label>
               <div class="d-flex flex-wrap">
                 <button onclick="insertVar('[NOMOR_SURAT]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Nomor
@@ -157,14 +168,38 @@
             </div>
 
             <div class="mb-4">
-              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Pejabat & Dinas</label>
+              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Kop Surat & Dinas</label>
               <div class="d-flex flex-wrap">
-                <button onclick="insertVar('[PIMPINAN_NAMA]')" class="btn btn-outline-info btn-xs m-1 var-btn">Nama
-                  Pejabat</button>
-                <button onclick="insertVar('[PIMPINAN_NIP]')" class="btn btn-outline-info btn-xs m-1 var-btn">NIP
-                  Pejabat</button>
                 <button onclick="insertVar('[LOGO_DINAS]')" class="btn btn-outline-info btn-xs m-1 var-btn">Logo
                   Kop</button>
+                <button onclick="insertVar('[KOTA_DINAS]')"
+                  class="btn btn-outline-info btn-xs m-1 var-btn">Kota/Kabupaten</button>
+                <button onclick="insertVar('[ALAMAT_DINAS]')" class="btn btn-outline-info btn-xs m-1 var-btn">Alamat
+                  Dinas</button>
+                <button onclick="insertVar('[PROVINSI_DINAS]')"
+                  class="btn btn-outline-info btn-xs m-1 var-btn">Provinsi</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Pejabat Penandatangan</label>
+              <div class="d-flex flex-wrap">
+                <button onclick="insertVar('[PIMPINAN_NAMA]')" class="btn btn-outline-warning btn-xs m-1 var-btn">Nama
+                  Pejabat</button>
+                <button onclick="insertVar('[PIMPINAN_JABATAN]')"
+                  class="btn btn-outline-warning btn-xs m-1 var-btn">Jabatan</button>
+                <button onclick="insertVar('[PIMPINAN_NIP]')" class="btn btn-outline-warning btn-xs m-1 var-btn">NIP
+                  Pejabat</button>
+                <button onclick="insertVar('[PIMPINAN_PANGKAT]')"
+                  class="btn btn-outline-warning btn-xs m-1 var-btn">Pangkat</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Watermark</label>
+              <div class="d-flex flex-wrap">
+                <button onclick="insertVar('[WATERMARK_LOGO]')"
+                  class="btn btn-outline-secondary btn-xs m-1 var-btn">Watermark Logo</button>
               </div>
             </div>
           </div>
@@ -272,6 +307,20 @@
       border: 1px dotted #ccc;
       padding: 5px;
     }
+
+    /* Variable badges in editor */
+    .var-badge {
+      display: inline;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #007bff;
+      background: #e8f0fe;
+      border: 1px solid #b3d4fc;
+      border-radius: 3px;
+      font-family: monospace;
+      white-space: nowrap;
+    }
   </style>
 
   @push('scripts')
@@ -280,7 +329,7 @@
       function execCommandWithArg(command, arg) { document.execCommand(command, false, arg); }
 
       function insertVar(val) {
-        const span = `<span class="badge border border-primary text-primary mx-1" contenteditable="false">${val}</span>&nbsp;`;
+        const span = `<span class="var-badge" contenteditable="false">${val}</span>&nbsp;`;
         document.execCommand('insertHTML', false, span);
       }
 
@@ -292,22 +341,70 @@
       const presets = @json($presets);
       const logoUrl = @json($logoUrl);
 
+      // Known variable patterns
+      const varPatterns = [
+        'NOMOR_SURAT', 'TANGGAL_TERBIT', 'MASA_BERLAKU',
+        'NAMA_LEMBAGA', 'NPSN', 'ALAMAT_LEMBAGA',
+        'LOGO_DINAS', 'KOTA_DINAS', 'ALAMAT_DINAS', 'PROVINSI_DINAS',
+        'PIMPINAN_NAMA', 'PIMPINAN_JABATAN', 'PIMPINAN_NIP', 'PIMPINAN_PANGKAT',
+        'WATERMARK_LOGO'
+      ];
+
       function openPresetModal() { $('#presetModal').modal('show'); }
       function closePresetModal() { $('#presetModal').modal('hide'); }
 
+      /**
+       * processTemplate: Convert raw template HTML into editor-friendly HTML
+       * - Replace [LOGO_DINAS] in <img src="[LOGO_DINAS]"> with actual URL
+       * - Replace [VAR] text with styled badges for visibility
+       */
       function processTemplate(html) {
+        // 1. Fix logo: replace <img src="[LOGO_DINAS]"...> with actual logo preview
         if (logoUrl) {
-          return html.replace(/\[LOGO_DINAS\]/g, `<img src="${logoUrl}" style="height: 60px; width: auto;" contenteditable="false">`);
+          // Handle <img> tags that have [LOGO_DINAS] as src
+          html = html.replace(/<img[^>]*src=["'][^"']*\[LOGO_DINAS\][^"']*["'][^>]*>/gi,
+            `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
+          );
+          // Handle standalone [LOGO_DINAS] text
+          html = html.replace(/\[LOGO_DINAS\]/g,
+            `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
+          );
         }
+
+        // 2. Convert all known [VARIABLE] placeholders into styled badges
+        varPatterns.forEach(v => {
+          if (v === 'LOGO_DINAS') return; // Already handled above
+          const regex = new RegExp(`\\[${v}\\]`, 'g');
+          html = html.replace(regex, `<span class="var-badge" contenteditable="false">[${v}]</span>`);
+        });
+
+        // 3. Handle [DATA:FIELD_NAME] custom fields
+        html = html.replace(/\[DATA:([A-Z_]+)\]/g,
+          '<span class="var-badge" style="color:#28a745; border-color:#28a745; background:#e6f9ed;" contenteditable="false">[DATA:$1]</span>'
+        );
+
         return html;
       }
 
+      /**
+       * revertTemplate: Convert editor HTML back to raw template for storage
+       * - Replace logo <img> back to [LOGO_DINAS]
+       * - Strip badge wrappers, keep [VAR] text only
+       */
       function revertTemplate(html) {
+        // 1. Revert logo images back to [LOGO_DINAS]
         if (logoUrl) {
           const escapedUrl = logoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(`<img[^>]*src="${escapedUrl}"[^>]*>`, 'g');
-          return html.replace(regex, '[LOGO_DINAS]');
+          const regex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi');
+          html = html.replace(regex, '[LOGO_DINAS]');
         }
+
+        // 2. Strip badge wrappers: <span class="var-badge"...>[VAR]</span> → [VAR]
+        html = html.replace(/<span[^>]*class="var-badge"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
+
+        // 3. Strip old badge wrappers (from previous editor version)
+        html = html.replace(/<span[^>]*class="badge[^"]*"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
+
         return html;
       }
 

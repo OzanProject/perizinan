@@ -19,14 +19,49 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
+        // Base validation rules
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'lembaga_id' => ['required', 'exists:lembagas,id'],
+            'jenjang' => ['required', 'string'],
+        ];
+
+        // Conditional validation based on lembaga_id value
+        if ($request->lembaga_id === 'new') {
+            $rules['nama_lembaga_baru'] = ['required', 'string', 'max:255'];
+            $rules['npsn'] = ['nullable', 'string', 'max:8'];
+        } else {
+            $rules['lembaga_id'] = ['required', 'exists:lembagas,id'];
+        }
+
+        $request->validate($rules, [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique' => 'Email ini sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal :min karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok. Pastikan kedua password sama persis.',
+            'jenjang.required' => 'Pilih jenjang pendidikan terlebih dahulu.',
+            'lembaga_id.required' => 'Pilih lembaga atau tambah lembaga baru.',
+            'lembaga_id.exists' => 'Lembaga yang dipilih tidak valid.',
+            'nama_lembaga_baru.required' => 'Nama lembaga baru wajib diisi.',
         ]);
 
-        $lembaga = \App\Models\Lembaga::findOrFail($request->lembaga_id);
+        // Resolve lembaga: existing or create new
+        if ($request->lembaga_id === 'new') {
+            $dinas = \App\Models\Dinas::first();
+
+            $lembaga = \App\Models\Lembaga::create([
+                'nama_lembaga' => $request->nama_lembaga_baru,
+                'npsn' => $request->npsn,
+                'jenjang' => $request->jenjang,
+                'dinas_id' => $dinas?->id,
+                'alamat' => '-',
+            ]);
+        } else {
+            $lembaga = \App\Models\Lembaga::findOrFail($request->lembaga_id);
+        }
 
         $user = User::create([
             'name' => $request->name,

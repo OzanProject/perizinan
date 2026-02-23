@@ -208,7 +208,7 @@ class PerizinanController extends Controller
 
   public function confirmTaken(Perizinan $perizinan)
   {
-    $this->authorize('update', $perizinan);
+    $this->authorize('confirmTaken', $perizinan);
 
     if ($perizinan->status !== PerizinanStatus::SIAP_DIAMBIL->value) {
       return back()->with('warning', 'Hanya pengajuan dengan status Siap Diambil yang dapat dikonfirmasi.');

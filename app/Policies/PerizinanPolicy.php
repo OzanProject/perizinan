@@ -31,6 +31,12 @@ class PerizinanPolicy
             in_array($perizinan->status, [PerizinanStatus::DRAFT->value, PerizinanStatus::PERBAIKAN->value]);
     }
 
+    public function confirmTaken(User $user, Perizinan $perizinan): bool
+    {
+        return $user->lembaga_id === $perizinan->lembaga_id &&
+            $perizinan->status === PerizinanStatus::SIAP_DIAMBIL->value;
+    }
+
     public function verify(User $user, Perizinan $perizinan): bool
     {
         return $user->hasRole('super_admin') &&

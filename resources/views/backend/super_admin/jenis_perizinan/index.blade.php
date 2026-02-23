@@ -48,32 +48,30 @@
                           <span class="badge badge-secondary px-3 py-1 shadow-sm">Nonaktif</span>
                         @endif
                       </td>
-                      <td class="text-right align-middle">
-                        <div class="btn-group">
-                          <a href="{{ route('super_admin.jenis_perizinan.syarat.index', $item) }}"
-                            class="btn btn-sm btn-info shadow-sm" title="Kelola Syarat">
-                            <i class="fas fa-tasks"></i>
-                          </a>
-                          <a href="{{ route('super_admin.jenis_perizinan.form', $item) }}"
-                            class="btn btn-sm btn-dark shadow-sm" title="Kelola Form">
-                            <i class="fas fa-edit-square"></i>
-                          </a>
-                          <a href="{{ route('super_admin.jenis_perizinan.template', $item) }}"
-                            class="btn btn-sm btn-secondary shadow-sm" title="Template Sertifikat">
-                            <i class="fas fa-certificate"></i>
-                          </a>
-                          <button onclick="openModal('edit', {{ json_encode($item) }})"
-                            class="btn btn-sm btn-warning shadow-sm" title="Edit">
-                            <i class="fas fa-pencil-alt"></i>
+                      <td class="text-right align-middle" style="white-space: nowrap;">
+                        <a href="{{ route('super_admin.jenis_perizinan.template', $item) }}"
+                          class="btn btn-xs btn-primary mr-1" title="Template Sertifikat">
+                          <i class="fas fa-certificate mr-1"></i> Template
+                        </a>
+                        <a href="{{ route('super_admin.jenis_perizinan.syarat.index', $item) }}"
+                          class="btn btn-xs btn-info mr-1" title="Kelola Syarat">
+                          <i class="fas fa-tasks mr-1"></i> Syarat
+                        </a>
+                        <a href="{{ route('super_admin.jenis_perizinan.form', $item) }}" class="btn btn-xs btn-dark mr-1"
+                          title="Kelola Form">
+                          <i class="fas fa-wpforms mr-1"></i> Form
+                        </a>
+                        <button onclick="openModal('edit', {{ json_encode($item) }})" class="btn btn-xs btn-warning mr-1"
+                          title="Edit">
+                          <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <form action="{{ route('super_admin.jenis_perizinan.destroy', $item) }}" method="POST"
+                          class="d-inline" onsubmit="return confirm('Hapus jenis perizinan ini?')">
+                          @csrf @method('DELETE')
+                          <button type="submit" class="btn btn-xs btn-danger" title="Hapus">
+                            <i class="fas fa-trash"></i>
                           </button>
-                          <form action="{{ route('super_admin.jenis_perizinan.destroy', $item) }}" method="POST"
-                            class="d-inline" onsubmit="return confirm('Hapus jenis perizinan ini?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger shadow-sm" title="Hapus">
-                              <i class="fas fa-trash"></i>
-                            </button>
-                          </form>
-                        </div>
+                        </form>
                       </td>
                     </tr>
                   @empty

@@ -55,6 +55,9 @@ class SettingController extends Controller
     $request->validate([
       'app_name' => 'required|string|max:255',
       'kode_surat' => 'required|string|max:50',
+      'alamat' => 'nullable|string|max:500',
+      'kabupaten' => 'nullable|string|max:255',
+      'provinsi' => 'nullable|string|max:255',
       'pimpinan_nama' => 'required|string|max:255',
       'pimpinan_jabatan' => 'required|string|max:255',
       'pimpinan_pangkat' => 'nullable|string|max:255',
@@ -70,6 +73,9 @@ class SettingController extends Controller
 
     $dinas->app_name = $request->app_name;
     $dinas->kode_surat = $request->kode_surat;
+    $dinas->alamat = $request->alamat;
+    $dinas->kabupaten = $request->kabupaten;
+    $dinas->provinsi = $request->provinsi;
     $dinas->pimpinan_nama = $request->pimpinan_nama;
     $dinas->pimpinan_jabatan = $request->pimpinan_jabatan;
     $dinas->pimpinan_pangkat = $request->pimpinan_pangkat;

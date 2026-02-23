@@ -93,6 +93,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/pusat-cetak', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'pusatCetak'])->name('pusat_cetak');
             Route::get('/{perizinan}/preview', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'preview'])->name('preview');
             Route::get('/{perizinan}/export-pdf', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportPdf'])->name('export_pdf');
+            Route::get('/{perizinan}/export-word', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportWord'])->name('export_word');
+            Route::get('/{perizinan}/export-excel', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportExcel'])->name('export_excel');
             Route::get('/{perizinan}/finalisasi', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'finalisasi'])->name('finalisasi');
 
             // Preset & Layout
