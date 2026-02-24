@@ -53,7 +53,8 @@
                                 <div class="mt-2">
                                     <p
                                         class="mb-0 font-weight-bold small {{ $i <= $currentIndex ? 'text-primary' : 'text-muted' }}">
-                                        {{ $step['label'] }}</p>
+                                        {{ $step['label'] }}
+                                    </p>
                                     <small class="text-muted d-none d-md-block"
                                         style="font-size: 10px;">{{ $step['desc'] }}</small>
                                 </div>
@@ -162,12 +163,10 @@
                         </div>
                     @elseif($statusValue == 'disetujui' || $statusValue == 'selesai')
                         <div class="text-center py-2">
-                            <button class="btn btn-success btn-lg px-5 shadow-sm font-weight-bold mr-2 mb-2">
-                                <i class="fas fa-download mr-2"></i> Unduh Sertifikat
-                            </button>
-                            <button class="btn btn-outline-secondary btn-lg px-4 mb-2">
+                            <a href="{{ route('admin_lembaga.perizinan.receipt', $perizinan) }}" target="_blank"
+                                class="btn btn-outline-secondary btn-lg px-5 shadow-sm font-weight-bold mr-2 mb-2">
                                 <i class="fas fa-print mr-2"></i> Print Tanda Terima
-                            </button>
+                            </a>
                         </div>
                     @elseif($statusValue == 'draft')
                         <div class="d-flex align-items-center justify-content-between">

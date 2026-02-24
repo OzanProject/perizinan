@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/perizinan/{perizinan}', [\App\Http\Controllers\Backend\AdminLembaga\PerizinanController::class, 'destroy'])->name('perizinan.destroy');
         Route::post('/perizinan', [\App\Http\Controllers\Backend\AdminLembaga\PerizinanController::class, 'store'])->name('perizinan.store');
         Route::post('/perizinan/{perizinan}/submit', [\App\Http\Controllers\Backend\AdminLembaga\PerizinanController::class, 'submit'])->name('perizinan.submit');
+        Route::get('/perizinan/{perizinan}/receipt', [\App\Http\Controllers\Backend\AdminLembaga\PerizinanController::class, 'receipt'])->name('perizinan.receipt');
         Route::post('/perizinan/{perizinan}/discussion', [\App\Http\Controllers\Backend\PerizinanDiscussionController::class, 'store'])->name('perizinan.discussion.store');
 
         // Panduan Sistem

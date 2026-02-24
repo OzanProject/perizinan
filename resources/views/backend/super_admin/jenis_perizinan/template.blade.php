@@ -31,20 +31,20 @@
       <!-- Native Text Editor Toolbar -->
       <div class="card-body py-2 px-3 bg-light border-bottom">
         <div class="d-flex flex-wrap align-items-center justify-content-center">
-          <!-- Text Blocks -->
-          <div class="btn-group mr-3 mb-1">
-            <select onchange="execCommandWithArg('formatBlock', this.value)"
-              class="form-control form-control-sm border-0 bg-white" style="width: 120px;">
-              <option value="p">Normal Text</option>
-              <option value="h1">Heading 1</option>
-              <option value="h2">Heading 2</option>
+          <!-- Font & Size -->
+          <div class="btn-group mr-3 mb-1 shadow-sm px-1 bg-white rounded">
+            <select onchange="applyFontSize(this.value)" class="form-control form-control-sm border-0 font-weight-bold"
+              style="width: 70px;" title="Font Size">
+              @foreach([8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72] as $size)
+                <option value="{{ $size }}pt" {{ $size == 11 ? 'selected' : '' }}>{{ $size }}</option>
+              @endforeach
             </select>
-            <select onchange="execCommandWithArg('fontName', this.value)"
-              class="form-control form-control-sm border-0 bg-white" style="width: 130px;">
-              <option value="Times New Roman">Times New Roman</option>
-              <option value="Arial">Arial</option>
-              <option value="Public Sans">Public Sans</option>
-            </select>
+            <div class="border-right my-1 mx-1"></div>
+            <button type="button" onclick="document.getElementById('color-picker').click()"
+              class="btn btn-link text-dark p-2" title="Text Color">
+              <i class="fas fa-font" style="border-bottom: 3px solid #000;" id="color-indicator"></i>
+              <input type="color" id="color-picker" onchange="applyColor(this.value)" style="display: none;">
+            </button>
           </div>
 
           <!-- Formatting -->
@@ -55,6 +55,20 @@
                 class="fas fa-italic"></i></button>
             <button type="button" onclick="execCmd('underline')" class="btn btn-link text-dark p-2" title="Underline"><i
                 class="fas fa-underline"></i></button>
+          </div>
+
+          <!-- Paragraph Settings (Line Height) -->
+          <div class="btn-group mr-3 mb-1 shadow-sm px-1 bg-white rounded align-items-center">
+            <span class="small text-muted px-2"><i class="fas fa-arrows-alt-v mr-1"></i> Line Height</span>
+            <select onchange="applyLineHeight(this.value)" class="form-control form-control-sm border-0 bg-transparent"
+              style="width: 65px;">
+              <option value="1">1.0</option>
+              <option value="1.15">1.15</option>
+              <option value="1.3" selected>1.3</option>
+              <option value="1.5">1.5</option>
+              <option value="2">2.0</option>
+              <option value="3">3.0</option>
+            </select>
           </div>
 
           <!-- Alignment -->
@@ -69,12 +83,17 @@
                 class="fas fa-align-justify"></i></button>
           </div>
 
-          <!-- Lists & Tables -->
+          <!-- Lists & Indentation -->
           <div class="btn-group mb-1 shadow-sm px-1 bg-white rounded">
             <button type="button" onclick="execCmd('insertUnorderedList')" class="btn btn-link text-dark p-2"
-              title="List"><i class="fas fa-list-ul"></i></button>
+              title="Bullets"><i class="fas fa-list-ul"></i></button>
             <button type="button" onclick="execCmd('insertOrderedList')" class="btn btn-link text-dark p-2"
-              title="Ordered List"><i class="fas fa-list-ol"></i></button>
+              title="Numbering"><i class="fas fa-list-ol"></i></button>
+            <div class="border-right my-1 mx-1"></div>
+            <button type="button" onclick="execCmd('outdent')" class="btn btn-link text-dark p-2"
+              title="Decrease Indent"><i class="fas fa-outdent"></i></button>
+            <button type="button" onclick="execCmd('indent')" class="btn btn-link text-dark p-2"
+              title="Increase Indent"><i class="fas fa-indent"></i></button>
             <button type="button" onclick="insertTable()" class="btn btn-link text-dark p-2" title="Table"><i
                 class="fas fa-table"></i></button>
           </div>
@@ -83,45 +102,58 @@
     </div>
 
     <!-- Main Workspace -->
-    <div class="row no-gutters bg-light" style="min-height: calc(100vh - 180px);">
-      <!-- Canvas Side -->
-      <div class="col-md-9 p-5 overflow-auto custom-scrollbar" style="max-height: calc(100vh - 180px);">
+    <div class="d-flex bg-light" style="height: calc(100vh - 180px); overflow: hidden;">
+      <!-- Canvas Side (Flexible) -->
+      <div class="flex-grow-1 p-5 overflow-auto custom-scrollbar bg-gray-dark border-right shadow-inner">
         <form id="template-form" action="{{ route('super_admin.jenis_perizinan.template.update', $jenisPerizinan) }}"
           method="POST">
           @csrf
           <input type="hidden" name="template_html" id="template-input">
-          <div id="editor-canvas" contenteditable="true"
-            class="a4-paper font-serif-doc shadow-lg mx-auto p-5 bg-white border">
-            {!! $jenisPerizinan->template_html ?? '
-                            <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                                <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                                <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                                <p style="font-style: italic; font-size: 14px;">Jl. Jendral Sudirman No. 123, Kota Suka Maju, Telp. (021) 12345678</p>
-                            </div>
-                            <div class="text-center" style="margin-bottom: 30px;">
-                                <h1 style="font-weight: bold; text-decoration: underline; text-transform: uppercase;">Surat Izin Operasional</h1>
-                                <p>Nomor: [NOMOR_SURAT]</p>
-                            </div>
-                            <div style="text-align: justify;">
-                                <p>Berdasarkan peraturan yang berlaku, memberikan Izin Operasional kepada:</p>
-                                <table style="width:100%; margin-top: 20px;">
-                                    <tr><td style="width: 150px;">Nama Lembaga</td><td>:</td><td style="font-weight: bold;">[NAMA_LEMBAGA]</td></tr>
-                                    <tr><td>NPSN</td><td>:</td><td>[NPSN]</td></tr>
-                                    <tr><td>Alamat</td><td>:</td><td>[ALAMAT_LEMBAGA]</td></tr>
-                                </table>
-                            </div>
-                        ' !!}
+
+          @php
+            $isLandscape = ($activePreset->orientation ?? 'portrait') == 'landscape';
+            $w = $isLandscape ? '297mm' : '210mm';
+            $mt = $activePreset->margin_top ?? 20;
+            $mr = $activePreset->margin_right ?? 20;
+            $mb = $activePreset->margin_bottom ?? 20;
+            $ml = $activePreset->margin_left ?? 20;
+            $padding = "{$mt}mm {$mr}mm {$mb}mm {$ml}mm";
+          @endphp
+
+          <div class="canvas-container mx-auto shadow-lg mb-5" style="width: {{ $w }}; position: relative;">
+            @if($watermarkEnabled && $frameUrl)
+              <div class="frame-overlay" style="
+                                    position: absolute;
+                                    top: 0; left: 0; width: 100%; height: 100%;
+                                    pointer-events: none;
+                                    z-index: 10;
+                                    background-image: url('{{ $frameUrl }}');
+                                    background-size: 100% 100%;
+                                    opacity: {{ min($watermarkOpacity * 3, 1.0) }};
+                                  "></div>
+            @endif
+
+            <div id="editor-canvas" contenteditable="true" class="a4-paper font-serif-doc bg-white border-0"
+              style="padding: {{ $padding }}; width: {{ $w }}; min-height: {{ $isLandscape ? '210mm' : '297mm' }};">
+              {!! $jenisPerizinan->template_html ?? '
+                                            <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                                <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                                <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                                <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
+                                            </div>
+                                        ' !!}
+            </div>
           </div>
         </form>
       </div>
 
-      <!-- Sidebar Variables -->
-      <div class="col-md-3 bg-white border-left shadow-sm">
+      <!-- Sidebar Variables (Fixed Width) -->
+      <div class="bg-white border-left shadow-sm d-flex flex-column" style="width: 350px; min-width: 350px;">
         <div class="p-3 border-bottom bg-light">
           <h5 class="font-weight-bold mb-0 small text-uppercase tracking-wider"><i
               class="fas fa-database mr-2 text-primary"></i> Variabel Dinamis</h5>
         </div>
-        <div class="p-3">
+        <div class="p-3 flex-grow-1 overflow-auto custom-scrollbar">
           <div class="input-group input-group-sm mb-3">
             <div class="input-group-prepend">
               <span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span>
@@ -129,87 +161,107 @@
             <input type="text" id="search-var" class="form-control border-left-0" placeholder="Cari variabel...">
           </div>
 
-          <div class="overflow-auto custom-scrollbar" style="max-height: calc(100vh - 300px);">
-            @if($jenisPerizinan->form_config)
-              <div class="mb-4">
-                <label class="text-xs font-weight-bold text-success text-uppercase mb-2 d-block">Mapping Data Ajuan</label>
-                <div class="d-flex flex-wrap">
-                  @foreach($jenisPerizinan->form_config as $field)
-                    <button type="button" onclick="insertVar('[DATA:{{ strtoupper($field['name']) }}]')"
-                      class="btn btn-outline-success btn-xs m-1 var-btn">
-                      {{ $field['label'] }} <i class="fas fa-plus small ml-1"></i>
-                    </button>
-                  @endforeach
-                </div>
-              </div>
-            @endif
-
-            <div class="mb-4">
-              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Identitas Lembaga</label>
-              <div class="d-flex flex-wrap">
-                <button onclick="insertVar('[NAMA_LEMBAGA]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Nama
-                  Lembaga</button>
-                <button onclick="insertVar('[NPSN]')" class="btn btn-outline-primary btn-xs m-1 var-btn">NPSN</button>
-                <button onclick="insertVar('[ALAMAT_LEMBAGA]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Alamat
-                  Lembaga</button>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Identitas Izin</label>
-              <div class="d-flex flex-wrap">
-                <button onclick="insertVar('[NOMOR_SURAT]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Nomor
-                  Surat</button>
-                <button onclick="insertVar('[TANGGAL_TERBIT]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Tanggal
-                  Terbit</button>
-                <button onclick="insertVar('[MASA_BERLAKU]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Masa
-                  Berlaku</button>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Kop Surat & Dinas</label>
-              <div class="d-flex flex-wrap">
-                <button onclick="insertVar('[LOGO_DINAS]')" class="btn btn-outline-info btn-xs m-1 var-btn">Logo
-                  Kop</button>
-                <button onclick="insertVar('[KOTA_DINAS]')"
-                  class="btn btn-outline-info btn-xs m-1 var-btn">Kota/Kabupaten</button>
-                <button onclick="insertVar('[ALAMAT_DINAS]')" class="btn btn-outline-info btn-xs m-1 var-btn">Alamat
-                  Dinas</button>
-                <button onclick="insertVar('[PROVINSI_DINAS]')"
-                  class="btn btn-outline-info btn-xs m-1 var-btn">Provinsi</button>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Pejabat Penandatangan</label>
-              <div class="d-flex flex-wrap">
-                <button onclick="insertVar('[PIMPINAN_NAMA]')" class="btn btn-outline-warning btn-xs m-1 var-btn">Nama
-                  Pejabat</button>
-                <button onclick="insertVar('[PIMPINAN_JABATAN]')"
-                  class="btn btn-outline-warning btn-xs m-1 var-btn">Jabatan</button>
-                <button onclick="insertVar('[PIMPINAN_NIP]')" class="btn btn-outline-warning btn-xs m-1 var-btn">NIP
-                  Pejabat</button>
-                <button onclick="insertVar('[PIMPINAN_PANGKAT]')"
-                  class="btn btn-outline-warning btn-xs m-1 var-btn">Pangkat</button>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Watermark</label>
-              <div class="d-flex flex-wrap">
-                <button onclick="insertVar('[WATERMARK_LOGO]')"
-                  class="btn btn-outline-secondary btn-xs m-1 var-btn">Watermark Logo</button>
-              </div>
+          <div class="mb-4">
+            <label class="text-xs font-weight-bold text-danger text-uppercase mb-2 d-block">Mapping Premium Garut</label>
+            <div class="d-flex flex-wrap">
+              <button type="button" onclick="insertVar('[DATA:NAMA_PIMPINAN]')"
+                class="btn btn-outline-danger btn-xs m-1 var-btn">Nama Pimpinan</button>
+              <button type="button" onclick="insertVar('[DATA:NAMA_PENYELENGGARA]')"
+                class="btn btn-outline-danger btn-xs m-1 var-btn">Nama Penyelenggara</button>
+              <button type="button" onclick="insertVar('[DATA:JENIS_PENDIDIKAN]')"
+                class="btn btn-outline-danger btn-xs m-1 var-btn">Jenis Pendidikan</button>
+              <button type="button" onclick="insertVar('[DATA:KECAMATAN]')"
+                class="btn btn-outline-danger btn-xs m-1 var-btn">Kecamatan</button>
+              <button type="button" onclick="insertVar('[DATA:NOMOR_IZIN_PENDIRIAN]')"
+                class="btn btn-outline-danger btn-xs m-1 var-btn">No. Izin Pendirian</button>
+              <button type="button" onclick="insertVar('[DATA:TANGGAL_IZIN_PENDIRIAN]')"
+                class="btn btn-outline-danger btn-xs m-1 var-btn">Tgl Izin Pendirian</button>
             </div>
           </div>
 
-          <div class="mt-3 p-2 bg-info rounded small opacity-75">
-            <i class="fas fa-info-circle mr-1"></i> Klik variabel untuk menyisipkan ke posisi kursor di canvas.
+          @if($jenisPerizinan->form_config)
+            <div class="mb-4">
+              <label class="text-xs font-weight-bold text-success text-uppercase mb-2 d-block">Mapping Data Ajuan</label>
+              <div class="d-flex flex-wrap">
+                @foreach($jenisPerizinan->form_config as $field)
+                  <button type="button" onclick="insertVar('[DATA:{{ strtoupper($field['name']) }}]')"
+                    class="btn btn-outline-success btn-xs m-1 var-btn">
+                    {{ $field['label'] }} <i class="fas fa-plus small ml-1"></i>
+                  </button>
+                @endforeach
+              </div>
+            </div>
+          @endif
+
+          <div class="mb-4">
+            <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Identitas Lembaga</label>
+            <div class="d-flex flex-wrap">
+              <button onclick="insertVar('[NAMA_LEMBAGA]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Nama
+                Lembaga</button>
+              <button onclick="insertVar('[NPSN]')" class="btn btn-outline-primary btn-xs m-1 var-btn">NPSN</button>
+              <button onclick="insertVar('[ALAMAT_LEMBAGA]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Alamat
+                Lembaga</button>
+            </div>
           </div>
+
+          <div class="mb-4">
+            <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Identitas Izin</label>
+            <div class="d-flex flex-wrap">
+              <button onclick="insertVar('[NOMOR_SURAT]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Nomor
+                Surat</button>
+              <button onclick="insertVar('[TANGGAL_TERBIT]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Tanggal
+                Terbit</button>
+              <button onclick="insertVar('[MASA_BERLAKU]')" class="btn btn-outline-primary btn-xs m-1 var-btn">Masa
+                Berlaku</button>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Kop Surat & Dinas</label>
+            <div class="d-flex flex-wrap">
+              <button onclick="insertVar('[LOGO_DINAS]')" class="btn btn-outline-info btn-xs m-1 var-btn">Logo
+                Kop</button>
+              <button onclick="insertVar('[KOTA_DINAS]')"
+                class="btn btn-outline-info btn-xs m-1 var-btn">Kota/Kabupaten</button>
+              <button onclick="insertVar('[ALAMAT_DINAS]')" class="btn btn-outline-info btn-xs m-1 var-btn">Alamat
+                Dinas</button>
+              <button onclick="insertVar('[PROVINSI_DINAS]')"
+                class="btn btn-outline-info btn-xs m-1 var-btn">Provinsi</button>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Pejabat Penandatangan</label>
+            <div class="d-flex flex-wrap">
+              <button onclick="insertVar('[PIMPINAN_NAMA]')" class="btn btn-outline-warning btn-xs m-1 var-btn">Nama
+                Pejabat</button>
+              <button onclick="insertVar('[PIMPINAN_JABATAN]')"
+                class="btn btn-outline-warning btn-xs m-1 var-btn">Jabatan</button>
+              <button onclick="insertVar('[PIMPINAN_NIP]')" class="btn btn-outline-warning btn-xs m-1 var-btn">NIP
+                Pejabat</button>
+              <button onclick="insertVar('[PIMPINAN_PANGKAT]')"
+                class="btn btn-outline-warning btn-xs m-1 var-btn">Pangkat</button>
+              <button type="button" onclick="insertSignatureBlock()" class="btn btn-warning btn-xs m-1 font-weight-bold">
+                <i class="fas fa-file-signature mr-1"></i> Sisipkan Blok Tanda Tangan
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="text-xs font-weight-bold text-muted text-uppercase mb-2 d-block">Watermark</label>
+            <div class="d-flex flex-wrap">
+              <button onclick="insertVar('[WATERMARK_LOGO]')"
+                class="btn btn-outline-secondary btn-xs m-1 var-btn">Watermark Logo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 p-2 bg-info rounded small opacity-75">
+          <i class="fas fa-info-circle mr-1"></i> Klik variabel untuk menyisipkan ke posisi kursor di canvas.
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- Preset Modal (Bootstrap 4) -->
@@ -254,11 +306,19 @@
 
   <style>
     .a4-paper {
-      width: 210mm;
-      min-height: 297mm;
       background: white;
-      padding: 20mm;
       color: black !important;
+      position: relative;
+      z-index: 1;
+      margin: 0;
+    }
+
+    .canvas-container {
+      background-color: white;
+    }
+
+    .bg-gray-dark {
+      background-color: #343a40 !important;
     }
 
     .font-serif-doc {
@@ -325,6 +385,37 @@
 
   @push('scripts')
     <script>
+      function applyColor(val) {
+        document.execCommand('foreColor', false, val);
+        document.getElementById('color-indicator').style.borderBottomColor = val;
+      }
+
+      function applyFontSize(val) {
+        // execCommand 'fontSize' only supports 1-7. For precision, we use style injection.
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const span = document.createElement('span');
+          span.style.fontSize = val;
+          range.surroundContents(span);
+        }
+      }
+
+      function applyLineHeight(val) {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+          let node = selection.anchorNode;
+          // Find closest block element
+          while (node && node.id !== 'editor-canvas') {
+            if (node.nodeType === 1 && (['P', 'DIV', 'H1', 'H2', 'H3', 'TD'].includes(node.nodeName))) {
+              node.style.lineHeight = val;
+              break;
+            }
+            node = node.parentNode;
+          }
+        }
+      }
+
       function execCmd(command) { document.execCommand(command, false, null); }
       function execCommandWithArg(command, arg) { document.execCommand(command, false, arg); }
 
@@ -333,109 +424,132 @@
         document.execCommand('insertHTML', false, span);
       }
 
-      function insertTable() {
-        let table = '<table style="width:100%;"><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p>&nbsp;</p>';
-        document.execCommand('insertHTML', false, table);
-      }
+      function insertSignatureBlock() {
+        const block = `
+              <div class="signature-block" style="page-break-inside: avoid; margin-top: 10px;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
+                  <tr>
+                    <td width="55%"></td>
+                    <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.2;">
+                      <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
+                      <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
+                      <div style="margin-top:40px; font-weight:bold;">[PIMPINAN_NAMA]</div>
+                      <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
+                  <div style="margin-top: 1px;">NIP. [PIMP    INAN_NIP]</div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            `;
+            document.execCommand('insertHTML', false, block);
+            // Trigger processing to convert new variables into badges
+            const canvas = document.getElementById('editor-canvas');
+            canvas.innerHTML = processTemplate(canvas.innerHTML);
+          }
 
-      const presets = @json($presets);
-      const logoUrl = @json($logoUrl);
+          function insertTable() {
+            let table = '<table style="width:100%;"><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p>&nbsp;</p>';
+            document.execCommand('insertHTML', false, table);
+          }
 
-      // Known variable patterns
-      const varPatterns = [
-        'NOMOR_SURAT', 'TANGGAL_TERBIT', 'MASA_BERLAKU',
-        'NAMA_LEMBAGA', 'NPSN', 'ALAMAT_LEMBAGA',
-        'LOGO_DINAS', 'KOTA_DINAS', 'ALAMAT_DINAS', 'PROVINSI_DINAS',
-        'PIMPINAN_NAMA', 'PIMPINAN_JABATAN', 'PIMPINAN_NIP', 'PIMPINAN_PANGKAT',
-        'WATERMARK_LOGO'
-      ];
+          const presets = @json($presets);
+          const logoUrl = @json($logoUrl);
 
-      function openPresetModal() { $('#presetModal').modal('show'); }
-      function closePresetModal() { $('#presetModal').modal('hide'); }
+          // Known variable patterns
+          const varPatterns = [
+            'NOMOR_SURAT', 'TANGGAL_TERBIT', 'MASA_BERLAKU',
+            'NAMA_LEMBAGA', 'NPSN', 'ALAMAT_LEMBAGA',
+            'LOGO_DINAS', 'KOTA_DINAS', 'ALAMAT_DINAS', 'PROVINSI_DINAS',
+            'PIMPINAN_NAMA', 'PIMPINAN_JABATAN', 'PIMPINAN_NIP', 'PIMPINAN_PANGKAT',
+            'WATERMARK_LOGO'
+          ];
 
-      /**
-       * processTemplate: Convert raw template HTML into editor-friendly HTML
-       * - Replace [LOGO_DINAS] in <img src="[LOGO_DINAS]"> with actual URL
-       * - Replace [VAR] text with styled badges for visibility
-       */
-      function processTemplate(html) {
-        // 1. Fix logo: replace <img src="[LOGO_DINAS]"...> with actual logo preview
-        if (logoUrl) {
-          // Handle <img> tags that have [LOGO_DINAS] as src
-          html = html.replace(/<img[^>]*src=["'][^"']*\[LOGO_DINAS\][^"']*["'][^>]*>/gi,
-            `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
-          );
-          // Handle standalone [LOGO_DINAS] text
-          html = html.replace(/\[LOGO_DINAS\]/g,
-            `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
-          );
-        }
+          function openPresetModal() { $('#presetModal').modal('show'); }
+          function closePresetModal() { $('#presetModal').modal('hide'); }
 
-        // 2. Convert all known [VARIABLE] placeholders into styled badges
-        varPatterns.forEach(v => {
-          if (v === 'LOGO_DINAS') return; // Already handled above
-          const regex = new RegExp(`\\[${v}\\]`, 'g');
-          html = html.replace(regex, `<span class="var-badge" contenteditable="false">[${v}]</span>`);
-        });
+          /**
+           * processTemplate: Convert raw template HTML into editor-friendly HTML
+           * - Replace [LOGO_DINAS] in <img src="[LOGO_DINAS]"> with actual URL
+           * - Replace [VAR] text with styled badges for visibility
+           */
+          function processTemplate(html) {
+            // 1. Fix logo: replace <img src="[LOGO_DINAS]"...> with actual logo preview
+            if (logoUrl) {
+              // Handle <img> tags that have [LOGO_DINAS] as src
+              html = html.replace(/<img[^>]*src=["'][^"']*\[LOGO_DINAS\][^"']*["'][^>]*>/gi,
+                `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
+              );
+              // Handle standalone [LOGO_DINAS] text
+              html = html.replace(/\[LOGO_DINAS\]/g,
+                `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
+              );
+            }
 
-        // 3. Handle [DATA:FIELD_NAME] custom fields
-        html = html.replace(/\[DATA:([A-Z_]+)\]/g,
-          '<span class="var-badge" style="color:#28a745; border-color:#28a745; background:#e6f9ed;" contenteditable="false">[DATA:$1]</span>'
-        );
+            // 2. Convert all known [VARIABLE] placeholders into styled badges
+            varPatterns.forEach(v => {
+              if (v === 'LOGO_DINAS') return; // Already handled above
+              const regex = new RegExp(`\\[${v}\\]`, 'g');
+              html = html.replace(regex, `<span class="var-badge" contenteditable="false">[${v}]</span>`);
+            });
 
-        return html;
-      }
+            // 3. Handle [DATA:FIELD_NAME] custom fields
+            html = html.replace(/\[DATA:([A-Z_]+)\]/g,
+              '<span class="var-badge" style="color:#28a745; border-color:#28a745; background:#e6f9ed;" contenteditable="false">[DATA:$1]</span>'
+            );
 
-      /**
-       * revertTemplate: Convert editor HTML back to raw template for storage
-       * - Replace logo <img> back to [LOGO_DINAS]
-       * - Strip badge wrappers, keep [VAR] text only
-       */
-      function revertTemplate(html) {
-        // 1. Revert logo images back to [LOGO_DINAS]
-        if (logoUrl) {
-          const escapedUrl = logoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi');
-          html = html.replace(regex, '[LOGO_DINAS]');
-        }
+            return html;
+          }
 
-        // 2. Strip badge wrappers: <span class="var-badge"...>[VAR]</span> → [VAR]
-        html = html.replace(/<span[^>]*class="var-badge"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
+          /**
+           * revertTemplate: Convert editor HTML back to raw template for storage
+           * - Replace logo <img> back to [LOGO_DINAS]
+           * - Strip badge wrappers, keep [VAR] text only
+           */
+          function revertTemplate(html) {
+            // 1. Revert logo images back to [LOGO_DINAS]
+            if (logoUrl) {
+              const escapedUrl = logoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const regex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi');
+              html = html.replace(regex, '[LOGO_DINAS]');
+            }
 
-        // 3. Strip old badge wrappers (from previous editor version)
-        html = html.replace(/<span[^>]*class="badge[^"]*"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
+            // 2. Strip badge wrappers: <span class="var-badge"...>[VAR]</span> → [VAR]
+            html = html.replace(/<span[^>]*class="var-badge"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
 
-        return html;
-      }
+            // 3. Strip old badge wrappers (from previous editor version)
+            html = html.replace(/<span[^>]*class="badge[^"]*"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
 
-      function submitTemplate() {
-        const canvas = document.getElementById('editor-canvas');
-        const content = revertTemplate(canvas.innerHTML);
-        document.getElementById('template-input').value = content;
-        document.getElementById('template-form').submit();
-      }
+            return html;
+          }
 
-      function applyPreset(key) {
-        if (confirm(`Ganti template ini dengan "${presets[key].name}"?`)) {
-          document.getElementById('editor-canvas').innerHTML = processTemplate(presets[key].html);
-          closePresetModal();
-        }
-      }
+          function submitTemplate() {
+            const canvas = document.getElementById('editor-canvas');
+            const content = revertTemplate(canvas.innerHTML);
+            document.getElementById('template-input').value = content;
+            document.getElementById('template-form').submit();
+          }
 
-      window.addEventListener('DOMContentLoaded', () => {
-        const canvas = document.getElementById('editor-canvas');
-        if (canvas) {
-          canvas.innerHTML = processTemplate(canvas.innerHTML);
-          canvas.focus();
-        }
-      });
+          function applyPreset(key) {
+            if (confirm(`Ganti template ini dengan "${presets[key].name}"?`)) {
+              document.getElementById('editor-canvas').innerHTML = processTemplate(presets[key].html);
+              closePresetModal();
+            }
+          }
 
-      document.getElementById('search-var').addEventListener('input', function (e) {
-        const term = e.target.value.toLowerCase();
-        document.querySelectorAll('.var-btn').forEach(btn => {
-          btn.style.display = btn.innerText.toLowerCase().includes(term) ? 'inline-block' : 'none';
-        });
-      });
-    </script>
+          window.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('editor-canvas');
+            if (canvas) {
+              canvas.innerHTML = processTemplate(canvas.innerHTML);
+              canvas.focus();
+            }
+          });
+
+          document.getElementById('search-var').addEventListener('input', function (e) {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.var-btn').forEach(btn => {
+              btn.style.display = btn.innerText.toLowerCase().includes(term) ? 'inline-block' : 'none';
+            });
+          });
+        </script>
   @endpush
 @endsection

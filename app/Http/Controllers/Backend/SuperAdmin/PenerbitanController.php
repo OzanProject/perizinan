@@ -111,43 +111,8 @@ class PenerbitanController extends Controller
   {
     $this->authorize('view', $perizinan);
 
-    $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
-
-    // Use the user-designed template from template editor
-    $renderedBody = $perizinan->replaceVariables();
-
-    // Generate QR code for verification
-    $qrBlock = '';
-    if ($perizinan->document_hash) {
-      $verifyUrl = route('perizinan.verify', $perizinan->document_hash);
-      $qrSvg = base64_encode(
-        \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
-          ->size(90)->margin(0)->generate($verifyUrl)
-      );
-      $qrBlock = '
-        <div style="margin-top:30px; text-align:right; font-size:8pt;">
-          <div>Verifikasi Dokumen:</div>
-          <img src="data:image/svg+xml;base64,' . $qrSvg . '" width="80">
-          <div style="font-family:monospace; font-size:7pt;">' . substr($perizinan->document_hash, 0, 16) . '...</div>
-        </div>';
-    }
-
-    // Wrap in DomPDF-compatible full HTML document
-    $html = '<!DOCTYPE html><html><head><meta charset="UTF-8">
-      <style>
-        @page { margin: 25mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12pt; line-height: 1.6; color: #000; margin: 0; padding: 0; }
-        table { border-collapse: collapse; }
-        table, tr, td { page-break-inside: avoid; }
-        td { vertical-align: top; padding: 2px 0; }
-        img { max-width: 100%; }
-      </style>
-    </head><body>' . $renderedBody . $qrBlock . '</body></html>';
-
-    $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
-
-    $cleanName = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama_lembaga ?? 'Sertifikat');
-    return $pdf->download('Sertifikat_' . str_replace(' ', '_', $cleanName) . '.pdf');
+    // This service now handles active presets automatically
+    return $this->renderService->generatePdf($perizinan);
   }
 
   public function exportWord(Perizinan $perizinan)

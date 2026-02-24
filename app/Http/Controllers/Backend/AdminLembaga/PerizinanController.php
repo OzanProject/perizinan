@@ -233,4 +233,15 @@ class PerizinanController extends Controller
     $perizinan->delete();
     return redirect()->route('admin_lembaga.perizinan.index')->with('success', 'Pengajuan berhasil dihapus.');
   }
+
+  public function receipt(Perizinan $perizinan)
+  {
+    $this->authorize('view', $perizinan);
+    $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('backend.admin_lembaga.perizinan.receipt', compact('perizinan'))
+      ->setPaper('a4', 'portrait');
+
+    return $pdf->stream('tanda-terima-' . $perizinan->id . '.pdf');
+  }
 }

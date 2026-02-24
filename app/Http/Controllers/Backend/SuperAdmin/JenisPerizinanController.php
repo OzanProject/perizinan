@@ -73,10 +73,25 @@ class JenisPerizinanController extends Controller
     public function template(JenisPerizinan $jenisPerizinan)
     {
         $presets = CertificateTemplateService::getPresets();
-        $dinas = \App\Models\Dinas::first();
+        $dinas = Auth::user()->dinas;
         $logoUrl = $dinas && $dinas->logo ? asset('storage/' . $dinas->logo) : null;
+        $frameUrl = $dinas && $dinas->watermark_border_img ? asset('storage/' . $dinas->watermark_border_img) : null;
+        $watermarkEnabled = $dinas->watermark_enabled ?? true;
+        $watermarkOpacity = $dinas->watermark_opacity ?? 0.1;
 
-        return view('backend.super_admin.jenis_perizinan.template', compact('jenisPerizinan', 'presets', 'logoUrl'));
+        $activePreset = \App\Models\CetakPreset::where('dinas_id', $dinas->id)
+            ->where('is_active', true)
+            ->first();
+
+        return view('backend.super_admin.jenis_perizinan.template', compact(
+            'jenisPerizinan',
+            'presets',
+            'logoUrl',
+            'frameUrl',
+            'watermarkEnabled',
+            'watermarkOpacity',
+            'activePreset'
+        ));
     }
 
     public function updateTemplate(Request $request, JenisPerizinan $jenisPerizinan)

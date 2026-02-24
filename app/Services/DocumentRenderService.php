@@ -9,30 +9,43 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DocumentRenderService
 {
-    public function renderHtml(Perizinan $p): string
+    public function renderHtml(Perizinan $p, $preset = null): string
     {
         $p->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
         // Use the user-designed template from the template editor
         $body = $p->replaceVariables();
 
+        $pageCss = $this->buildPageCss($preset);
+
         return '<!DOCTYPE html><html><head><meta charset="UTF-8">
         <style>
-          body { font-family: DejaVu Sans, sans-serif; font-size: 12pt; line-height: 1.6; color: #000; }
-          table { border-collapse: collapse; }
+          ' . $pageCss . '
+          body { font-family: DejaVu Sans, sans-serif; font-size: 11pt; line-height: 1.4; color: #000; margin: 0; padding: 0; }
+          table { border-collapse: collapse; page-break-inside: avoid; }
           td { vertical-align: top; padding: 2px 0; }
-          img { max-width: 100%; }
+          img { max-width: 100%; page-break-inside: avoid; }
+          .signature-block { page-break-inside: avoid; breaks-inside: avoid; }
         </style>
-        </head><body>' . $body . $this->qrBlock($p) . '</body></html>';
+        </head><body>' . $body . '</body></html>';
     }
 
     public function generatePdf(Perizinan $p)
     {
-        $pdf = Pdf::loadHTML($this->renderHtml($p))
-            ->setPaper('a4')
+        $preset = \App\Models\CetakPreset::where('dinas_id', $p->dinas_id)
+            ->where('is_active', true)
+            ->first();
+
+        $html = $this->renderHtml($p, $preset);
+
+        $paperSize = $preset->paper_size ?? 'a4';
+        $orientation = $preset->orientation ?? 'portrait';
+
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper($paperSize, $orientation)
             ->setOptions([
                 'isRemoteEnabled' => true,
-                'isHtml5ParserEnabled' => false,
+                'isHtml5ParserEnabled' => true,
                 'defaultFont' => 'DejaVu Sans',
             ]);
 
@@ -58,110 +71,28 @@ class DocumentRenderService
         return $path;
     }
 
-    private function qrBlock($p)
+    private function buildPageCss($preset): string
     {
-        if (!$p->document_hash)
-            return '';
+        $size = 'A4 portrait';
+        $margin = '20mm 20mm 20mm 20mm';
 
-        $url = route('perizinan.verify', $p->document_hash);
+        if ($preset) {
+            $paperSize = $preset->paper_size ?: 'a4';
+            $orientation = $preset->orientation ?: 'portrait';
+            $size = "{$paperSize} {$orientation}";
 
-        $qr = base64_encode(
-            QrCode::format('svg')->size(90)->margin(0)->generate($url)
-        );
+            $mt = $preset->margin_top ?: 20;
+            $mr = $preset->margin_right ?: 20;
+            $mb = $preset->margin_bottom ?: 20;
+            $ml = $preset->margin_left ?: 20;
+            $margin = "{$mt}mm {$mr}mm {$mb}mm {$ml}mm";
+        }
 
         return "
-        <div class='qr'>
-            <div>Verifikasi Dokumen:</div>
-            <img src='data:image/svg+xml;base64,{$qr}' width='80'>
-            <div class='qr-text'>" . substr($p->document_hash, 0, 16) . "...</div>
-        </div>
-        ";
-    }
-
-    private function style()
-    {
-        return "
-        <style>
-
         @page {
-            size: A4;
-            margin: 25mm 25mm 25mm 25mm;
+            size: {$size};
+            margin: {$margin};
         }
-
-        body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 12pt;
-            line-height: 1.6;
-            color: #000;
-        }
-
-        .kop {
-            width: 100%;
-            border-bottom: 4px double #000;
-        }
-
-        .kop-text {
-            text-align: center;
-        }
-
-        .kop-1 {
-            font-size: 14pt;
-            font-weight: bold;
-        }
-
-        .kop-2 {
-            font-size: 13pt;
-            font-weight: bold;
-        }
-
-        .kop-3 {
-            font-size: 10pt;
-        }
-
-        .logo {
-            width: 75px;
-            height: 75px;
-        }
-
-        .judul {
-            text-align: center;
-            font-weight: bold;
-            font-size: 14pt;
-        }
-
-        .nomor {
-            text-align: center;
-        }
-
-        .isi {
-            text-align: justify;
-        }
-
-        .data td {
-            padding: 3px 0;
-        }
-
-        .ttd {
-            text-align: left;
-            font-size: 11pt;
-        }
-
-        .qr {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 8pt;
-        }
-
-        .qr-text {
-            font-family: monospace;
-            font-size: 7pt;
-        }
-
-        table, tr, td {
-            page-break-inside: avoid;
-        }
-
-        </style>
         ";
     }
 
