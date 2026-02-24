@@ -78,6 +78,22 @@ class PerizinanController extends Controller
     }
   }
 
+  public function reject(Perizinan $perizinan)
+  {
+    if ($perizinan->status !== PerizinanStatus::DIAJUKAN->value) {
+      return back()->with('warning', 'Hanya pengajuan dengan status Diajukan yang dapat ditolak.');
+    }
+
+    $this->authorize('verify', $perizinan);
+
+    try {
+      $this->workflowService->transitionTo($perizinan, PerizinanStatus::DITOLAK, 'Pengajuan ditolak oleh Dinas');
+      return back()->with('success', 'Pengajuan berhasil ditolak.');
+    } catch (\Exception $e) {
+      return back()->with('error', $e->getMessage());
+    }
+  }
+
   public function showFinalisasi(Perizinan $perizinan)
   {
     $this->authorize('verify', $perizinan);

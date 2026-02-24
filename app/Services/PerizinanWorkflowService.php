@@ -75,7 +75,7 @@ class PerizinanWorkflowService
   {
     $rules = [
       PerizinanStatus::DRAFT->value => [PerizinanStatus::DIAJUKAN->value],
-      PerizinanStatus::DIAJUKAN->value => [PerizinanStatus::PERBAIKAN->value, PerizinanStatus::DISETUJUI->value, PerizinanStatus::SIAP_DIAMBIL->value],
+      PerizinanStatus::DIAJUKAN->value => [PerizinanStatus::PERBAIKAN->value, PerizinanStatus::DISETUJUI->value, PerizinanStatus::SIAP_DIAMBIL->value, PerizinanStatus::DITOLAK->value],
       PerizinanStatus::PERBAIKAN->value => [PerizinanStatus::DIAJUKAN->value],
       PerizinanStatus::DISETUJUI->value => [PerizinanStatus::SIAP_DIAMBIL->value, PerizinanStatus::SELESAI->value],
       PerizinanStatus::SIAP_DIAMBIL->value => [PerizinanStatus::SELESAI->value],

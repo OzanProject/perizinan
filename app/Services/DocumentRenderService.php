@@ -9,11 +9,11 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DocumentRenderService
 {
-  public function renderHtml(Perizinan $p): string
-  {
-    $logo = $this->toBase64Public($p->dinas->logo ?? null);
+    public function renderHtml(Perizinan $p): string
+    {
+        $logo = $this->toBase64Public($p->dinas->logo ?? null);
 
-    return "
+        return "
         <!DOCTYPE html>
         <html>
         <head>
@@ -103,44 +103,118 @@ class DocumentRenderService
         </body>
         </html>
         ";
-  }
+    }
 
-  public function generatePdf(Perizinan $p)
-  {
-    $pdf = Pdf::loadHTML($this->renderHtml($p))
-      ->setPaper('a4')
-      ->setOptions([
-        'isRemoteEnabled' => true,
-        'isHtml5ParserEnabled' => false,
-        'defaultFont' => 'DejaVu Sans',
-      ]);
+    public function generatePdf(Perizinan $p)
+    {
+        $pdf = Pdf::loadHTML($this->renderHtml($p))
+            ->setPaper('a4')
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => false,
+                'defaultFont' => 'DejaVu Sans',
+            ]);
 
-    return $pdf->stream('surat.pdf');
-  }
+        return $pdf->stream('surat.pdf');
+    }
 
-  private function qrBlock($p)
-  {
-    if (!$p->document_hash)
-      return '';
+    public function storePermanentPdf(Perizinan $perizinan): string
+    {
+        $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-    $url = route('perizinan.verify', $p->document_hash);
+        $dinas = $perizinan->dinas;
+        $lembaga = $perizinan->lembaga;
+        $jenisPerizinan = $perizinan->jenisPerizinan;
 
-    $qr = base64_encode(
-      QrCode::format('svg')->size(90)->margin(0)->generate($url)
-    );
+        // Logo base64
+        $logo = null;
+        if ($dinas->logo) {
+            $path = storage_path('app/public/' . $dinas->logo);
+            if (file_exists($path)) {
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = base64_encode(file_get_contents($path));
+                $logo = "data:image/{$type};base64,{$data}";
+            }
+        }
 
-    return "
+        // Build field rows from perizinan_data
+        $rawData = $perizinan->perizinan_data ?? [];
+        $labelMap = [
+            'nama' => 'Nama',
+            'ttl' => 'Tempat, Tanggal Lahir',
+            'tempat_lahir' => 'Tempat Lahir',
+            'tanggal_lahir' => 'Tanggal Lahir',
+            'pendidikan' => 'Pendidikan Terakhir',
+            'jabatan' => 'Jabatan',
+            'unit_kerja' => 'Unit Kerja',
+            'unit' => 'Unit Kerja',
+            'nama_lembaga' => 'Lembaga',
+        ];
+        $fieldRows = [];
+        foreach ($rawData as $key => $value) {
+            if (in_array($key, ['npsn', 'alamat']))
+                continue;
+            $label = $labelMap[$key] ?? ucwords(str_replace('_', ' ', $key));
+            $fieldRows[] = ['label' => $label, 'value' => $value ?: '-'];
+        }
+
+        // QR code
+        $qrCode = null;
+        if ($perizinan->document_hash) {
+            $verifyUrl = route('perizinan.verify', $perizinan->document_hash);
+            $qrCode = base64_encode(
+                QrCode::format('svg')->size(90)->margin(0)->generate($verifyUrl)
+            );
+        }
+
+        $html = view('backend.super_admin.penerbitan.pdf_template', compact(
+            'perizinan',
+            'dinas',
+            'lembaga',
+            'jenisPerizinan',
+            'logo',
+            'fieldRows',
+            'qrCode'
+        ))->render();
+
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
+
+        $folder = 'issued_pdfs/' . date('Y/m');
+        if (!Storage::disk('local')->exists($folder)) {
+            Storage::disk('local')->makeDirectory($folder);
+        }
+
+        $filename = "{$perizinan->id}_" . time() . ".pdf";
+        $path = "{$folder}/{$filename}";
+
+        Storage::disk('local')->put($path, $pdf->output());
+
+        return $path;
+    }
+
+    private function qrBlock($p)
+    {
+        if (!$p->document_hash)
+            return '';
+
+        $url = route('perizinan.verify', $p->document_hash);
+
+        $qr = base64_encode(
+            QrCode::format('svg')->size(90)->margin(0)->generate($url)
+        );
+
+        return "
         <div class='qr'>
             <div>Verifikasi Dokumen:</div>
             <img src='data:image/svg+xml;base64,{$qr}' width='80'>
             <div class='qr-text'>" . substr($p->document_hash, 0, 16) . "...</div>
         </div>
         ";
-  }
+    }
 
-  private function style()
-  {
-    return "
+    private function style()
+    {
+        return "
         <style>
 
         @page {
@@ -223,18 +297,18 @@ class DocumentRenderService
 
         </style>
         ";
-  }
-
-  private function toBase64Public(?string $path): ?string
-  {
-    if (!$path || !Storage::disk('public')->exists($path)) {
-      return null;
     }
 
-    $fullPath = Storage::disk('public')->path($path);
-    $type = pathinfo($fullPath, PATHINFO_EXTENSION);
-    $data = base64_encode(file_get_contents($fullPath));
+    private function toBase64Public(?string $path): ?string
+    {
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            return null;
+        }
 
-    return "data:image/{$type};base64,{$data}";
-  }
+        $fullPath = Storage::disk('public')->path($path);
+        $type = pathinfo($fullPath, PATHINFO_EXTENSION);
+        $data = base64_encode(file_get_contents($fullPath));
+
+        return "data:image/{$type};base64,{$data}";
+    }
 }

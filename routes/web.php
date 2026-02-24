@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::post('perizinan/{perizinan}/approve', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'approve'])->name('perizinan.approve');
         Route::post('perizinan/{perizinan}/auto-release', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'autoRelease'])->name('perizinan.auto_release');
         Route::post('perizinan/{perizinan}/revision', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'needRevision'])->name('perizinan.revision');
+        Route::post('perizinan/{perizinan}/reject', [App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'reject'])->name('perizinan.reject');
         Route::post('/perizinan/{perizinan}/discussion', [\App\Http\Controllers\Backend\PerizinanDiscussionController::class, 'store'])->name('perizinan.discussion.store');
 
         // Master Data: Jenis Perizinan
