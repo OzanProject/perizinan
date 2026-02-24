@@ -45,9 +45,9 @@
                       <div class="card-header border-0 bg-white py-3">
                         <h3 class="card-title font-weight-bold text-muted small uppercase">Field #{{ $loop->iteration }}</h3>
                         <div class="card-tools">
-                          <button type="button" onclick="this.closest('.field-item').remove()"
-                            class="btn btn-tool text-danger" title="Hapus Field">
-                            <i class="fas fa-trash-alt h5 mb-0"></i>
+                          <button type="button" onclick="removeField(this)"
+                            class="btn btn-sm btn-outline-danger" title="Hapus Field">
+                            <i class="fas fa-times mr-1"></i> Hapus
                           </button>
                         </div>
                       </div>
@@ -149,49 +149,51 @@
         const item = document.createElement('div');
         item.className = 'field-item card shadow-sm mb-4 border-left-4 border-success animate__animated animate__fadeInDown';
 
+        const uid = 'new_' + fieldCount + '_' + Date.now();
+
         item.innerHTML = `
-                    <div class="card-header border-0 bg-white py-3">
-                        <h3 class="card-title font-weight-bold text-success small uppercase">Field Baru #${fieldCount + 1}</h3>
-                        <div class="card-tools">
-                            <button type="button" onclick="removeField(this)" class="btn btn-tool text-danger" title="Hapus Field">
-                                <i class="fas fa-trash-alt h5 mb-0"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group mb-md-0">
-                                    <label class="small font-weight-bold text-uppercase text-muted">Label Field</label>
-                                    <input type="text" name="fields[\${fieldCount}][label]" class="form-control font-weight-bold" placeholder="Contoh: Nama Pemilik PKBM" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group mb-md-0">
-                                    <label class="small font-weight-bold text-uppercase text-muted">Key (Unique ID)</label>
-                                    <input type="text" name="fields[\${fieldCount}][name]" oninput="this.value = this.value.toLowerCase().replace(/\\s+/g, '_').replace(/[^a-z0-9_]/g, '')" class="form-control font-mono" placeholder="nama_pimpinan" required>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group mb-md-0">
-                                    <label class="small font-weight-bold text-uppercase text-muted">Tipe Input</label>
-                                    <select name="fields[\${fieldCount}][type]" class="form-control custom-select">
-                                        <option value="text">Teks Biasa</option>
-                                        <option value="number">Angka</option>
-                                        <option value="date">Tanggal</option>
-                                        <option value="textarea">Paragraf</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2 d-flex align-items-end">
-                                <div class="custom-control custom-checkbox mb-2">
-                                    <input type="checkbox" name="fields[\${fieldCount}][required]" value="1" id="req-\${fieldCount}" class="custom-control-input">
-                                    <label for="req-\${fieldCount}" class="custom-control-label small font-weight-bold text-uppercase text-muted cursor-pointer">Wajib Diisi</label>
-                                </div>
+                        <div class="card-header border-0 bg-white py-3">
+                            <h3 class="card-title font-weight-bold text-success small uppercase">Field Baru #${fieldCount + 1}</h3>
+                            <div class="card-tools">
+                                <button type="button" onclick="removeField(this)" class="btn btn-sm btn-outline-danger" title="Hapus Field">
+                                    <i class="fas fa-times mr-1"></i> Hapus
+                                </button>
                             </div>
                         </div>
-                    </div>
-                `;
+                        <div class="card-body pt-0">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group mb-md-0">
+                                        <label class="small font-weight-bold text-uppercase text-muted">Label Field</label>
+                                        <input type="text" name="fields[${fieldCount}][label]" class="form-control font-weight-bold" placeholder="Contoh: Nama Pemilik PKBM" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group mb-md-0">
+                                        <label class="small font-weight-bold text-uppercase text-muted">Key (Unique ID)</label>
+                                        <input type="text" name="fields[${fieldCount}][name]" oninput="this.value = this.value.toLowerCase().replace(/\\s+/g, '_').replace(/[^a-z0-9_]/g, '')" class="form-control font-mono" placeholder="nama_pimpinan" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group mb-md-0">
+                                        <label class="small font-weight-bold text-uppercase text-muted">Tipe Input</label>
+                                        <select name="fields[${fieldCount}][type]" class="form-control custom-select">
+                                            <option value="text">Teks Biasa</option>
+                                            <option value="number">Angka</option>
+                                            <option value="date">Tanggal</option>
+                                            <option value="textarea">Paragraf</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <div class="custom-control custom-checkbox mb-2">
+                                        <input type="checkbox" name="fields[${fieldCount}][required]" value="1" id="req-${uid}" class="custom-control-input">
+                                        <label for="req-${uid}" class="custom-control-label small font-weight-bold text-uppercase text-muted cursor-pointer">Wajib Diisi</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
 
         container.appendChild(item);
         fieldCount++;
