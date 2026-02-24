@@ -261,14 +261,19 @@
                         Sertifikat</h6>
 
                       <div class="bg-light p-3 rounded border">
-                        <div class="row">
-                          <div class="col-md-5">
+                        {{-- Row 1: Two watermark upload fields side by side --}}
+                        <div class="row mb-3">
+                          <div class="col-md-6">
                             <div class="form-group mb-0">
-                              <label class="small font-weight-bold text-muted text-uppercase">Aset Watermark</label>
+                              <label class="small font-weight-bold text-muted text-uppercase">
+                                <i class="fas fa-shield-alt mr-1"></i> Watermark Tengah (Logo)
+                              </label>
+                              <p class="x-small text-muted mb-2">Tampil di tengah halaman, semi-transparan di belakang
+                                teks.</p>
                               <div class="d-flex align-items-center bg-white p-2 rounded border">
                                 <div id="watermark-preview-container"
-                                  class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 roundedoverflow-hidden"
-                                  style="width: 50px; height: 50px; padding: 5px;">
+                                  class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 rounded overflow-hidden"
+                                  style="width: 60px; height: 60px; padding: 5px;">
                                   @if($dinas->watermark_img)
                                     <img src="{{ Storage::url($dinas->watermark_img) }}"
                                       style="max-width: 100%; max-height: 100%; object-fit: contain;">
@@ -281,11 +286,42 @@
                                   <input type="file" name="watermark_img" class="d-none" accept="image/*">
                                 </label>
                               </div>
-                              <p class="x-small text-muted mt-1 mb-0">Gunakan latar belakang transparan (PNG).</p>
+                              <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: logo kabupaten, lambang
+                                dinas.</p>
                             </div>
                           </div>
-                          <div class="col-md-7">
-                            <div class="form-group mb-2">
+                          <div class="col-md-6">
+                            <div class="form-group mb-0">
+                              <label class="small font-weight-bold text-muted text-uppercase">
+                                <i class="fas fa-border-style mr-1"></i> Bingkai / Border
+                              </label>
+                              <p class="x-small text-muted mb-2">Ornamen bingkai sekeliling halaman surat.</p>
+                              <div class="d-flex align-items-center bg-white p-2 rounded border">
+                                <div id="watermark-border-preview-container"
+                                  class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 rounded overflow-hidden"
+                                  style="width: 60px; height: 60px; padding: 5px;">
+                                  @if($dinas->watermark_border_img)
+                                    <img src="{{ Storage::url($dinas->watermark_border_img) }}"
+                                      style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                  @else
+                                    <i class="fas fa-vector-square text-muted"></i>
+                                  @endif
+                                </div>
+                                <label class="btn btn-xs btn-outline-primary mb-0">
+                                  Pilih File
+                                  <input type="file" name="watermark_border_img" class="d-none" accept="image/*">
+                                </label>
+                              </div>
+                              <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: ornamen emas, bingkai resmi.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {{-- Row 2: Settings --}}
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group mb-0">
                               <div class="custom-control custom-switch">
                                 <input type="checkbox" name="watermark_enabled" class="custom-control-input"
                                   id="watermarkEnabled" {{ ($dinas->watermark_enabled ?? true) ? 'checked' : '' }}>
@@ -293,23 +329,21 @@
                                   Watermark Otomatis</label>
                               </div>
                             </div>
-                            <div class="row">
-                              <div class="col-6">
-                                <div class="form-group mb-0">
-                                  <label class="x-small font-weight-bold text-muted mb-1">Opacity (%)</label>
-                                  <input type="number" name="watermark_opacity" step="0.01" min="0.01" max="1"
-                                    value="{{ old('watermark_opacity', $dinas->watermark_opacity ?? 0.05) }}"
-                                    class="form-control form-control-sm">
-                                </div>
-                              </div>
-                              <div class="col-6">
-                                <div class="form-group mb-0">
-                                  <label class="x-small font-weight-bold text-muted mb-1">Size (px)</label>
-                                  <input type="number" name="watermark_size" min="50" max="1000"
-                                    value="{{ old('watermark_size', $dinas->watermark_size ?? 400) }}"
-                                    class="form-control form-control-sm">
-                                </div>
-                              </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group mb-0">
+                              <label class="x-small font-weight-bold text-muted mb-1">Opacity (0.01 - 1.0)</label>
+                              <input type="number" name="watermark_opacity" step="0.01" min="0.01" max="1"
+                                value="{{ old('watermark_opacity', $dinas->watermark_opacity ?? 0.05) }}"
+                                class="form-control form-control-sm">
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group mb-0">
+                              <label class="x-small font-weight-bold text-muted mb-1">Ukuran Watermark (px)</label>
+                              <input type="number" name="watermark_size" min="50" max="1000"
+                                value="{{ old('watermark_size', $dinas->watermark_size ?? 400) }}"
+                                class="form-control form-control-sm">
                             </div>
                           </div>
                         </div>
@@ -322,6 +356,202 @@
                     </button>
                   </div>
                 </form>
+              </div>
+
+              {{-- Variable Reference Card --}}
+              <div class="card card-outline card-info shadow-sm mt-4">
+                <div class="card-header border-bottom-0 py-2" data-toggle="collapse" data-target="#varRefCollapse"
+                  style="cursor: pointer;">
+                  <h3 class="card-title font-weight-bold small">
+                    <i class="fas fa-code text-info mr-2"></i> Referensi Variabel Template
+                  </h3>
+                  <div class="card-tools">
+                    <span class="badge badge-info badge-pill">Klik untuk buka/tutup</span>
+                  </div>
+                </div>
+                <div class="collapse" id="varRefCollapse">
+                  <div class="card-body pt-2">
+                    <p class="text-muted small mb-3">
+                      Variabel di bawah ini bisa dipakai di <strong>Template Editor</strong> (halaman Jenis Perizinan).
+                      Nilai diambil otomatis dari data yang Anda isi di Settings.
+                    </p>
+
+                    <div class="row">
+                      {{-- Kop Surat & Dinas --}}
+                      <div class="col-md-6">
+                        <h6 class="font-weight-bold text-primary small text-uppercase mb-2">
+                          <i class="fas fa-building mr-1"></i> Kop Surat & Dinas
+                        </h6>
+                        <table class="table table-sm table-bordered mb-3" style="font-size: 12px;">
+                          <thead class="bg-light">
+                            <tr>
+                              <th style="width:45%">Variabel</th>
+                              <th>Nilai Saat Ini</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><code>[LOGO_DINAS]</code></td>
+                              <td>{{ $dinas->logo ? '✅ Sudah diupload' : '❌ Belum ada' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[ALAMAT_DINAS]</code></td>
+                              <td>{{ $dinas->alamat ?: '-' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[KOTA_DINAS]</code></td>
+                              <td>{{ $dinas->kabupaten ?: '-' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[PROVINSI_DINAS]</code></td>
+                              <td>{{ $dinas->provinsi ?: '-' }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {{-- Pejabat Penandatangan --}}
+                      <div class="col-md-6">
+                        <h6 class="font-weight-bold text-warning small text-uppercase mb-2">
+                          <i class="fas fa-user-tie mr-1"></i> Pejabat Penandatangan
+                        </h6>
+                        <table class="table table-sm table-bordered mb-3" style="font-size: 12px;">
+                          <thead class="bg-light">
+                            <tr>
+                              <th style="width:45%">Variabel</th>
+                              <th>Nilai Saat Ini</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><code>[PIMPINAN_NAMA]</code></td>
+                              <td>{{ $dinas->pimpinan_nama ?: '-' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[PIMPINAN_JABATAN]</code></td>
+                              <td>{{ $dinas->pimpinan_jabatan ?: '-' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[PIMPINAN_PANGKAT]</code></td>
+                              <td>{{ $dinas->pimpinan_pangkat ?: '-' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[PIMPINAN_NIP]</code></td>
+                              <td>{{ $dinas->pimpinan_nip ?: '-' }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      {{-- Identitas Izin --}}
+                      <div class="col-md-6">
+                        <h6 class="font-weight-bold text-success small text-uppercase mb-2">
+                          <i class="fas fa-file-alt mr-1"></i> Identitas Izin (Otomatis per Perizinan)
+                        </h6>
+                        <table class="table table-sm table-bordered mb-3" style="font-size: 12px;">
+                          <thead class="bg-light">
+                            <tr>
+                              <th style="width:45%">Variabel</th>
+                              <th>Keterangan</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><code>[NOMOR_SURAT]</code></td>
+                              <td class="text-muted">Dari nomor surat perizinan</td>
+                            </tr>
+                            <tr>
+                              <td><code>[TANGGAL_TERBIT]</code></td>
+                              <td class="text-muted">Format: 24 Februari 2026</td>
+                            </tr>
+                            <tr>
+                              <td><code>[JENIS_IZIN]</code></td>
+                              <td class="text-muted">Nama jenis perizinan</td>
+                            </tr>
+                            <tr>
+                              <td><code>[MASA_BERLAKU]</code></td>
+                              <td class="text-muted">Contoh: 2 Tahun</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {{-- Identitas Lembaga --}}
+                      <div class="col-md-6">
+                        <h6 class="font-weight-bold text-info small text-uppercase mb-2">
+                          <i class="fas fa-school mr-1"></i> Identitas Lembaga (Otomatis per Perizinan)
+                        </h6>
+                        <table class="table table-sm table-bordered mb-3" style="font-size: 12px;">
+                          <thead class="bg-light">
+                            <tr>
+                              <th style="width:45%">Variabel</th>
+                              <th>Keterangan</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><code>[NAMA_LEMBAGA]</code></td>
+                              <td class="text-muted">Data lembaga pemohon</td>
+                            </tr>
+                            <tr>
+                              <td><code>[NPSN]</code></td>
+                              <td class="text-muted">NPSN lembaga</td>
+                            </tr>
+                            <tr>
+                              <td><code>[ALAMAT_LEMBAGA]</code></td>
+                              <td class="text-muted">Alamat lembaga</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      {{-- Aset Visual --}}
+                      <div class="col-md-6">
+                        <h6 class="font-weight-bold text-danger small text-uppercase mb-2">
+                          <i class="fas fa-image mr-1"></i> Aset Visual
+                        </h6>
+                        <table class="table table-sm table-bordered mb-0" style="font-size: 12px;">
+                          <thead class="bg-light">
+                            <tr>
+                              <th style="width:45%">Variabel</th>
+                              <th>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><code>[LOGO_DINAS]</code></td>
+                              <td>{{ $dinas->logo ? '✅ Ada' : '❌ Kosong' }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[WATERMARK_LOGO]</code></td>
+                              <td>{{ $dinas->watermark_img ? '✅ Ada' : ($dinas->logo ? '⚡ Pakai logo' : '❌ Kosong') }}</td>
+                            </tr>
+                            <tr>
+                              <td><code>[STEMPEL_DINAS]</code></td>
+                              <td>{{ $dinas->stempel_img ? '✅ Ada' : '❌ Kosong' }}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {{-- Field Custom --}}
+                      <div class="col-md-6">
+                        <h6 class="font-weight-bold text-secondary small text-uppercase mb-2">
+                          <i class="fas fa-puzzle-piece mr-1"></i> Field Custom (dari Form Config)
+                        </h6>
+                        <div class="bg-white border rounded p-2" style="font-size: 12px;">
+                          <p class="text-muted mb-1">Field yang ditambahkan di Form Config Jenis Perizinan otomatis bisa dipakai:</p>
+                          <code>[DATA:NAMA_FIELD]</code> atau <code>[NAMA_FIELD]</code>
+                          <p class="text-muted mb-0 mt-1">Contoh: <code>[DATA:JABATAN]</code>, <code>[DATA:UNIT_KERJA]</code></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Keamanan Tab -->
@@ -518,6 +748,7 @@
         setupImagePreview('logo', 'logo-preview-container');
         setupImagePreview('stempel_img', 'stempel-preview-container');
         setupImagePreview('watermark_img', 'watermark-preview-container');
+        setupImagePreview('watermark_border_img', 'watermark-border-preview-container');
 
         // BS Custom File Input (for restore database)
         if (typeof bsCustomFileInput !== 'undefined') {

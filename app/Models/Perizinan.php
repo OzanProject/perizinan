@@ -242,6 +242,38 @@ class Perizinan extends Model
     // 3. Fallback/Cleanup
     $template = preg_replace('/\[DATA:[^\]]+\]/i', '................', $template);
 
+    // 4. Auto-inject full-page watermark layers if enabled
+    if ($dinas->watermark_enabled ?? true) {
+      $wmOpacity = $dinas->watermark_opacity ?? 0.08;
+      $wmSize = $dinas->watermark_size ?? 400;
+      $halfSize = $wmSize / 2;
+
+      // Layer 1: Center watermark (logo behind text)
+      $wmImg = $dinas->watermark_img ?: $dinas->logo;
+      if ($wmImg) {
+        $wmBase64 = $toBase64($wmImg);
+        // DomPDF doesn't support transform, use fixed position with negative margins to center
+        $template .= '
+        <div style="position: fixed; top: 50%; left: 50%;
+                    width: ' . $wmSize . 'px; height: ' . $wmSize . 'px;
+                    margin-top: -' . $halfSize . 'px; margin-left: -' . $halfSize . 'px;
+                    opacity: ' . $wmOpacity . '; z-index: -1;">
+          <img src="' . $wmBase64 . '" width="' . $wmSize . '" height="' . $wmSize . '" />
+        </div>';
+      }
+
+      // Layer 2: Border/frame decoration (full-page ornament)
+      if ($dinas->watermark_border_img) {
+        $borderBase64 = $toBase64($dinas->watermark_border_img);
+        $template .= '
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                    width: 100%; height: 100%;
+                    opacity: ' . min($wmOpacity * 3, 1.0) . '; z-index: -2;">
+          <img src="' . $borderBase64 . '" width="100%" height="100%" />
+        </div>';
+      }
+    }
+
     $this->rendered_template = $template;
     return $template;
   }

@@ -66,6 +66,7 @@ class SettingController extends Controller
       'logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:2048',
       'stempel_img' => 'nullable|image|mimes:png|max:2048', // PNG only for transparency
       'watermark_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
+      'watermark_border_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
       'watermark_enabled' => 'nullable|string', // Checkbox
       'watermark_opacity' => 'required|numeric|min:0.01|max:1',
       'watermark_size' => 'required|integer|min:50|max:1000',
@@ -109,6 +110,14 @@ class SettingController extends Controller
         Storage::disk('public')->delete($oldWatermark);
       }
       $dinas->watermark_img = $request->file('watermark_img')->store('watermarks', 'public');
+    }
+
+    if ($request->hasFile('watermark_border_img')) {
+      if ($dinas->watermark_border_img) {
+        $oldBorder = str_replace('public/', '', $dinas->watermark_border_img);
+        Storage::disk('public')->delete($oldBorder);
+      }
+      $dinas->watermark_border_img = $request->file('watermark_border_img')->store('watermarks', 'public');
     }
 
     $dinas->save();

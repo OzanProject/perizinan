@@ -74,7 +74,11 @@
     @yield('adminlte_css')
 
     {{-- Favicon --}}
-    @if(config('adminlte.use_ico_only'))
+    @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+        <link rel="shortcut icon" href="{{ Storage::url($globalDinas->logo) }}" />
+        <link rel="icon" type="image/png" href="{{ Storage::url($globalDinas->logo) }}">
+        <link rel="apple-touch-icon" href="{{ Storage::url($globalDinas->logo) }}">
+    @elseif(config('adminlte.use_ico_only'))
         <link rel="shortcut icon" href="{{ asset('favicons/favicon.ico') }}" />
     @elseif(config('adminlte.use_full_favicon'))
         <link rel="shortcut icon" href="{{ asset('favicons/favicon.ico') }}" />
@@ -94,6 +98,8 @@
         <link rel="manifest" crossorigin="use-credentials" href="{{ asset('favicons/manifest.json') }}">
         <meta name="msapplication-TileColor" content="#ffffff">
         <meta name="msapplication-TileImage" content="{{ asset('favicons/ms-icon-144x144.png') }}">
+    @else
+        <link rel="shortcut icon" href="{{ asset('favicons/favicon.ico') }}" />
     @endif
 
 </head>

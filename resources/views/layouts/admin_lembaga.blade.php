@@ -5,6 +5,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title') - {{ Auth::user()->lembaga->nama_lembaga ?? 'Dashboard Lembaga' }}</title>
+  @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+    <link rel="shortcut icon" href="{{ Storage::url($globalDinas->logo) }}" />
+    <link rel="icon" type="image/png" href="{{ Storage::url($globalDinas->logo) }}">
+  @endif
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet"

@@ -4,7 +4,12 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Register - Sistem Perizinan Dinas</title>
+    <title>Register - {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
+    </title>
+    @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+        <link rel="shortcut icon" href="{{ Storage::url($globalDinas->logo) }}" />
+        <link rel="icon" type="image/png" href="{{ Storage::url($globalDinas->logo) }}">
+    @endif
 
     <!-- Google Fonts: Public Sans & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,10 +89,17 @@
     <div class="w-full max-w-[500px]">
         <!-- Logo / Brand Header -->
         <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                <span class="material-symbols-outlined text-4xl">verified</span>
-            </div>
-            <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Sistem Perizinan Dinas</h1>
+            @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-3"
+                    style="width: 70px; height: 70px; object-fit: contain;">
+            @else
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+                    <span class="material-symbols-outlined text-4xl">verified</span>
+                </div>
+            @endif
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
+            </h1>
         </div>
         <!-- Card -->
         <div class="bg-white dark:bg-[#1a202c] shadow-admin-card rounded-lg overflow-hidden border-t-4 border-primary">

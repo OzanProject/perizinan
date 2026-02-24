@@ -25,6 +25,7 @@ class Dinas extends Model
     'kabupaten',
     'footer_text',
     'watermark_img',
+    'watermark_border_img',
     'watermark_enabled',
     'watermark_opacity',
     'watermark_size',

@@ -4,7 +4,11 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Login - Sistem Perizinan Dinas</title>
+    <title>Login - {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}</title>
+    @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+        <link rel="shortcut icon" href="{{ Storage::url($globalDinas->logo) }}" />
+        <link rel="icon" type="image/png" href="{{ Storage::url($globalDinas->logo) }}">
+    @endif
     <!-- Material Symbols -->
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -63,8 +67,12 @@
     <!-- Login Box Container -->
     <div class="w-full max-w-[400px] px-4 z-10 relative">
         <div class="text-center mb-4">
+            @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-3 drop-shadow-lg"
+                    style="width: 70px; height: 70px; object-fit: contain;">
+            @endif
             <h1 class="text-3xl font-bold text-white tracking-tight drop-shadow-md">
-                Sistem Perizinan Dinas
+                {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
             </h1>
         </div>
 
@@ -146,7 +154,8 @@
 
         <div class="mt-4 text-center">
             <p class="text-white/80 text-xs font-light">
-                © 2024 Dinas Pemerintahan Kota. All rights reserved.
+                © {{ date('Y') }} {{ isset($globalDinas) && $globalDinas ? $globalDinas->nama : 'Dinas Pemerintahan' }}.
+                All rights reserved.
             </p>
         </div>
     </div>

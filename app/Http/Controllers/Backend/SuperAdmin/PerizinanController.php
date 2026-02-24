@@ -39,7 +39,8 @@ class PerizinanController extends Controller
   public function show(Perizinan $perizinan)
   {
     $this->authorize('view', $perizinan);
-    $perizinan->load(['lembaga', 'jenisPerizinan', 'discussions.user']);
+    $perizinan->load(['lembaga', 'jenisPerizinan', 'discussions.user', 'dinas']);
+    $perizinan->replaceVariables();
     return view('backend.super_admin.perizinan.show', compact('perizinan'));
   }
 
@@ -111,6 +112,10 @@ class PerizinanController extends Controller
     if (!$perizinan->nomor_surat) {
       $perizinan->nomor_surat_auto = $this->nomorSuratService->generate($perizinan);
     }
+
+    // Render the template so live preview has content
+    $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
+    $perizinan->replaceVariables();
 
     return view('backend.super_admin.perizinan.finalisasi', compact('perizinan'));
   }

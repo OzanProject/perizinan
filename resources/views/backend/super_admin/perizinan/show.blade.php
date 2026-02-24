@@ -347,6 +347,50 @@
         transform: rotate(-45deg);
       }
 
+      #draft-preview-canvas .position-relative {
+        position: relative !important;
+      }
+
+      /* Force fixed elements in template (watermarks/borders) to be absolute within the preview canvas */
+      #draft-preview-canvas div[style*="position: fixed"] {
+        position: absolute !important;
+      }
+
+      @media print {
+
+        .main-header,
+        .main-sidebar,
+        .card-header,
+        .card-footer,
+        .btn,
+        .modal-header,
+        .card-tools {
+          display: none !important;
+        }
+
+        .content-wrapper {
+          margin-left: 0 !important;
+          padding: 0 !important;
+        }
+
+        #draft-preview-canvas {
+          transform: scale(1) !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+
+        .modal {
+          position: static !important;
+          overflow: visible !important;
+        }
+
+        .modal-dialog {
+          max-width: 100% !important;
+          margin: 0 !important;
+        }
+      }
+
       #chat-container::-webkit-scrollbar {
         width: 4px;
       }
