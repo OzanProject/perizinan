@@ -6,7 +6,7 @@
     @else
       <i class="fas fa-certificate brand-image img-circle elevation-3 mt-1 ml-2"></i>
     @endif
-    <span class="brand-text font-weight-light">{{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}</span>
+    <span class="brand-text font-weight-light" style="white-space: normal; font-size: 14px; line-height: 1.3;">{{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}</span>
   </a>
 
   <!-- Sidebar -->
