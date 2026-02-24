@@ -99,7 +99,7 @@ class PenerbitanController extends Controller
     $this->authorize('view', $perizinan);
 
     // Use the service for consistent preview
-    $html = $this->renderService->renderHtml($perizinan, false);
+    $html = $this->renderService->renderHtml($perizinan);
 
     return response()->json([
       'success' => true,
@@ -113,66 +113,40 @@ class PenerbitanController extends Controller
 
     $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-    $dinas = $perizinan->dinas;
-    $lembaga = $perizinan->lembaga;
-    $jenisPerizinan = $perizinan->jenisPerizinan;
+    // Use the user-designed template from template editor
+    $renderedBody = $perizinan->replaceVariables();
 
-    // Convert logo ke base64 supaya aman di DomPDF
-    $logo = null;
-    if ($dinas->logo) {
-      $path = storage_path('app/public/' . $dinas->logo);
-      if (file_exists($path)) {
-        $type = pathinfo($path, PATHINFO_EXTENSION);
-        $data = base64_encode(file_get_contents($path));
-        $logo = "data:image/{$type};base64,{$data}";
-      }
-    }
-
-    // Build data rows dari perizinan_data (dinamis)
-    $data = $perizinan->perizinan_data ?? [];
-    $labelMap = [
-      'nama' => 'Nama',
-      'ttl' => 'Tempat, Tanggal Lahir',
-      'tempat_lahir' => 'Tempat Lahir',
-      'tanggal_lahir' => 'Tanggal Lahir',
-      'pendidikan' => 'Pendidikan Terakhir',
-      'jabatan' => 'Jabatan',
-      'unit_kerja' => 'Unit Kerja',
-      'unit' => 'Unit Kerja',
-      'nama_lembaga' => 'Lembaga',
-    ];
-
-    $fieldRows = [];
-    foreach ($data as $key => $value) {
-      if (in_array($key, ['npsn', 'alamat']))
-        continue; // handled separately
-      $label = $labelMap[$key] ?? ucwords(str_replace('_', ' ', $key));
-      $fieldRows[] = ['label' => $label, 'value' => $value ?: '-'];
-    }
-
-    // Generate QR code
-    $qrCode = null;
+    // Generate QR code for verification
+    $qrBlock = '';
     if ($perizinan->document_hash) {
       $verifyUrl = route('perizinan.verify', $perizinan->document_hash);
-      $qrCode = base64_encode(
+      $qrSvg = base64_encode(
         \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
           ->size(90)->margin(0)->generate($verifyUrl)
       );
+      $qrBlock = '
+        <div style="margin-top:30px; text-align:right; font-size:8pt;">
+          <div>Verifikasi Dokumen:</div>
+          <img src="data:image/svg+xml;base64,' . $qrSvg . '" width="80">
+          <div style="font-family:monospace; font-size:7pt;">' . substr($perizinan->document_hash, 0, 16) . '...</div>
+        </div>';
     }
 
-    $pdf = Pdf::loadView('backend.super_admin.penerbitan.pdf_template', compact(
-      'perizinan',
-      'dinas',
-      'lembaga',
-      'jenisPerizinan',
-      'logo',
-      'fieldRows',
-      'qrCode'
-    ));
+    // Wrap in DomPDF-compatible full HTML document
+    $html = '<!DOCTYPE html><html><head><meta charset="UTF-8">
+      <style>
+        @page { margin: 25mm; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12pt; line-height: 1.6; color: #000; margin: 0; padding: 0; }
+        table { border-collapse: collapse; }
+        table, tr, td { page-break-inside: avoid; }
+        td { vertical-align: top; padding: 2px 0; }
+        img { max-width: 100%; }
+      </style>
+    </head><body>' . $renderedBody . $qrBlock . '</body></html>';
 
-    $pdf->setPaper('a4', 'portrait');
+    $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
 
-    $cleanName = preg_replace('/[^A-Za-z0-9 _-]/', '', $lembaga->nama ?? 'Sertifikat');
+    $cleanName = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama_lembaga ?? 'Sertifikat');
     return $pdf->download('Sertifikat_' . str_replace(' ', '_', $cleanName) . '.pdf');
   }
 
@@ -180,12 +154,15 @@ class PenerbitanController extends Controller
   {
     $this->authorize('view', $perizinan);
 
-    $cleanLembaga = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama);
+    $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
+
+    // Use the user-designed template from template editor
+    $finalHtml = $perizinan->replaceVariables();
+
+    $cleanLembaga = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama_lembaga ?? 'Sertifikat');
     $filename = 'Sertifikat_' . str_replace(' ', '_', $cleanLembaga) . '.doc';
 
-    $finalHtml = $this->renderService->renderHtml($perizinan, true);
-
-    // Wrap in Word-compatible HTML with proper meta tags
+    // Wrap in Word-compatible HTML
     $wordHtml = '
     <html xmlns:o="urn:schemas-microsoft-com:office:office"
           xmlns:w="urn:schemas-microsoft-com:office:word"
@@ -223,8 +200,8 @@ class PenerbitanController extends Controller
 
     $perizinan->load(['lembaga', 'jenisPerizinan']);
 
-    $cleanLembaga = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama);
-    $filename = 'Data_Perizinan_' . str_replace(' ', '_', $cleanLembaga) . '.xlsx';
+    $cleanLembaga = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama_lembaga ?? 'Perizinan');
+    $filename = 'Data_Perizinan_' . str_replace(' ', '_', $cleanLembaga) . '.csv';
 
     // Build data rows
     $rows = [
@@ -243,23 +220,32 @@ class PenerbitanController extends Controller
       ['', ''],
       ['TANGGAL', ''],
       ['Tanggal Disetujui', $perizinan->approved_at ? $perizinan->approved_at->format('d/m/Y') : '-'],
-      ['Tanggal Diterbitkan', $perizinan->published_at ? $perizinan->published_at->format('d/m/Y') : '-'],
+      ['Tanggal Diterbitkan', $perizinan->tanggal_terbit ? $perizinan->tanggal_terbit->format('d/m/Y') : '-'],
     ];
 
-    // Add form_data if available
-    if ($perizinan->form_data && is_array($perizinan->form_data)) {
+    // Add perizinan_data if available
+    $perizinanData = $perizinan->perizinan_data;
+    if ($perizinanData && is_array($perizinanData)) {
       $rows[] = ['', ''];
       $rows[] = ['DATA ISIAN', ''];
-      foreach ($perizinan->form_data as $key => $value) {
-        $rows[] = [ucwords(str_replace('_', ' ', $key)), is_array($value) ? json_encode($value) : $value];
+      foreach ($perizinanData as $key => $value) {
+        $rows[] = [ucwords(str_replace('_', ' ', $key)), is_array($value) ? json_encode($value) : ($value ?? '-')];
       }
     }
 
-    // Use maatwebsite/excel with a simple FromArray export
-    return \Maatwebsite\Excel\Facades\Excel::download(
-      new \App\Exports\PerizinanExport($rows),
-      $filename
-    );
+    // Generate CSV with BOM for Excel UTF-8
+    $callback = function () use ($rows) {
+      $file = fopen('php://output', 'w');
+      fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+      foreach ($rows as $row) {
+        fputcsv($file, $row);
+      }
+      fclose($file);
+    };
+
+    return response()->streamDownload($callback, $filename, [
+      'Content-Type' => 'text/csv; charset=UTF-8',
+    ]);
   }
 
   /**

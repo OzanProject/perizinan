@@ -11,98 +11,19 @@ class DocumentRenderService
 {
     public function renderHtml(Perizinan $p): string
     {
-        $logo = $this->toBase64Public($p->dinas->logo ?? null);
+        $p->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-        return "
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <meta charset='UTF-8'>
-        " . $this->style() . "
-        </head>
-        <body>
+        // Use the user-designed template from the template editor
+        $body = $p->replaceVariables();
 
-        <table class='kop'>
-            <tr>
-                <td width='90'>" . ($logo ? "<img src='{$logo}' class='logo'>" : "") . "</td>
-                <td class='kop-text'>
-                    <div class='kop-1'>PEMERINTAH KABUPATEN GARUT</div>
-                    <div class='kop-2'>DINAS PENDIDIKAN</div>
-                    <div class='kop-3'>" . $p->dinas->alamat . "</div>
-                </td>
-            </tr>
-        </table>
-
-        <br>
-
-        <div class='judul'>SURAT KETERANGAN IZIN MEMIMPIN</div>
-        <div class='nomor'>Nomor : " . $p->nomor_surat . "</div>
-
-        <br><br>
-
-        <div class='isi'>
-
-        <strong>Dasar :</strong>
-        <ol>
-            <li>" . $p->dasar_1 . "</li>
-            <li>" . $p->dasar_2 . "</li>
-            <li>" . $p->dasar_3 . "</li>
-        </ol>
-
-        <p>
-        Berdasarkan hal tersebut di atas, maka dengan ini Kepala Dinas Pendidikan
-        Kabupaten Garut menerangkan bahwa :
-        </p>
-
-        <table class='data'>
-            <tr><td width='230'>Nama</td><td>: " . $p->nama . "</td></tr>
-            <tr><td>Tempat, Tanggal Lahir</td><td>: " . $p->ttl . "</td></tr>
-            <tr><td>Pendidikan Terakhir</td><td>: " . $p->pendidikan . "</td></tr>
-            <tr><td>Jabatan</td><td>: " . $p->jabatan . "</td></tr>
-            <tr><td>Unit Kerja</td><td>: " . $p->unit_kerja . "</td></tr>
-            <tr><td>NPSN</td><td>: " . $p->npsn . "</td></tr>
-            <tr><td>Alamat</td><td>: " . $p->alamat . "</td></tr>
-        </table>
-
-        <br>
-
-        <p>
-        Adalah benar sebagai " . $p->jabatan . " di " . $p->unit_kerja . "
-        yang diangkat oleh " . $p->yayasan . ".
-        </p>
-
-        <p>
-        Keterangan ini berlaku selama 2 (dua) tahun dengan ketentuan
-        tidak ada perubahan terhadap penugasan.
-        </p>
-
-        <p>
-        Demikian surat keterangan ini dibuat untuk dipergunakan sebagaimana mestinya.
-        </p>
-
-        </div>
-
-        <br><br><br>
-
-        <table width='100%'>
-        <tr>
-            <td width='60%'></td>
-            <td class='ttd'>
-                Dikeluarkan : Garut<br>
-                Pada Tanggal : " . $p->tanggal_surat . "<br><br><br>
-                <strong>KEPALA DINAS</strong><br><br><br><br>
-                " . $p->dinas->pimpinan_nama . "<br>
-                " . $p->dinas->pimpinan_pangkat . "<br>
-                NIP. " . $p->dinas->pimpinan_nip . "
-            </td>
-        </tr>
-        </table>
-
-        " . $this->qrBlock($p) . "
-
-        </body>
-        </html>
-        ";
+        return '<!DOCTYPE html><html><head><meta charset="UTF-8">
+        <style>
+          body { font-family: DejaVu Sans, sans-serif; font-size: 12pt; line-height: 1.6; color: #000; }
+          table { border-collapse: collapse; }
+          td { vertical-align: top; padding: 2px 0; }
+          img { max-width: 100%; }
+        </style>
+        </head><body>' . $body . $this->qrBlock($p) . '</body></html>';
     }
 
     public function generatePdf(Perizinan $p)
@@ -120,62 +41,7 @@ class DocumentRenderService
 
     public function storePermanentPdf(Perizinan $perizinan): string
     {
-        $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
-
-        $dinas = $perizinan->dinas;
-        $lembaga = $perizinan->lembaga;
-        $jenisPerizinan = $perizinan->jenisPerizinan;
-
-        // Logo base64
-        $logo = null;
-        if ($dinas->logo) {
-            $path = storage_path('app/public/' . $dinas->logo);
-            if (file_exists($path)) {
-                $type = pathinfo($path, PATHINFO_EXTENSION);
-                $data = base64_encode(file_get_contents($path));
-                $logo = "data:image/{$type};base64,{$data}";
-            }
-        }
-
-        // Build field rows from perizinan_data
-        $rawData = $perizinan->perizinan_data ?? [];
-        $labelMap = [
-            'nama' => 'Nama',
-            'ttl' => 'Tempat, Tanggal Lahir',
-            'tempat_lahir' => 'Tempat Lahir',
-            'tanggal_lahir' => 'Tanggal Lahir',
-            'pendidikan' => 'Pendidikan Terakhir',
-            'jabatan' => 'Jabatan',
-            'unit_kerja' => 'Unit Kerja',
-            'unit' => 'Unit Kerja',
-            'nama_lembaga' => 'Lembaga',
-        ];
-        $fieldRows = [];
-        foreach ($rawData as $key => $value) {
-            if (in_array($key, ['npsn', 'alamat']))
-                continue;
-            $label = $labelMap[$key] ?? ucwords(str_replace('_', ' ', $key));
-            $fieldRows[] = ['label' => $label, 'value' => $value ?: '-'];
-        }
-
-        // QR code
-        $qrCode = null;
-        if ($perizinan->document_hash) {
-            $verifyUrl = route('perizinan.verify', $perizinan->document_hash);
-            $qrCode = base64_encode(
-                QrCode::format('svg')->size(90)->margin(0)->generate($verifyUrl)
-            );
-        }
-
-        $html = view('backend.super_admin.penerbitan.pdf_template', compact(
-            'perizinan',
-            'dinas',
-            'lembaga',
-            'jenisPerizinan',
-            'logo',
-            'fieldRows',
-            'qrCode'
-        ))->render();
+        $html = $this->renderHtml($perizinan);
 
         $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
 
