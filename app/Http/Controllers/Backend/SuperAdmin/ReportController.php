@@ -101,7 +101,13 @@ class ReportController extends Controller
 
     $listLembaga = Lembaga::where('dinas_id', $dinasId)->orderBy('nama_lembaga')->get();
 
-    return view('backend.super_admin.report.index', compact('stats', 'monthlyTrend', 'lembagaStats', 'listLembaga'));
+    // Detailed perizinan list
+    $perizinans = (clone $baseQuery)
+      ->with(['lembaga', 'jenisPerizinan'])
+      ->latest()
+      ->paginate(15, ['*'], 'p_page');
+
+    return view('backend.super_admin.report.index', compact('stats', 'monthlyTrend', 'lembagaStats', 'listLembaga', 'perizinans'));
   }
 
   public function exportExcel()
@@ -112,11 +118,12 @@ class ReportController extends Controller
 
   public function exportPdf()
   {
-    $dinasId = Auth::user()->dinas_id;
-    $stats = $this->getOverviewStats($dinasId);
+    $user = Auth::user();
+    $dinas = $user->dinas;
+    $stats = $this->getOverviewStats($user->dinas_id);
     $lembagaStats = $this->getLembagaData();
 
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('backend.super_admin.report.pdf', compact('stats', 'lembagaStats'));
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('backend.super_admin.report.pdf', compact('stats', 'lembagaStats', 'dinas'));
     return $pdf->download('Laporan_Perizinan_' . date('Y-m-d') . '.pdf');
   }
 

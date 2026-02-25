@@ -110,12 +110,33 @@
 </head>
 
 <body>
-  <div class="header">
-    <h1>LAPORAN STATISTIK PERIZINAN</h1>
-    <p>Dinas Pendidikan - Sistem Informasi Perizinan PKBM</p>
-    <p>Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}</p>
+  <div class="header" style="border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px;">
+    <table width="100%" style="border: none;">
+      <tr>
+        <td width="80" style="border: none; vertical-align: middle;">
+          @if($dinas && $dinas->logo)
+            <img src="{{ public_path('storage/' . $dinas->logo) }}" width="65" height="65">
+          @else
+            <div style="width:65px; height:65px; background:#ddd;"></div>
+          @endif
+        </td>
+        <td style="border: none; text-align: center; vertical-align: middle;">
+          <div style="font-size: 16px; font-weight: bold; text-transform: uppercase;">PEMERINTAH KABUPATEN
+            {{ strtoupper($dinas->kota ?? 'GARUT') }}</div>
+          <div style="font-size: 18px; font-weight: bold; text-transform: uppercase;">
+            {{ strtoupper($dinas->app_name ?? 'DINAS PENDIDIKAN') }}</div>
+          <div style="font-size: 10px; font-style: italic;">{{ $dinas->alamat ?? '' }}</div>
+        </td>
+      </tr>
+    </table>
   </div>
 
+  <div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="margin: 0; text-decoration: underline; text-transform: uppercase;">LAPORAN STATISTIK PERIZINAN</h3>
+    <div style="font-size: 11px; margin-top: 5px;">Periode Laporan: s/d {{ now()->translatedFormat('d F Y') }}</div>
+  </div>
+
+  <h4 style="border-left: 5px solid #007bff; padding-left: 10px; margin-bottom: 10px;">I. RINGKASAN DATA</h4>
   <table class="stats-grid">
     <tr>
       <td class="stats-box">
@@ -137,13 +158,14 @@
     </tr>
   </table>
 
-  <h3>Aktivitas Lembaga</h3>
+  <h4 style="border-left: 5px solid #007bff; padding-left: 10px; margin-bottom: 10px; margin-top: 20px;">II. AKTIVITAS
+    LEMBAGA</h4>
   <table>
     <thead>
       <tr>
-        <th width="30">No</th>
+        <th width="30" class="text-center">No</th>
         <th>Nama Lembaga</th>
-        <th width="60">Jenjang</th>
+        <th width="60" class="text-center">Jenjang</th>
         <th width="80" class="text-center">Total</th>
         <th width="60" class="text-center">Selesai</th>
         <th width="60" class="text-center">Proses</th>
@@ -151,7 +173,7 @@
       </tr>
     </thead>
     <tbody>
-      @foreach($lembagaStats as $index => $lembaga)
+      @forelse($lembagaStats as $index => $lembaga)
         @php
           $persentase = $lembaga->total_pengajuan > 0
             ? round(($lembaga->selesai / $lembaga->total_pengajuan) * 100, 1)
@@ -161,17 +183,28 @@
           <td class="text-center">{{ $index + 1 }}</td>
           <td>{{ $lembaga->nama_lembaga }}</td>
           <td class="text-center">{{ strtoupper($lembaga->jenjang) }}</td>
-          <td class="text-center">{{ number_format($lembaga->total_pengajuan) }}</td>
+          <td class="text-center font-weight-bold">{{ number_format($lembaga->total_pengajuan) }}</td>
           <td class="text-center">{{ $lembaga->selesai }}</td>
           <td class="text-center">{{ $lembaga->proses }}</td>
-          <td class="text-center">{{ $persentase }}%</td>
+          <td class="text-center font-weight-bold">{{ $persentase }}%</td>
         </tr>
-      @endforeach
+      @empty
+        <tr>
+          <td colspan="7" class="text-center">Tidak ada data lembaga.</td>
+        </tr>
+      @endforelse
     </tbody>
   </table>
 
+  <div style="margin-top: 40px; float: right; width: 250px; text-align: center;">
+    <div>{{ ($dinas->kota ?? 'Garut') }}, {{ now()->translatedFormat('d F Y') }}</div>
+    <div style="margin-top: 5px; font-weight: bold;">Kepala Dinas</div>
+    <div style="margin-top: 60px; font-weight: bold; text-decoration: underline;">__________________________</div>
+    <div>NIP. ____________________</div>
+  </div>
+
   <div class="footer">
-    © {{ date('Y') }} Sistem Perizinan Dinas - Laporan ini digenerate secara otomatis oleh sistem.
+    Dicetak melalui Sistem Perizinan pada {{ now()->format('d/m/Y H:i') }} | Halaman 1 dari 1
   </div>
 </body>
 

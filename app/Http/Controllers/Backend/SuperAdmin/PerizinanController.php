@@ -7,6 +7,7 @@ use App\Models\Perizinan;
 use App\Enums\PerizinanStatus;
 use App\Services\PerizinanWorkflowService;
 use App\Services\NomorSuratService;
+use App\Models\CetakPreset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -117,7 +118,9 @@ class PerizinanController extends Controller
     $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
     $perizinan->replaceVariables();
 
-    return view('backend.super_admin.perizinan.finalisasi', compact('perizinan'));
+    $activePreset = CetakPreset::where('is_active', true)->first();
+
+    return view('backend.super_admin.perizinan.finalisasi', compact('perizinan', 'activePreset'));
   }
 
   public function release(Request $request, Perizinan $perizinan)
@@ -142,6 +145,7 @@ class PerizinanController extends Controller
 
     try {
       $data['approved_at'] = $perizinan->approved_at ?? now();
+      $perizinan->allowImmutableUpdate = true;
       $perizinan->update($data);
 
       if ($perizinan->status !== PerizinanStatus::SIAP_DIAMBIL->value) {

@@ -50,11 +50,26 @@ class DashboardController extends Controller
 
   private function adminLembagaDashboard($user)
   {
+    $stats = [
+      'total_pengajuan' => Perizinan::where('lembaga_id', $user->lembaga_id)->count(),
+      'sedang_proses' => Perizinan::where('lembaga_id', $user->lembaga_id)
+        ->whereIn('status', [
+          PerizinanStatus::DIAJUKAN->value,
+          PerizinanStatus::PERBAIKAN->value
+        ])->count(),
+      'disetujui' => Perizinan::where('lembaga_id', $user->lembaga_id)
+        ->whereIn('status', [
+          PerizinanStatus::DISETUJUI->value,
+          PerizinanStatus::SIAP_DIAMBIL->value,
+          PerizinanStatus::SELESAI->value
+        ])->count(),
+    ];
+
     $perizinan = Perizinan::where('lembaga_id', $user->lembaga_id)
       ->with(['jenisPerizinan', 'dokumens', 'discussions'])
       ->latest()
       ->first();
 
-    return view('backend.admin_lembaga.dashboard', compact('perizinan'));
+    return view('backend.admin_lembaga.dashboard', compact('perizinan', 'stats'));
   }
 }

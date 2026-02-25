@@ -123,25 +123,25 @@
           <div class="canvas-container mx-auto shadow-lg mb-5" style="width: {{ $w }}; position: relative;">
             @if($watermarkEnabled && $frameUrl)
               <div class="frame-overlay" style="
-                                    position: absolute;
-                                    top: 0; left: 0; width: 100%; height: 100%;
-                                    pointer-events: none;
-                                    z-index: 10;
-                                    background-image: url('{{ $frameUrl }}');
-                                    background-size: 100% 100%;
-                                    opacity: {{ min($watermarkOpacity * 3, 1.0) }};
-                                  "></div>
+                                        position: absolute;
+                                        top: 0; left: 0; width: 100%; height: 100%;
+                                        pointer-events: none;
+                                        z-index: 10;
+                                        background-image: url('{{ $frameUrl }}');
+                                        background-size: 100% 100%;
+                                        opacity: {{ min($watermarkOpacity * 3, 1.0) }};
+                                      "></div>
             @endif
 
             <div id="editor-canvas" contenteditable="true" class="a4-paper font-serif-doc bg-white border-0"
               style="padding: {{ $padding }}; width: {{ $w }}; min-height: {{ $isLandscape ? '210mm' : '297mm' }};">
               {!! $jenisPerizinan->template_html ?? '
-                                            <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                                                <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                                                <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                                                <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
-                                            </div>
-                                        ' !!}
+                                              <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                                  <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                                  <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                                  <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
+                                              </div>
+                                          ' !!}
             </div>
           </div>
         </form>
@@ -426,130 +426,130 @@
 
       function insertSignatureBlock() {
         const block = `
-              <div class="signature-block" style="page-break-inside: avoid; margin-top: 10px;">
-                <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
-                  <tr>
-                    <td width="55%"></td>
-                    <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.2;">
-                      <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
-                      <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
-                      <div style="margin-top:40px; font-weight:bold;">[PIMPINAN_NAMA]</div>
-                      <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
-                  <div style="margin-top: 1px;">NIP. [PIMP    INAN_NIP]</div>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            `;
-            document.execCommand('insertHTML', false, block);
-            // Trigger processing to convert new variables into badges
-            const canvas = document.getElementById('editor-canvas');
-            canvas.innerHTML = processTemplate(canvas.innerHTML);
-          }
+                  <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
+                      <tr>
+                        <td width="55%"></td>
+                        <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
+                          <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
+                          <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
+                          <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
+                          <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
+                      <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                `;
+        document.execCommand('insertHTML', false, block);
+        // Trigger processing to convert new variables into badges
+        const canvas = document.getElementById('editor-canvas');
+        canvas.innerHTML = processTemplate(canvas.innerHTML);
+      }
 
-          function insertTable() {
-            let table = '<table style="width:100%;"><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p>&nbsp;</p>';
-            document.execCommand('insertHTML', false, table);
-          }
+      function insertTable() {
+        let table = '<table style="width:100%;"><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p>&nbsp;</p>';
+        document.execCommand('insertHTML', false, table);
+      }
 
-          const presets = @json($presets);
-          const logoUrl = @json($logoUrl);
+      const presets = @json($presets);
+      const logoUrl = @json($logoUrl);
 
-          // Known variable patterns
-          const varPatterns = [
-            'NOMOR_SURAT', 'TANGGAL_TERBIT', 'MASA_BERLAKU',
-            'NAMA_LEMBAGA', 'NPSN', 'ALAMAT_LEMBAGA',
-            'LOGO_DINAS', 'KOTA_DINAS', 'ALAMAT_DINAS', 'PROVINSI_DINAS',
-            'PIMPINAN_NAMA', 'PIMPINAN_JABATAN', 'PIMPINAN_NIP', 'PIMPINAN_PANGKAT',
-            'WATERMARK_LOGO'
-          ];
+      // Known variable patterns
+      const varPatterns = [
+        'NOMOR_SURAT', 'TANGGAL_TERBIT', 'MASA_BERLAKU',
+        'NAMA_LEMBAGA', 'NPSN', 'ALAMAT_LEMBAGA',
+        'LOGO_DINAS', 'KOTA_DINAS', 'ALAMAT_DINAS', 'PROVINSI_DINAS',
+        'PIMPINAN_NAMA', 'PIMPINAN_JABATAN', 'PIMPINAN_NIP', 'PIMPINAN_PANGKAT',
+        'WATERMARK_LOGO'
+      ];
 
-          function openPresetModal() { $('#presetModal').modal('show'); }
-          function closePresetModal() { $('#presetModal').modal('hide'); }
+      function openPresetModal() { $('#presetModal').modal('show'); }
+      function closePresetModal() { $('#presetModal').modal('hide'); }
 
-          /**
-           * processTemplate: Convert raw template HTML into editor-friendly HTML
-           * - Replace [LOGO_DINAS] in <img src="[LOGO_DINAS]"> with actual URL
-           * - Replace [VAR] text with styled badges for visibility
-           */
-          function processTemplate(html) {
-            // 1. Fix logo: replace <img src="[LOGO_DINAS]"...> with actual logo preview
-            if (logoUrl) {
-              // Handle <img> tags that have [LOGO_DINAS] as src
-              html = html.replace(/<img[^>]*src=["'][^"']*\[LOGO_DINAS\][^"']*["'][^>]*>/gi,
-                `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
-              );
-              // Handle standalone [LOGO_DINAS] text
-              html = html.replace(/\[LOGO_DINAS\]/g,
-                `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
-              );
-            }
+      /**
+       * processTemplate: Convert raw template HTML into editor-friendly HTML
+       * - Replace [LOGO_DINAS] in <img src="[LOGO_DINAS]"> with actual URL
+       * - Replace [VAR] text with styled badges for visibility
+       */
+      function processTemplate(html) {
+        // 1. Fix logo: replace <img src="[LOGO_DINAS]"...> with actual logo preview
+        if (logoUrl) {
+          // Handle <img> tags that have [LOGO_DINAS] as src
+          html = html.replace(/<img[^>]*src=["'][^"']*\[LOGO_DINAS\][^"']*["'][^>]*>/gi,
+            `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
+          );
+          // Handle standalone [LOGO_DINAS] text
+          html = html.replace(/\[LOGO_DINAS\]/g,
+            `<img src="${logoUrl}" style="width:70px; height:70px; display:block;" contenteditable="false">`
+          );
+        }
 
-            // 2. Convert all known [VARIABLE] placeholders into styled badges
-            varPatterns.forEach(v => {
-              if (v === 'LOGO_DINAS') return; // Already handled above
-              const regex = new RegExp(`\\[${v}\\]`, 'g');
-              html = html.replace(regex, `<span class="var-badge" contenteditable="false">[${v}]</span>`);
-            });
+        // 2. Convert all known [VARIABLE] placeholders into styled badges
+        varPatterns.forEach(v => {
+          if (v === 'LOGO_DINAS') return; // Already handled above
+          const regex = new RegExp(`\\[${v}\\]`, 'g');
+          html = html.replace(regex, `<span class="var-badge" contenteditable="false">[${v}]</span>`);
+        });
 
-            // 3. Handle [DATA:FIELD_NAME] custom fields
-            html = html.replace(/\[DATA:([A-Z_]+)\]/g,
-              '<span class="var-badge" style="color:#28a745; border-color:#28a745; background:#e6f9ed;" contenteditable="false">[DATA:$1]</span>'
-            );
+        // 3. Handle [DATA:FIELD_NAME] custom fields
+        html = html.replace(/\[DATA:([A-Z_]+)\]/g,
+          '<span class="var-badge" style="color:#28a745; border-color:#28a745; background:#e6f9ed;" contenteditable="false">[DATA:$1]</span>'
+        );
 
-            return html;
-          }
+        return html;
+      }
 
-          /**
-           * revertTemplate: Convert editor HTML back to raw template for storage
-           * - Replace logo <img> back to [LOGO_DINAS]
-           * - Strip badge wrappers, keep [VAR] text only
-           */
-          function revertTemplate(html) {
-            // 1. Revert logo images back to [LOGO_DINAS]
-            if (logoUrl) {
-              const escapedUrl = logoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-              const regex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi');
-              html = html.replace(regex, '[LOGO_DINAS]');
-            }
+      /**
+       * revertTemplate: Convert editor HTML back to raw template for storage
+       * - Replace logo <img> back to [LOGO_DINAS]
+       * - Strip badge wrappers, keep [VAR] text only
+       */
+      function revertTemplate(html) {
+        // 1. Revert logo images back to [LOGO_DINAS]
+        if (logoUrl) {
+          const escapedUrl = logoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi');
+          html = html.replace(regex, '[LOGO_DINAS]');
+        }
 
-            // 2. Strip badge wrappers: <span class="var-badge"...>[VAR]</span> → [VAR]
-            html = html.replace(/<span[^>]*class="var-badge"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
+        // 2. Strip badge wrappers: <span class="var-badge"...>[VAR]</span> → [VAR]
+        html = html.replace(/<span[^>]*class="var-badge"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
 
-            // 3. Strip old badge wrappers (from previous editor version)
-            html = html.replace(/<span[^>]*class="badge[^"]*"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
+        // 3. Strip old badge wrappers (from previous editor version)
+        html = html.replace(/<span[^>]*class="badge[^"]*"[^>]*>\[([A-Z_:]+)\]<\/span>/g, '[$1]');
 
-            return html;
-          }
+        return html;
+      }
 
-          function submitTemplate() {
-            const canvas = document.getElementById('editor-canvas');
-            const content = revertTemplate(canvas.innerHTML);
-            document.getElementById('template-input').value = content;
-            document.getElementById('template-form').submit();
-          }
+      function submitTemplate() {
+        const canvas = document.getElementById('editor-canvas');
+        const content = revertTemplate(canvas.innerHTML);
+        document.getElementById('template-input').value = content;
+        document.getElementById('template-form').submit();
+      }
 
-          function applyPreset(key) {
-            if (confirm(`Ganti template ini dengan "${presets[key].name}"?`)) {
-              document.getElementById('editor-canvas').innerHTML = processTemplate(presets[key].html);
-              closePresetModal();
-            }
-          }
+      function applyPreset(key) {
+        if (confirm(`Ganti template ini dengan "${presets[key].name}"?`)) {
+          document.getElementById('editor-canvas').innerHTML = processTemplate(presets[key].html);
+          closePresetModal();
+        }
+      }
 
-          window.addEventListener('DOMContentLoaded', () => {
-            const canvas = document.getElementById('editor-canvas');
-            if (canvas) {
-              canvas.innerHTML = processTemplate(canvas.innerHTML);
-              canvas.focus();
-            }
-          });
+      window.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('editor-canvas');
+        if (canvas) {
+          canvas.innerHTML = processTemplate(canvas.innerHTML);
+          canvas.focus();
+        }
+      });
 
-          document.getElementById('search-var').addEventListener('input', function (e) {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.var-btn').forEach(btn => {
-              btn.style.display = btn.innerText.toLowerCase().includes(term) ? 'inline-block' : 'none';
-            });
-          });
-        </script>
+      document.getElementById('search-var').addEventListener('input', function (e) {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.var-btn').forEach(btn => {
+          btn.style.display = btn.innerText.toLowerCase().includes(term) ? 'inline-block' : 'none';
+        });
+      });
+    </script>
   @endpush
 @endsection

@@ -86,6 +86,13 @@
             </a>
           </li>
 
+          <li class="nav-item border-bottom pb-2 mb-2">
+            <a href="{{ route('super_admin.laporan.index') }}" class="nav-link {{ request()->routeIs('super_admin.laporan.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-chart-line text-info"></i>
+              <p>Laporan & Statistik</p>
+            </a>
+          </li>
+
           <li class="nav-header">SYSTEM</li>
           <li class="nav-item">
             <a href="{{ route('super_admin.users.index') }}" class="nav-link {{ request()->routeIs('super_admin.users.*') ? 'active' : '' }}">

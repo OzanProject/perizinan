@@ -4,6 +4,37 @@
 
 @section('content')
   <div class="container-fluid">
+    <!-- Dynamic Stats Row -->
+    <div class="row">
+      <div class="col-12 col-sm-6 col-md-4">
+        <div class="info-box shadow-sm mb-4">
+          <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-file-invoice"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text font-weight-bold text-uppercase small">Total Pengajuan</span>
+            <span class="info-box-number h4 mb-0">{{ number_format($stats['total_pengajuan']) }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4">
+        <div class="info-box shadow-sm mb-4">
+          <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock text-white"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text font-weight-bold text-uppercase small">Sedang Proses</span>
+            <span class="info-box-number h4 mb-0 text-warning">{{ number_format($stats['sedang_proses']) }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4">
+        <div class="info-box shadow-sm mb-4">
+          <span class="info-box-icon bg-success elevation-1"><i class="fas fa-check-circle"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text font-weight-bold text-uppercase small">Disetujui</span>
+            <span class="info-box-number h4 mb-0 text-success">{{ number_format($stats['disetujui']) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     @if(!$perizinan)
       <!-- Empty State: No Applications Yet -->
       <div class="row">
@@ -130,11 +161,8 @@
                 </p>
 
                 <div class="d-flex flex-wrap gap-2">
-                  <button class="btn btn-success btn-lg shadow-sm font-weight-bold px-4 mr-3">
-                    <i class="fas fa-download mr-2"></i> Unduh SK Izin
-                  </button>
-                  <a href="{{ route('admin_lembaga.perizinan.index') }}" class="btn btn-default shadow-sm border">
-                    Lihat Riwayat Pengajuan
+                  <a href="{{ route('admin_lembaga.perizinan.index') }}" class="btn btn-success shadow-sm px-4 mr-3">
+                    <i class="fas fa-list mr-2"></i> Lihat Seluruh Pengajuan
                   </a>
                 </div>
               </div>
@@ -167,34 +195,27 @@
         </div>
       </div>
 
-      <!-- Summary Statistics Row -->
-      <div class="row mt-3">
-        <div class="col-md-4">
-          <div class="info-box shadow-sm border">
-            <span class="info-box-icon bg-blue"><i class="fas fa-folder-open"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text text-muted font-weight-bold small">JENIS IZIN</span>
-              <span class="info-box-number text-dark">{{ $perizinan->jenisPerizinan->nama }}</span>
-            </div>
-          </div>
+      <!-- Latest Application Details -->
+      <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-light py-2">
+          <h3 class="card-title font-weight-bold small text-muted text-uppercase mb-0">Detil Pengajuan Terakhir</h3>
         </div>
-        <div class="col-md-4">
-          <div class="info-box shadow-sm border">
-            <span class="info-box-icon bg-purple text-white"><i class="fas fa-calendar-alt"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text text-muted font-weight-bold small">TANGGAL PENGAJUAN</span>
-              <span class="info-box-number text-dark">{{ $perizinan->created_at->translatedFormat('d F Y') }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="info-box shadow-sm border">
-            <span class="info-box-icon bg-success text-white"><i class="fas fa-id-card"></i></span>
-            <div class="info-box-content">
-              <span class="info-box-text text-muted font-weight-bold small">NOMOR PENGAJUAN</span>
-              <span
-                class="info-box-number text-dark font-family-mono">{{ $perizinan->nomor_ajuan ?? 'DALAM PROSES' }}</span>
-            </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0">
+              <tr>
+                <th width="200" class="pl-3 py-2 border-0">Jenis Perizinan</th>
+                <td class="py-2 border-0 text-primary font-weight-bold">{{ $perizinan->jenisPerizinan->nama }}</td>
+              </tr>
+              <tr>
+                <th class="pl-3 py-2">Nomor Ajuan</th>
+                <td class="py-2 font-family-mono">{{ $perizinan->nomor_ajuan ?? 'DALAM PROSES' }}</td>
+              </tr>
+              <tr>
+                <th class="pl-3 py-2">Tanggal Masuk</th>
+                <td class="py-2">{{ $perizinan->created_at->translatedFormat('d F Y') }}</td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>

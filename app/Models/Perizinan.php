@@ -11,12 +11,18 @@ class Perizinan extends Model
 {
   use HasFactory;
 
+  public $allowImmutableUpdate = false;
+
   protected static function boot()
   {
     parent::boot();
 
     // Immutability Guard: Prevent editing final document data
     static::updating(function ($perizinan) {
+      if ($perizinan->allowImmutableUpdate) {
+        return;
+      }
+
       if (in_array($perizinan->getOriginal('status'), [PerizinanStatus::SIAP_DIAMBIL->value, PerizinanStatus::SELESAI->value])) {
         $protected = ['snapshot_html', 'document_hash', 'pdf_path', 'nomor_surat'];
         foreach ($protected as $field) {

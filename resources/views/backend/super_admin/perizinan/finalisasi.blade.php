@@ -2,6 +2,26 @@
 
 @section('title', 'Finalisasi Sertifikat')
 
+@php
+    $paperSize = strtoupper($activePreset->paper_size ?? 'A4');
+    $orientation = strtolower($activePreset->orientation ?? 'portrait');
+    
+    $width = '210mm';
+    $height = '297mm';
+    $isF4 = $paperSize === 'F4';
+    
+    if ($isF4) {
+        $width = '215mm';
+        $height = '330mm';
+    }
+    
+    if ($orientation === 'landscape') {
+        $temp = $width;
+        $width = $height;
+        $height = $temp;
+    }
+@endphp
+
 @push('styles')
     <style>
         .finalisasi-wrapper {
@@ -44,8 +64,8 @@
 
         #preview-paper {
             background: white;
-            width: 793px;
-            min-height: 1122px;
+            width: {{ $width }};
+            min-height: {{ $height }};
             box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
             transform-origin: top center;
             transition: transform 0.3s ease;
@@ -56,7 +76,7 @@
         #certificate-canvas {
             position: relative;
             width: 100%;
-            min-height: 1122px;
+            min-height: {{ $height }};
             background: white;
             padding: 0;
             margin: 0;
@@ -217,7 +237,7 @@
             <div class="right-panel">
                 <div class="bg-white border-bottom py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="z-index: 5;">
                     <div class="text-muted font-weight-bold small">
-                        <i class="fas fa-eye text-primary mr-2"></i> LIVE PREVIEW SERTIFIKAT
+                        <i class="fas fa-eye text-primary mr-2"></i> LIVE PREVIEW: {{ $paperSize }} {{ strtoupper($orientation) }}
                     </div>
                     <div class="btn-group">
                         <button type="button" class="btn btn-light btn-sm border" onclick="zoomPreview(-0.1)"><i class="fas fa-minus"></i></button>

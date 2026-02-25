@@ -121,11 +121,35 @@ class PenerbitanController extends Controller
 
     $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
+    $activePreset = CetakPreset::where('dinas_id', $perizinan->dinas_id)
+      ->where('is_active', true)
+      ->first();
+
+    // Mapping Paper Sizes for Word
+    $paperSize = 'A4';
+    $orientation = 'portrait';
+    $margins = '1cm';
+
+    if ($activePreset) {
+      $paperSize = strtoupper($activePreset->paper_size);
+      $orientation = strtolower($activePreset->orientation);
+
+      // Map "F4" to dimensions for Word CSS
+      if ($paperSize === 'F4') {
+        $paperSize = '21.5cm 33.0cm';
+      }
+
+      $mt = $activePreset->margin_top ?? 1.0;
+      $mr = $activePreset->margin_right ?? 1.0;
+      $mb = $activePreset->margin_bottom ?? 1.0;
+      $ml = $activePreset->margin_left ?? 1.0;
+      $margins = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
+    }
+
     // Use the user-designed template from template editor
     $finalHtml = $perizinan->replaceVariables();
 
-    $cleanLembaga = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama_lembaga ?? 'Sertifikat');
-    $filename = 'Sertifikat_' . str_replace(' ', '_', $cleanLembaga) . '.doc';
+    $filename = $this->renderService->generateStandardFilename($perizinan) . '.doc';
 
     // Wrap in Word-compatible HTML
     $wordHtml = '
@@ -145,9 +169,14 @@ class PenerbitanController extends Controller
       </xml>
       <![endif]-->
       <style>
-        @page { size: A4; margin: 2.5cm; }
-        body { font-family: \'Times New Roman\', serif; font-size: 12pt; }
-        table { border-collapse: collapse; }
+        @page { 
+          size: ' . $paperSize . ($orientation === 'landscape' ? ' landscape' : '') . '; 
+          margin: ' . $margins . '; 
+          mso-page-orientation: ' . $orientation . ';
+        }
+        body { font-family: \'Times New Roman\', serif; font-size: 11pt; line-height: 1.2; }
+        table { border-collapse: collapse; width: 100%; }
+        .signature-block { page-break-inside: avoid; }
       </style>
     </head>
     <body>' . $finalHtml . '</body>
@@ -165,8 +194,7 @@ class PenerbitanController extends Controller
 
     $perizinan->load(['lembaga', 'jenisPerizinan']);
 
-    $cleanLembaga = preg_replace('/[^A-Za-z0-9 _-]/', '', $perizinan->lembaga->nama_lembaga ?? 'Perizinan');
-    $filename = 'Data_Perizinan_' . str_replace(' ', '_', $cleanLembaga) . '.csv';
+    $filename = $this->renderService->generateStandardFilename($perizinan) . '.csv';
 
     // Build data rows
     $rows = [

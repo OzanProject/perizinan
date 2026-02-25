@@ -53,6 +53,7 @@ class PerizinanWorkflowService
       }
 
       // Single Atomic Save (Prevents Immutability Guard from blocking the transition itself)
+      $perizinan->allowImmutableUpdate = true;
       $perizinan->save();
 
       // Catat log status
@@ -79,7 +80,7 @@ class PerizinanWorkflowService
       PerizinanStatus::PERBAIKAN->value => [PerizinanStatus::DIAJUKAN->value],
       PerizinanStatus::DISETUJUI->value => [PerizinanStatus::SIAP_DIAMBIL->value, PerizinanStatus::SELESAI->value],
       PerizinanStatus::SIAP_DIAMBIL->value => [PerizinanStatus::SELESAI->value],
-      PerizinanStatus::SELESAI->value => [],
+      PerizinanStatus::SELESAI->value => [PerizinanStatus::SIAP_DIAMBIL->value],
     ];
 
     return in_array($to->value, $rules[$from->value] ?? []);

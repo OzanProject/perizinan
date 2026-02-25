@@ -21,11 +21,11 @@ class DocumentRenderService
         return '<!DOCTYPE html><html><head><meta charset="UTF-8">
         <style>
           ' . $pageCss . '
-          body { font-family: DejaVu Sans, sans-serif; font-size: 11pt; line-height: 1.4; color: #000; margin: 0; padding: 0; }
+          body { font-family: DejaVu Sans, sans-serif; font-size: 10.5pt; line-height: 1.1; color: #000; margin: 0; padding: 0; }
           table { border-collapse: collapse; page-break-inside: avoid; }
-          td { vertical-align: top; padding: 2px 0; }
+          td { vertical-align: top; padding: 1px 0; }
           img { max-width: 100%; page-break-inside: avoid; }
-          .signature-block { page-break-inside: avoid; breaks-inside: avoid; }
+          .signature-block { page-break-inside: avoid; breaks-inside: avoid; margin-top: 5px; }
         </style>
         </head><body>' . $body . '</body></html>';
     }
@@ -41,6 +41,12 @@ class DocumentRenderService
         $paperSize = $preset->paper_size ?? 'a4';
         $orientation = $preset->orientation ?? 'portrait';
 
+        // DomPDF doesn't natively support F4. We define it manually (210mm x 330mm in points).
+        // 1mm = 2.83465 points
+        if (strtoupper($paperSize) === 'F4') {
+            $paperSize = [0, 0, 595.28, 935.43]; // 210mm x 330mm
+        }
+
         $pdf = Pdf::loadHTML($html)
             ->setPaper($paperSize, $orientation)
             ->setOptions([
@@ -49,7 +55,26 @@ class DocumentRenderService
                 'defaultFont' => 'DejaVu Sans',
             ]);
 
-        return $pdf->stream('surat.pdf');
+        $filename = $this->generateStandardFilename($p) . '.pdf';
+
+        return $pdf->stream($filename);
+    }
+
+    public function generateStandardFilename(Perizinan $p): string
+    {
+        $p->load(['lembaga', 'jenisPerizinan']);
+
+        $lembaga = $p->lembaga->nama_lembaga ?? 'Lembaga';
+        $jenis = $p->jenisPerizinan->nama ?? 'Perizinan';
+        $tanggal = date('d-m-Y');
+
+        $name = "{$lembaga}-{$jenis}-{$tanggal}";
+
+        // Sanitize: replace spaces with dash and remove special characters
+        $name = str_replace(' ', '-', $name);
+        $name = preg_replace('/[^A-Za-z0-9_-]/', '', $name);
+
+        return $name;
     }
 
     public function storePermanentPdf(Perizinan $perizinan): string
@@ -74,18 +99,28 @@ class DocumentRenderService
     private function buildPageCss($preset): string
     {
         $size = 'A4 portrait';
-        $margin = '20mm 20mm 20mm 20mm';
+        $margin = '10mm 10mm 10mm 10mm';
 
         if ($preset) {
-            $paperSize = $preset->paper_size ?: 'a4';
-            $orientation = $preset->orientation ?: 'portrait';
-            $size = "{$paperSize} {$orientation}";
+            $paperSize = strtoupper($preset->paper_size ?: 'a4');
+            $orientation = strtolower($preset->orientation ?: 'portrait');
+
+            if ($paperSize === 'F4') {
+                $size = "210mm 330mm {$orientation}";
+            } else {
+                $size = "{$paperSize} {$orientation}";
+            }
 
             $mt = $preset->margin_top ?: 20;
             $mr = $preset->margin_right ?: 20;
             $mb = $preset->margin_bottom ?: 20;
             $ml = $preset->margin_left ?: 20;
-            $margin = "{$mt}mm {$mr}mm {$mb}mm {$ml}mm";
+
+            // Convert cm to mm if needed (user inputs cm in UI)
+            // But UI says margin (cm) so we should multiply by 10 if we want mm
+            // Currently preset stores it as cm in input-margin-top etc.
+            // Let's check how it's stored in database.
+            $margin = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
 
         return "

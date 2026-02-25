@@ -118,7 +118,8 @@
                     <option value="">Semua Lembaga</option>
                     @foreach($listLembaga as $l)
                       <option value="{{ $l->id }}" {{ request('lembaga_id') == $l->id ? 'selected' : '' }}>
-                        {{ $l->nama_lembaga }}</option>
+                        {{ $l->nama_lembaga }}
+                      </option>
                     @endforeach
                   </select>
                 </div>
@@ -251,6 +252,68 @@
               </div>
             </div>
           @endif
+        </div>
+      </div>
+      <!-- Detailed Submissions Table -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card card-outline card-info shadow-sm border-0">
+            <div class="card-header bg-white d-flex align-items-center">
+              <h3 class="card-title font-weight-bold text-dark"><i class="fas fa-list mr-2 text-info"></i> Daftar
+                Pengajuan
+                Terperinci</h3>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                  <thead class="bg-light">
+                    <tr>
+                      <th class="px-4 text-center" style="width: 50px;">No</th>
+                      <th>Nomor Ajuan</th>
+                      <th>Lembaga</th>
+                      <th>Jenis Perizinan</th>
+                      <th class="text-center">Tanggal</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-right px-4">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @forelse($perizinans as $index => $item)
+                      <tr>
+                        <td class="text-center">{{ $perizinans->firstItem() + $index }}</td>
+                        <td class="font-family-mono small font-weight-bold">{{ $item->nomor_ajuan ?? '-' }}</td>
+                        <td>{{ $item->lembaga ? $item->lembaga->nama_lembaga : '-' }}</td>
+                        <td>{{ $item->jenisPerizinan ? $item->jenisPerizinan->nama : '-' }}</td>
+                        <td class="text-center small">{{ $item->created_at->format('d/m/Y') }}</td>
+                        <td class="text-center">
+                          <span
+                            class="badge badge-{{ \App\Enums\PerizinanStatus::from($item->status)->color() }} px-2 py-1">
+                            {{ \App\Enums\PerizinanStatus::from($item->status)->label() }}
+                          </span>
+                        </td>
+                        <td class="text-right px-4">
+                          <a href="{{ route('super_admin.perizinan.show', $item) }}" class="btn btn-xs btn-info shadow-sm">
+                            <i class="fas fa-eye mr-1"></i> Detail
+                          </a>
+                        </td>
+                      </tr>
+                    @empty
+                      <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">Tidak ada data untuk filter ini.</td>
+                      </tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            @if($perizinans->hasPages())
+              <div class="card-footer bg-white">
+                <div class="float-right">
+                  {{ $perizinans->appends(request()->query())->links() }}
+                </div>
+              </div>
+            @endif
+          </div>
         </div>
       </div>
     </div>
