@@ -123,25 +123,25 @@
           <div class="canvas-container mx-auto shadow-lg mb-5" style="width: {{ $w }}; position: relative;">
             @if($watermarkEnabled && $frameUrl)
               <div class="frame-overlay" style="
-                                        position: absolute;
-                                        top: 0; left: 0; width: 100%; height: 100%;
-                                        pointer-events: none;
-                                        z-index: 10;
-                                        background-image: url('{{ $frameUrl }}');
-                                        background-size: 100% 100%;
-                                        opacity: {{ min($watermarkOpacity * 3, 1.0) }};
-                                      "></div>
+                                                position: absolute;
+                                                top: 0; left: 0; width: 100%; height: 100%;
+                                                pointer-events: none;
+                                                z-index: 10;
+                                                background-image: url('{{ $frameUrl }}');
+                                                background-size: 100% 100%;
+                                                opacity: {{ min($watermarkOpacity * 3, 1.0) }};
+                                              "></div>
             @endif
 
             <div id="editor-canvas" contenteditable="true" class="a4-paper font-serif-doc bg-white border-0"
               style="padding: {{ $padding }}; width: {{ $w }}; min-height: {{ $isLandscape ? '210mm' : '297mm' }};">
               {!! $jenisPerizinan->template_html ?? '
-                                              <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                                                  <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                                                  <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                                                  <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
-                                              </div>
-                                          ' !!}
+                                                  <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                                      <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                                      <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                                      <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
+                                                  </div>
+                                              ' !!}
             </div>
           </div>
         </form>
@@ -426,21 +426,21 @@
 
       function insertSignatureBlock() {
         const block = `
-                  <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
-                    <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
-                      <tr>
-                        <td width="55%"></td>
-                        <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
-                          <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
-                          <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
-                          <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
-                          <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
-                      <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
-                        </td>
-                      </tr>
-                    </table>
-                  </div>
-                `;
+                          <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
+                              <tr>
+                                <td width="55%"></td>
+                                <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
+                                  <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
+                                  <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
+                                  <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
+                                  <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
+                              <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        `;
         document.execCommand('insertHTML', false, block);
         // Trigger processing to convert new variables into badges
         const canvas = document.getElementById('editor-canvas');

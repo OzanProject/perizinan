@@ -285,6 +285,15 @@
                                   Pilih File
                                   <input type="file" name="watermark_img" class="d-none" accept="image/*">
                                 </label>
+                                @if($dinas->watermark_img)
+                                  <form action="{{ route('super_admin.settings.delete_image') }}" method="POST"
+                                    class="d-inline ml-1" onsubmit="return confirm('Hapus watermark tengah?')">
+                                    @csrf
+                                    <input type="hidden" name="field" value="watermark_img">
+                                    <button type="submit" class="btn btn-xs btn-outline-danger"><i
+                                        class="fas fa-trash-alt"></i> Hapus</button>
+                                  </form>
+                                @endif
                               </div>
                               <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: logo kabupaten, lambang
                                 dinas.</p>
@@ -311,6 +320,15 @@
                                   Pilih File
                                   <input type="file" name="watermark_border_img" class="d-none" accept="image/*">
                                 </label>
+                                @if($dinas->watermark_border_img)
+                                  <form action="{{ route('super_admin.settings.delete_image') }}" method="POST"
+                                    class="d-inline ml-1" onsubmit="return confirm('Hapus gambar bingkai?')">
+                                    @csrf
+                                    <input type="hidden" name="field" value="watermark_border_img">
+                                    <button type="submit" class="btn btn-xs btn-outline-danger"><i
+                                        class="fas fa-trash-alt"></i> Hapus</button>
+                                  </form>
+                                @endif
                               </div>
                               <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: ornamen emas, bingkai resmi.
                               </p>
@@ -528,7 +546,8 @@
                             </tr>
                             <tr>
                               <td><code>[WATERMARK_LOGO]</code></td>
-                              <td>{{ $dinas->watermark_img ? '✅ Ada' : ($dinas->logo ? '⚡ Pakai logo' : '❌ Kosong') }}</td>
+                              <td>{{ $dinas->watermark_img ? '✅ Ada' : ($dinas->logo ? '⚡ Pakai logo' : '❌ Kosong') }}
+                              </td>
                             </tr>
                             <tr>
                               <td><code>[STEMPEL_DINAS]</code></td>
@@ -544,9 +563,11 @@
                           <i class="fas fa-puzzle-piece mr-1"></i> Field Custom (dari Form Config)
                         </h6>
                         <div class="bg-white border rounded p-2" style="font-size: 12px;">
-                          <p class="text-muted mb-1">Field yang ditambahkan di Form Config Jenis Perizinan otomatis bisa dipakai:</p>
+                          <p class="text-muted mb-1">Field yang ditambahkan di Form Config Jenis Perizinan otomatis bisa
+                            dipakai:</p>
                           <code>[DATA:NAMA_FIELD]</code> atau <code>[NAMA_FIELD]</code>
-                          <p class="text-muted mb-0 mt-1">Contoh: <code>[DATA:JABATAN]</code>, <code>[DATA:UNIT_KERJA]</code></p>
+                          <p class="text-muted mb-0 mt-1">Contoh: <code>[DATA:JABATAN]</code>,
+                            <code>[DATA:UNIT_KERJA]</code></p>
                         </div>
                       </div>
                     </div>

@@ -115,6 +115,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/cache-clear', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'clearCache'])->name('settings.cache.clear');
         Route::post('/settings/backup', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'backupDb'])->name('settings.backup');
         Route::post('/settings/restore', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'restoreDb'])->name('settings.restore');
+        Route::post('/settings/delete-image', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'deleteImage'])->name('settings.delete_image');
+
     });
 });
 

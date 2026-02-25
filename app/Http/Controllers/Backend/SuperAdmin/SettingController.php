@@ -196,4 +196,25 @@ class SettingController extends Controller
       return back()->with('error', 'Terjadi kesalahan saat memulihkan database: ' . $e->getMessage());
     }
   }
+
+  public function deleteImage(Request $request)
+  {
+    $allowedFields = ['watermark_img', 'watermark_border_img', 'logo', 'stempel_img'];
+    $field = $request->input('field');
+
+    if (!in_array($field, $allowedFields)) {
+      return back()->with('error', 'Field tidak diizinkan untuk dihapus.');
+    }
+
+    $dinas = Auth::user()->dinas;
+
+    if ($dinas->$field) {
+      Storage::disk('public')->delete($dinas->$field);
+      $dinas->$field = null;
+      $dinas->save();
+    }
+
+    return back()->with('success', 'Gambar berhasil dihapus.');
+  }
 }
+
