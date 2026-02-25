@@ -286,13 +286,9 @@
                                   <input type="file" name="watermark_img" class="d-none" accept="image/*">
                                 </label>
                                 @if($dinas->watermark_img)
-                                  <form action="{{ route('super_admin.settings.delete_image') }}" method="POST"
-                                    class="d-inline ml-1" onsubmit="return confirm('Hapus watermark tengah?')">
-                                    @csrf
-                                    <input type="hidden" name="field" value="watermark_img">
-                                    <button type="submit" class="btn btn-xs btn-outline-danger"><i
-                                        class="fas fa-trash-alt"></i> Hapus</button>
-                                  </form>
+                                  <button type="button" onclick="confirmDeleteImage('watermark_img', 'watermark tengah')" class="btn btn-xs btn-outline-danger ml-1">
+                                    <i class="fas fa-trash-alt"></i> Hapus
+                                  </button>
                                 @endif
                               </div>
                               <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: logo kabupaten, lambang
@@ -321,13 +317,9 @@
                                   <input type="file" name="watermark_border_img" class="d-none" accept="image/*">
                                 </label>
                                 @if($dinas->watermark_border_img)
-                                  <form action="{{ route('super_admin.settings.delete_image') }}" method="POST"
-                                    class="d-inline ml-1" onsubmit="return confirm('Hapus gambar bingkai?')">
-                                    @csrf
-                                    <input type="hidden" name="field" value="watermark_border_img">
-                                    <button type="submit" class="btn btn-xs btn-outline-danger"><i
-                                        class="fas fa-trash-alt"></i> Hapus</button>
-                                  </form>
+                                  <button type="button" onclick="confirmDeleteImage('watermark_border_img', 'gambar bingkai')" class="btn btn-xs btn-outline-danger ml-1">
+                                    <i class="fas fa-trash-alt"></i> Hapus
+                                  </button>
                                 @endif
                               </div>
                               <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: ornamen emas, bingkai resmi.
@@ -714,6 +706,13 @@
     </div>
   </div>
 
+  {{-- Hidden form for image deletion to avoid nested forms --}}
+  <form id="delete-image-form" action="{{ route('super_admin.settings.delete_image') }}" method="POST" style="display: none;">
+    @csrf
+    <input type="hidden" name="field" id="delete-field">
+  </form>
+
+
   @push('scripts')
     <script>
       // Image Preview Logic
@@ -781,6 +780,14 @@
       @if($errors->hasAny(['current_password', 'password']))
         $('#tab-security-link').tab('show');
       @endif
+
+      // Delete Image Logic via Hidden Form
+      function confirmDeleteImage(field, label) {
+        if (confirm(`Apakah Anda yakin ingin menghapus ${label}?`)) {
+          document.getElementById('delete-field').value = field;
+          document.getElementById('delete-image-form').submit();
+        }
+      }
     </script>
   @endpush
 @endsection
