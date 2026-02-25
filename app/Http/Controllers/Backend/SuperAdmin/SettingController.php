@@ -69,6 +69,7 @@ class SettingController extends Controller
       'watermark_border_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
       'watermark_enabled' => 'nullable|string', // Checkbox
       'watermark_opacity' => 'required|numeric|min:0.01|max:1',
+      'watermark_border_opacity' => 'required|numeric|min:0.01|max:1',
       'watermark_size' => 'required|integer|min:50|max:1000',
     ]);
 
@@ -84,6 +85,7 @@ class SettingController extends Controller
     $dinas->footer_text = $request->footer_text;
     $dinas->watermark_enabled = $request->has('watermark_enabled');
     $dinas->watermark_opacity = $request->watermark_opacity;
+    $dinas->watermark_border_opacity = $request->watermark_border_opacity;
     $dinas->watermark_size = $request->watermark_size;
 
     if ($request->hasFile('logo')) {

@@ -28,12 +28,14 @@ class Dinas extends Model
     'watermark_border_img',
     'watermark_enabled',
     'watermark_opacity',
+    'watermark_border_opacity',
     'watermark_size',
   ];
 
   protected $casts = [
     'watermark_enabled' => 'boolean',
     'watermark_opacity' => 'float',
+    'watermark_border_opacity' => 'float',
     'watermark_size' => 'integer',
   ];
 

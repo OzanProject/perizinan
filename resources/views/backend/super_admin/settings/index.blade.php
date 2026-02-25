@@ -286,7 +286,8 @@
                                   <input type="file" name="watermark_img" class="d-none" accept="image/*">
                                 </label>
                                 @if($dinas->watermark_img)
-                                  <button type="button" onclick="confirmDeleteImage('watermark_img', 'watermark tengah')" class="btn btn-xs btn-outline-danger ml-1">
+                                  <button type="button" onclick="confirmDeleteImage('watermark_img', 'watermark tengah')"
+                                    class="btn btn-xs btn-outline-danger ml-1">
                                     <i class="fas fa-trash-alt"></i> Hapus
                                   </button>
                                 @endif
@@ -317,7 +318,9 @@
                                   <input type="file" name="watermark_border_img" class="d-none" accept="image/*">
                                 </label>
                                 @if($dinas->watermark_border_img)
-                                  <button type="button" onclick="confirmDeleteImage('watermark_border_img', 'gambar bingkai')" class="btn btn-xs btn-outline-danger ml-1">
+                                  <button type="button"
+                                    onclick="confirmDeleteImage('watermark_border_img', 'gambar bingkai')"
+                                    class="btn btn-xs btn-outline-danger ml-1">
                                     <i class="fas fa-trash-alt"></i> Hapus
                                   </button>
                                 @endif
@@ -342,9 +345,17 @@
                           </div>
                           <div class="col-md-4">
                             <div class="form-group mb-0">
-                              <label class="x-small font-weight-bold text-muted mb-1">Opacity (0.01 - 1.0)</label>
+                              <label class="x-small font-weight-bold text-muted mb-1">Opacity Watermark Tengah</label>
                               <input type="number" name="watermark_opacity" step="0.01" min="0.01" max="1"
                                 value="{{ old('watermark_opacity', $dinas->watermark_opacity ?? 0.05) }}"
+                                class="form-control form-control-sm">
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group mb-0">
+                              <label class="x-small font-weight-bold text-muted mb-1">Opacity Bingkai / Border</label>
+                              <input type="number" name="watermark_border_opacity" step="0.01" min="0.01" max="1"
+                                value="{{ old('watermark_border_opacity', $dinas->watermark_border_opacity ?? 0.2) }}"
                                 class="form-control form-control-sm">
                             </div>
                           </div>
@@ -559,7 +570,8 @@
                             dipakai:</p>
                           <code>[DATA:NAMA_FIELD]</code> atau <code>[NAMA_FIELD]</code>
                           <p class="text-muted mb-0 mt-1">Contoh: <code>[DATA:JABATAN]</code>,
-                            <code>[DATA:UNIT_KERJA]</code></p>
+                            <code>[DATA:UNIT_KERJA]</code>
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -707,7 +719,8 @@
   </div>
 
   {{-- Hidden form for image deletion to avoid nested forms --}}
-  <form id="delete-image-form" action="{{ route('super_admin.settings.delete_image') }}" method="POST" style="display: none;">
+  <form id="delete-image-form" action="{{ route('super_admin.settings.delete_image') }}" method="POST"
+    style="display: none;">
     @csrf
     <input type="hidden" name="field" id="delete-field">
   </form>

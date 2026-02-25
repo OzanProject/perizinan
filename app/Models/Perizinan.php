@@ -271,10 +271,11 @@ class Perizinan extends Model
       // Layer 2: Border/frame decoration (full-page ornament)
       if ($dinas->watermark_border_img) {
         $borderBase64 = $toBase64($dinas->watermark_border_img);
+        $borderOpacity = $dinas->watermark_border_opacity ?? 0.2;
         $template .= '
         <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
                     width: 100%; height: 100%;
-                    opacity: ' . min($wmOpacity * 3, 1.0) . '; z-index: -2;">
+                    opacity: ' . $borderOpacity . '; z-index: -2;">
           <img src="' . $borderBase64 . '" width="100%" height="100%" />
         </div>';
       }

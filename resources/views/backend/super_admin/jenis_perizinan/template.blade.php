@@ -122,8 +122,18 @@
           <input type="hidden" name="template_html" id="template-input">
 
           @php
-            $isLandscape = ($activePreset->orientation ?? 'portrait') == 'landscape';
-            $w = $isLandscape ? '297mm' : '210mm';
+            $paper = $activePreset->paper_size ?? 'A4';
+            $orientation = $activePreset->orientation ?? 'portrait';
+            $isLandscape = $orientation == 'landscape';
+
+            $dims = [
+              'A4' => ['portrait' => ['w' => '210mm', 'h' => '297mm'], 'landscape' => ['w' => '297mm', 'h' => '210mm']],
+              'F4' => ['portrait' => ['w' => '215mm', 'h' => '330mm'], 'landscape' => ['w' => '330mm', 'h' => '215mm']],
+            ];
+
+            $w = $dims[$paper][$orientation]['w'] ?? '210mm';
+            $minH = $dims[$paper][$orientation]['h'] ?? '297mm';
+
             $mt = $activePreset->margin_top ?? 20;
             $mr = $activePreset->margin_right ?? 20;
             $mb = $activePreset->margin_bottom ?? 20;
@@ -131,28 +141,29 @@
             $padding = "{$mt}mm {$mr}mm {$mb}mm {$ml}mm";
           @endphp
 
-          <div class="canvas-container mx-auto shadow-lg mb-5" style="width: {{ $w }}; position: relative;">
+          <div id="canvas-wrapper" class="canvas-container mx-auto shadow-lg mb-5"
+            style="width: {{ $w }}; position: relative; transition: width 0.3s ease;">
             @if($watermarkEnabled && $frameUrl)
               <div id="frame-overlay" class="frame-overlay" style="
-                                                    position: absolute;
-                                                    top: 0; left: 0; width: 100%; height: 100%;
-                                                    pointer-events: none;
-                                                    z-index: 2;
-                                                    background-image: url('{{ $frameUrl }}');
-                                                    background-size: 100% 100%;
-                                                    opacity: {{ min($watermarkOpacity * 3, 1.0) }};
-                                                  "></div>
+                                                            position: absolute;
+                                                            top: 0; left: 0; width: 100%; height: 100%;
+                                                            pointer-events: none;
+                                                            z-index: 2;
+                                                            background-image: url('{{ $frameUrl }}');
+                                                            background-size: 100% 100%;
+                                                            opacity: {{ $dinas->watermark_border_opacity ?? 0.2 }};
+                                                          "></div>
             @endif
 
             <div id="editor-canvas" contenteditable="true" class="a4-paper font-serif-doc bg-white border-0"
-              style="padding: {{ $padding }}; width: {{ $w }}; min-height: {{ $isLandscape ? '210mm' : '297mm' }}; position: relative; z-index: 1;">
+              style="padding: {{ $padding }}; width: 100%; min-height: {{ $minH }}; position: relative; z-index: 1;">
               {!! $jenisPerizinan->template_html ?? '
-                                                    <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                                                        <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                                                        <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                                                        <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
-                                                    </div>
-                                                ' !!}
+                                                        <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                                            <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                                            <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                                            <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
+                                                        </div>
+                                                    ' !!}
             </div>
           </div>
         </form>
@@ -437,21 +448,21 @@
 
       function insertSignatureBlock() {
         const block = `
-                              <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
-                                <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
-                                  <tr>
-                                    <td width="55%"></td>
-                                    <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
-                                      <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
-                                      <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
-                                      <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
-                                      <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
-                                  <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
-                                    </td>
-                                  </tr>
-                                </table>
-                              </div>
-                            `;
+                                      <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
+                                          <tr>
+                                            <td width="55%"></td>
+                                            <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
+                                              <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
+                                              <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
+                                              <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
+                                              <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
+                                          <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      </div>
+                                    `;
         document.execCommand('insertHTML', false, block);
         // Trigger processing to convert new variables into badges
         const canvas = document.getElementById('editor-canvas');
@@ -578,7 +589,30 @@
 
       function applyPreset(key) {
         if (confirm(`Ganti template ini dengan "${presets[key].name}"?`)) {
-          document.getElementById('editor-canvas').innerHTML = processTemplate(presets[key].html);
+          const preset = presets[key];
+          const canvas = document.getElementById('editor-canvas');
+          const wrapper = document.getElementById('canvas-wrapper');
+
+          // 1. Apply HTML
+          canvas.innerHTML = processTemplate(preset.html);
+
+          // 2. Adjust paper size and orientation
+          const paper = preset.paper_size || 'A4';
+          const orientation = preset.orientation || 'portrait';
+
+          const dims = {
+            'A4': { 'portrait': { 'w': '210mm', 'h': '297mm' }, 'landscape': { 'w': '297mm', 'h': '210mm' } },
+            'F4': { 'portrait': { 'w': '215mm', 'h': '330mm' }, 'landscape': { 'w': '330mm', 'h': '215mm' } }
+          };
+
+          const config = dims[paper][orientation];
+          if (config) {
+            wrapper.style.width = config.w;
+            canvas.style.minHeight = config.h;
+            // Update internal padding if needed (resets to 20mm usually for presets)
+            canvas.style.padding = "20mm 20mm 20mm 20mm";
+          }
+
           closePresetModal();
         }
       }

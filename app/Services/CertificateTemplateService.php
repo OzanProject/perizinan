@@ -23,8 +23,10 @@ class CertificateTemplateService
                 'html' => self::getPerubahanAlamat()
             ],
             'heregister' => [
-                'name' => 'HER-REGISTRASI (Landscape + Bingkai Emas)',
-                'description' => 'Format Sertifikat Daftar Ulang berornamen bingkai emas. Landscape.',
+                'name' => 'HER-REGISTRASI (Landscape + Bingkai)',
+                'description' => 'Format Sertifikat Daftar Ulang berornamen bingkai. Landscape F4.',
+                'paper_size' => 'F4',
+                'orientation' => 'landscape',
                 'html' => self::getHerregistrasi()
             ],
             'standar_izin' => [
@@ -264,49 +266,52 @@ class CertificateTemplateService
     private static function getHerregistrasi(): string
     {
         return '
-        <div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; margin: 0; padding: 0; background: transparent; position: relative; width: 100%;">
-            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td width="80" style="vertical-align: middle;">
-                            <img src="[LOGO_DINAS]" width="60" height="60" style="display:block;" onerror="this.style.display=\'none\'">
-                        </td>
-                        <td style="text-align: center; vertical-align: middle;">
-                            <div style="font-size: 13pt; font-weight: bold; text-transform: uppercase;">PEMERINTAH KABUPATEN [KOTA_DINAS]</div>
-                            <div style="font-size: 18pt; font-weight: bold; text-transform: uppercase;">DINAS PENDIDIKAN</div>
-                            <div style="font-size: 9pt;">[ALAMAT_DINAS]</div>
-                        </td>
-                    </tr>
-                </table>
+        <div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.35; margin: 0; padding: 0mm; background: transparent; position: relative; width: 100%; min-height: 200mm;">
+            <div style="text-align: center; margin-bottom: 12px; padding-top: 10px;">
+                <div style="margin-bottom: 8px;">
+                    <img src="[LOGO_DINAS]" width="75" height="75" style="display:inline-block; margin-bottom: 5px;">
+                </div>
+                <div style="font-size: 14pt; font-weight: bold; text-transform: uppercase; line-height: 1.1;">PEMERINTAH KABUPATEN [KOTA_DINAS]</div>
+                <div style="font-size: 20pt; font-weight: bold; text-transform: uppercase; line-height: 1.1;">DINAS PENDIDIKAN</div>
+                <div style="font-size: 10pt; line-height: 1.1; margin-top: 3px;">[ALAMAT_DINAS]</div>
+                <div style="border-bottom: 2px solid #000; margin-top: 10px; margin-left: auto; margin-right: auto; width: 100%;"></div>
             </div>
-            <div style="text-align: center; margin-bottom: 15px;">
-                <div style="font-size: 13pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN DAFTAR ULANG ( HER-REGISTRASI )</div>
-                <div style="font-weight: bold; margin-top: 4px;">Nomor : [NOMOR_SURAT] &nbsp; - Disdik</div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN DAFTAR ULANG ( HER-REGISTRASI )</div>
+                <div style="font-weight: bold; margin-top: 6px;">Nomor : [NOMOR_SURAT] &nbsp;&nbsp; - Disdik</div>
             </div>
-            <div style="margin-bottom: 8px;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</div>
-            <table width="100%" cellpadding="2" cellspacing="0" style="margin-left: 60px; margin-bottom: 12px;">
-                <tr><td width="180">Nama Lembaga</td><td width="10">:</td><td><strong>[NAMA_LEMBAGA]</strong></td></tr>
+
+            <div style="margin-bottom: 10px; padding-left: 30px;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</div>
+            
+            <table width="90%" cellpadding="3" cellspacing="0" style="margin-left: 80px; margin-bottom: 20px;">
+                <tr><td width="200">Nama Lembaga</td><td width="15">:</td><td style="font-weight: bold;">[NAMA_LEMBAGA]</td></tr>
                 <tr><td>Nama Pimpinan</td><td>:</td><td>[DATA:NAMA_PIMPINAN]</td></tr>
                 <tr><td>Nama Penyelenggara</td><td>:</td><td>[DATA:NAMA_PENYELENGGARA]</td></tr>
-                <tr><td>NPSN</td><td>:</td><td>[DATA:NPSN]</td></tr>
+                <tr><td>NPSN</td><td>:</td><td>[NPSN]</td></tr>
                 <tr><td>Kode/ Jenis Pendidikan</td><td>:</td><td>[DATA:JENIS_PENDIDIKAN]</td></tr>
                 <tr><td>Alamat Lembaga</td><td>:</td><td>[ALAMAT_LEMBAGA]</td></tr>
                 <tr><td>Kecamatan</td><td>:</td><td>[DATA:KECAMATAN]</td></tr>
-                <tr><td>Kabupaten</td><td>:</td><td>[DATA:KABUPATEN]</td></tr>
+                <tr><td>Kabupaten</td><td>:</td><td>[KOTA_DINAS]</td></tr>
             </table>
-            <div style="margin-bottom: 5px; margin-left: 60px;">Telah memiliki Izin Pendirian Kepala Dinas Kabupaten [KOTA_DINAS] :</div>
-            <table width="100%" cellpadding="2" cellspacing="0" style="margin-left: 80px; margin-bottom: 12px;">
-                <tr><td width="150">Nomor</td><td width="10">:</td><td>[DATA:SK_NOMOR]</td></tr>
+
+            <div style="margin-bottom: 6px; margin-left: 30px;">Telah memiliki Izin Pendirian Kepala Dinas Kabupaten [KOTA_DINAS] :</div>
+            <table width="50%" cellpadding="3" cellspacing="0" style="margin-left: 100px; margin-bottom: 20px;">
+                <tr><td width="150">Nomor</td><td width="15">:</td><td>[DATA:SK_NOMOR]</td></tr>
                 <tr><td>Tanggal</td><td>:</td><td>[DATA:SK_TANGGAL]</td></tr>
             </table>
-            <div style="text-align: justify; margin-bottom: 20px;">Berdasarkan kelengkapan proposal permohonan izin operasional Lembaga Kursus dan Pelatihan (LKP), LKP tersebut telah melakukan daftar ulang (her-registrasi) pada Bidang Pendidikan Anak Usia Dini (PAUD) dan DIKMAS Dinas Pendidikan Kabupaten [KOTA_DINAS]. Surat keterangan ini berlaku selama 2 ( Dua ) tahun sejak diterbitkan.</div>
-            <table width="100%" cellpadding="0" cellspacing="0">
+
+            <div style="text-align: justify; margin-bottom: 25px; padding-left: 30px; padding-right: 30px;">
+                Berdasarkan kelengkapan proposal permohonan izin operasional Lembaga Kursus dan Pelatihan (LKP), LKP tersebut telah melakukan daftar ulang (her-registrasi) pada Bidang Pendidikan Anak Usia Dini (PAUD) dan DIKMAS Dinas Pendidikan Kabupaten [KOTA_DINAS]. Surat keterangan ini berlaku selama 2 ( Dua ) tahun sejak diterbitkan.
+            </div>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 15px;">
                 <tr>
                     <td width="60%"></td>
                     <td style="text-align: center;">
-                        <div>[KOTA_DINAS], &nbsp; [TANGGAL_TERBIT]</div>
-                        <div style="margin-top: 3px; font-weight: bold; text-transform: uppercase;">KEPALA</div>
-                        <div style="margin-top: 60px; font-weight: bold; text-decoration: underline;">[PIMPINAN_NAMA]</div>
+                        <div style="margin-bottom: 4px;">[KOTA_DINAS], &nbsp; [TANGGAL_TERBIT]</div>
+                        <div style="font-weight: bold; text-transform: uppercase;">KEPALA</div>
+                        <div style="margin-top: 70px; font-weight: bold; text-decoration: underline;">[PIMPINAN_NAMA]</div>
                         <div>[PIMPINAN_PANGKAT]</div>
                         <div>NIP. [PIMPINAN_NIP]</div>
                     </td>
