@@ -264,8 +264,7 @@ class CertificateTemplateService
     private static function getHerregistrasi(): string
     {
         return '
-        <div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; margin: 0; padding: 30px; border: 14px double #C5A028; box-sizing: border-box; position: relative;">
-            <div style="position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px; border: 2px solid #C5A028; pointer-events: none;"></div>
+        <div style="font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; margin: 0; padding: 0; background: transparent; position: relative; width: 100%;">
             <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>

@@ -16,6 +16,10 @@
           </div>
           <div class="col-md-8 text-right">
             <div class="btn-group mr-2">
+              <button type="button" onclick="toggleWatermark()" id="btn-toggle-watermark"
+                class="btn btn-outline-secondary btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-eye-slash mr-1"></i> Sembunyikan Bingkai
+              </button>
               <button type="button" onclick="openPresetModal()" class="btn btn-warning btn-sm shadow-sm font-weight-bold">
                 <i class="fas fa-magic mr-1"></i> Gunakan Preset
               </button>
@@ -94,8 +98,14 @@
               title="Decrease Indent"><i class="fas fa-outdent"></i></button>
             <button type="button" onclick="execCmd('indent')" class="btn btn-link text-dark p-2"
               title="Increase Indent"><i class="fas fa-indent"></i></button>
+            <div class="border-right my-1 mx-1"></div>
             <button type="button" onclick="insertTable()" class="btn btn-link text-dark p-2" title="Table"><i
                 class="fas fa-table"></i></button>
+            <button type="button" onclick="document.getElementById('image-upload').click()"
+              class="btn btn-link text-dark p-2" title="Sisipkan Gambar">
+              <i class="fas fa-image"></i>
+            </button>
+            <input type="file" id="image-upload" style="display: none;" accept="image/*" onchange="insertImage(this)">
           </div>
         </div>
       </div>
@@ -104,7 +114,8 @@
     <!-- Main Workspace -->
     <div class="d-flex bg-light" style="height: calc(100vh - 180px); overflow: hidden;">
       <!-- Canvas Side (Flexible) -->
-      <div class="flex-grow-1 p-5 overflow-auto custom-scrollbar bg-gray-dark border-right shadow-inner">
+      <div class="flex-grow-1 p-5 overflow-auto custom-scrollbar bg-gray-dark border-right shadow-inner"
+        onclick="focusCanvas(event)">
         <form id="template-form" action="{{ route('super_admin.jenis_perizinan.template.update', $jenisPerizinan) }}"
           method="POST">
           @csrf
@@ -122,26 +133,26 @@
 
           <div class="canvas-container mx-auto shadow-lg mb-5" style="width: {{ $w }}; position: relative;">
             @if($watermarkEnabled && $frameUrl)
-              <div class="frame-overlay" style="
-                                                position: absolute;
-                                                top: 0; left: 0; width: 100%; height: 100%;
-                                                pointer-events: none;
-                                                z-index: 10;
-                                                background-image: url('{{ $frameUrl }}');
-                                                background-size: 100% 100%;
-                                                opacity: {{ min($watermarkOpacity * 3, 1.0) }};
-                                              "></div>
+              <div id="frame-overlay" class="frame-overlay" style="
+                                                    position: absolute;
+                                                    top: 0; left: 0; width: 100%; height: 100%;
+                                                    pointer-events: none;
+                                                    z-index: 2;
+                                                    background-image: url('{{ $frameUrl }}');
+                                                    background-size: 100% 100%;
+                                                    opacity: {{ min($watermarkOpacity * 3, 1.0) }};
+                                                  "></div>
             @endif
 
             <div id="editor-canvas" contenteditable="true" class="a4-paper font-serif-doc bg-white border-0"
-              style="padding: {{ $padding }}; width: {{ $w }}; min-height: {{ $isLandscape ? '210mm' : '297mm' }};">
+              style="padding: {{ $padding }}; width: {{ $w }}; min-height: {{ $isLandscape ? '210mm' : '297mm' }}; position: relative; z-index: 1;">
               {!! $jenisPerizinan->template_html ?? '
-                                                  <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                                                      <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                                                      <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                                                      <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
-                                                  </div>
-                                              ' !!}
+                                                    <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                                        <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                                        <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                                        <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
+                                                    </div>
+                                                ' !!}
             </div>
           </div>
         </form>
@@ -426,21 +437,21 @@
 
       function insertSignatureBlock() {
         const block = `
-                          <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
-                            <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
-                              <tr>
-                                <td width="55%"></td>
-                                <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
-                                  <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
-                                  <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
-                                  <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
-                                  <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
-                              <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
-                                </td>
-                              </tr>
-                            </table>
-                          </div>
-                        `;
+                              <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
+                                <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
+                                  <tr>
+                                    <td width="55%"></td>
+                                    <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
+                                      <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
+                                      <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
+                                      <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
+                                      <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
+                                  <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                            `;
         document.execCommand('insertHTML', false, block);
         // Trigger processing to convert new variables into badges
         const canvas = document.getElementById('editor-canvas');
@@ -450,6 +461,42 @@
       function insertTable() {
         let table = '<table style="width:100%;"><tr><td>&nbsp;</td><td>&nbsp;</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p>&nbsp;</p>';
         document.execCommand('insertHTML', false, table);
+      }
+
+      function insertImage(input) {
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const img = `<img src="${e.target.result}" style="max-width: 100%; height: auto; display: block; margin: 10px 0;" alt="Uploaded Image">`;
+            document.execCommand('insertHTML', false, img);
+          }
+          reader.readAsDataURL(input.files[0]);
+          input.value = ''; // Reset input
+        }
+      }
+
+      function toggleWatermark() {
+        const frame = document.getElementById('frame-overlay');
+        const btn = document.getElementById('btn-toggle-watermark');
+        if (frame) {
+          if (frame.style.display === 'none') {
+            frame.style.display = 'block';
+            btn.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> Sembunyikan Bingkai';
+            btn.className = 'btn btn-outline-secondary btn-sm shadow-sm font-weight-bold';
+          } else {
+            frame.style.display = 'none';
+            btn.innerHTML = '<i class="fas fa-eye mr-1"></i> Tampilkan Bingkai';
+            btn.className = 'btn btn-secondary btn-sm shadow-sm font-weight-bold';
+          }
+        }
+      }
+
+      function focusCanvas(e) {
+        // If user clicks on the grey area (not the canvas itself), focus the canvas
+        if (e.target.classList.contains('bg-gray-dark') || e.target.classList.contains('flex-grow-1')) {
+          const canvas = document.getElementById('editor-canvas');
+          canvas.focus();
+        }
       }
 
       const presets = @json($presets);
