@@ -21,13 +21,32 @@ class DocumentRenderService
         return '<!DOCTYPE html><html><head><meta charset="UTF-8">
         <style>
           ' . $pageCss . '
-          body { font-family: DejaVu Sans, sans-serif; font-size: 10.5pt; line-height: 1.1; color: #000; margin: 0; padding: 0; }
+          body { 
+            font-family: DejaVu Sans, sans-serif; 
+            font-size: 10.5pt; 
+            line-height: 1.35; 
+            color: #000; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-print-color-adjust: exact;
+          }
+          .certificate-wrapper {
+            position: relative;
+            width: 100%;
+            height: 99.5%; /* Slight buffer to prevent rounding-error page breaks */
+            overflow: hidden;
+            display: block;
+            box-sizing: border-box;
+          }
           table { border-collapse: collapse; page-break-inside: avoid; }
           td { vertical-align: top; padding: 1px 0; }
           img { max-width: 100%; page-break-inside: avoid; }
-          .signature-block { page-break-inside: avoid; breaks-inside: avoid; margin-top: 5px; }
+          .signature-block { page-break-inside: avoid; margin-top: 10px; }
+          
+          /* Force single page rendering */
+          * { box-sizing: border-box; }
         </style>
-        </head><body>' . $body . '</body></html>';
+        </head><body><div class="certificate-wrapper">' . $body . '</div></body></html>';
     }
 
     public function generatePdf(Perizinan $p, $paperSize = null, $orientation = null)
@@ -111,10 +130,12 @@ class DocumentRenderService
         }
 
         if ($preset) {
-            $mt = $preset->margin_top ?: 20;
-            $mr = $preset->margin_right ?: 20;
-            $mb = $preset->margin_bottom ?: 20;
-            $ml = $preset->margin_left ?: 20;
+            // Use Null Coalesce (??) to allow 0 constant value
+            // Fallback to 1.0 cm if null
+            $mt = $preset->margin_top ?? 1.0;
+            $mr = $preset->margin_right ?? 1.0;
+            $mb = $preset->margin_bottom ?? 1.0;
+            $ml = $preset->margin_left ?? 1.0;
 
             $margin = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
