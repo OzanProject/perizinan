@@ -44,46 +44,76 @@
         </li>
 
         @if(Auth::user()->hasRole('super_admin'))
-          <li class="nav-header">MANAJEMEN DATA</li>
+          <li class="nav-header">DATA UTAMA</li>
           <li class="nav-item">
             <a href="{{ route('super_admin.lembaga.index') }}" class="nav-link {{ request()->routeIs('super_admin.lembaga.index') ? 'active' : '' }}">
               <i class="nav-icon fas fa-university"></i>
               <p>Manajemen Lembaga</p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="{{ route('super_admin.jenis_perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.jenis_perizinan.index') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-list"></i>
-              <p>Jenis Perizinan</p>
-            </a>
-          </li>
 
-          <li class="nav-header">LAYANAN PERIZINAN</li>
-          <li class="nav-item">
-            <a href="{{ route('super_admin.perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.perizinan.index') && request('status') !== 'disetujui' ? 'active' : '' }}">
-              <i class="nav-icon fas fa-file-alt"></i>
-              <p>Daftar Pengajuan</p>
-            </a>
-          </li>
+          <li class="nav-header">MODUL PERIZINAN</li>
+          
+          @php
+            // Logika untuk mendeteksi apakah salah satu sub-menu sedang aktif
+            $isPerizinanActive = request()->routeIs('super_admin.jenis_perizinan.*') || 
+                                 request()->routeIs('super_admin.perizinan.*') || 
+                                 request()->routeIs('super_admin.penerbitan.*');
+          @endphp
 
-          <li class="nav-header">PENERBITAN</li>
-          <li class="nav-item">
-            <a href="{{ route('super_admin.penerbitan.antrian') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.antrian') || request()->routeIs('super_admin.penerbitan.finalisasi') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-hourglass-half"></i>
-              <p>Antrian Cetak</p>
+          <li class="nav-item {{ $isPerizinanActive ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ $isPerizinanActive ? 'active' : '' }}">
+              <i class="nav-icon fas fa-folder-open"></i>
+              <p>
+                Siklus Perizinan
+                <i class="right fas fa-angle-left"></i>
+              </p>
             </a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('super_admin.penerbitan.pusat_cetak') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.pusat_cetak') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-print"></i>
-              <p>Pusat Cetak</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('super_admin.penerbitan.preset.index') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.preset.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-sliders-h"></i>
-              <p>Preset & Layout</p>
-            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{ route('super_admin.jenis_perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.jenis_perizinan.*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon text-warning"></i>
+                  <p>1. Jenis Perizinan</p>
+                </a>
+              </li>
+              
+              <li class="nav-item">
+                <a href="{{ route('super_admin.perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.perizinan.*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon text-info"></i>
+                  <p>2. Daftar Pengajuan</p>
+                </a>
+              </li>
+
+              <li class="nav-item {{ request()->routeIs('super_admin.penerbitan.*') ? 'menu-open' : '' }}">
+                <a href="#" class="nav-link {{ request()->routeIs('super_admin.penerbitan.*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon text-success"></i>
+                  <p>
+                    3. Pusat Penerbitan
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview" style="padding-left: 15px;">
+                  <li class="nav-item">
+                    <a href="{{ route('super_admin.penerbitan.antrian') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.antrian') || request()->routeIs('super_admin.penerbitan.finalisasi') ? 'active' : '' }}">
+                      <i class="fas fa-hourglass-half nav-icon" style="font-size: 12px;"></i>
+                      <p>Antrian Cetak</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('super_admin.penerbitan.pusat_cetak') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.pusat_cetak') ? 'active' : '' }}">
+                      <i class="fas fa-print nav-icon" style="font-size: 12px;"></i>
+                      <p>Pusat Cetak</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{ route('super_admin.penerbitan.preset.index') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.preset.*') ? 'active' : '' }}">
+                      <i class="fas fa-sliders-h nav-icon" style="font-size: 12px;"></i>
+                      <p>Preset & Layout</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
           </li>
 
           <li class="nav-item border-bottom pb-2 mb-2">

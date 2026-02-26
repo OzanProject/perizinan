@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Perizinan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DocumentRenderService
 {
@@ -13,31 +12,79 @@ class DocumentRenderService
     {
         $p->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-        // Use the user-designed template from the template editor
         $body = $p->replaceVariables();
+
+        // =========================================================================
+        // TRIK ANTI-LONCAT 1: PEMBERSIH SPASI GAIB
+        // Menghapus tag <p> kosong atau <br> berlebih di paling bawah dokumen 
+        // yang sering ditambahkan otomatis oleh CKEditor dan memicu halaman ke-2.
+        // =========================================================================
+        $body = preg_replace('/(<p>(&nbsp;|\s|<br\s*\/?>)*<\/p>\s*)+$/i', '', $body);
+        $body = preg_replace('/(<br\s*\/?>\s*)+$/i', '', $body);
 
         $pageCss = $this->buildPageCss($preset, $paperSize, $orientation);
 
-        return '<!DOCTYPE html><html><head><meta charset="UTF-8">
-        <style>
-          ' . $pageCss . '
-          body { 
-            font-family: DejaVu Sans, sans-serif; 
-            font-size: 10pt; 
-            line-height: 1.15; 
-            color: #000; 
-            margin: 0; 
-            padding: 0; 
-          }
-          table { border-collapse: collapse; page-break-inside: avoid; }
-          td { vertical-align: top; padding: 1px 0; }
-          img { max-width: 100%; page-break-inside: avoid; }
-          .signature-block { page-break-inside: avoid; margin-top: 5px; }
-          
-          /* Force single page rendering by allowing hard clipping if needed */
-          html, body { overflow: hidden; }
-        </style>
-        </head><body>' . $body . '</body></html>';
+        // Ambil padding cerdas yang menyesuaikan orientasi kertas
+        $padding = $this->getContentPadding($preset, $orientation);
+
+        return '<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                /* Kertas 0 Margin agar Bingkai Full */
+                ' . $pageCss . '
+                
+                body { 
+                    font-family: "Times New Roman", Times, serif; 
+                    /* TRIK ANTI-LONCAT 2: Font dikecilkan jadi 10.5pt agar tabel muat */
+                    font-size: 10.5pt; 
+                    line-height: 1.15; 
+                    color: #000; 
+                    margin: 0; 
+                    padding: ' . $padding . '; 
+                }
+
+                /* Fix Logo CKEditor */
+                figure { margin: 0; padding: 0; }
+                figure.image {
+                    display: block !important;
+                    width: 100% !important;
+                    text-align: center !important;
+                    margin-bottom: 5px !important;
+                    clear: both !important;
+                }
+                figure.image img {
+                    display: inline-block !important;
+                    margin: 0 auto !important;
+                    max-width: 100%;
+                    height: auto;
+                }
+                .image-style-align-left { text-align: left !important; }
+                .image-style-align-left img { float: left !important; margin-right: 15px !important; }
+                .image-style-align-center { text-align: center !important; }
+                .image-style-align-center img { margin-left: auto !important; margin-right: auto !important; }
+                .image-style-align-right { text-align: right !important; }
+                .image-style-align-right img { float: right !important; margin-left: 15px !important; }
+
+                /* TRIK ANTI-LONCAT 3: Memampatkan jarak margin paragraf */
+                p { clear: both; margin-top: 0; margin-bottom: 4px; }
+                p:last-child { margin-bottom: 0 !important; }
+                div:last-child { margin-bottom: 0 !important; }
+
+                /* Tabel & Tanda Tangan */
+                table { border-collapse: collapse; width: 100%; page-break-inside: avoid; }
+                tr { page-break-inside: avoid; page-break-after: auto; }
+                td { vertical-align: top; padding: 2px 4px; border: none; }
+                
+                /* Tanda tangan tidak boleh terbelah */
+                .signature-block { page-break-inside: avoid; margin-top: 5px; }
+            </style>
+        </head>
+        <body>
+            ' . $body . '
+        </body>
+        </html>';
     }
 
     public function generatePdf(Perizinan $p, $paperSize = null, $orientation = null)
@@ -46,23 +93,25 @@ class DocumentRenderService
             ->where('is_active', true)
             ->first();
 
-        $html = $this->renderHtml($p, $preset, $paperSize, $orientation);
-
-        $paperSize = $paperSize ?: ($preset->paper_size ?? 'a4');
+        // Pastikan orientation terdefinisi agar Smart Padding berfungsi
+        $paperSize = $paperSize ?: ($preset->paper_size ?? 'A4');
         $orientation = $orientation ?: ($preset->orientation ?? 'portrait');
 
-        // DomPDF doesn't natively support F4. We define it manually (210mm x 330mm in points).
-        // 1mm = 2.83465 points
+        $html = $this->renderHtml($p, $preset, $paperSize, $orientation);
+
         if (strtoupper($paperSize) === 'F4') {
-            $paperSize = [0, 0, 595.28, 935.43]; // 210mm x 330mm
+            $paperSizeArray = [0, 0, 595.28, 935.43]; // 210mm x 330mm
+        } else {
+            $paperSizeArray = strtolower($paperSize);
         }
 
         $pdf = Pdf::loadHTML($html)
-            ->setPaper($paperSize, $orientation)
+            ->setPaper($paperSizeArray, $orientation)
             ->setOptions([
                 'isRemoteEnabled' => true,
                 'isHtml5ParserEnabled' => true,
-                'defaultFont' => 'DejaVu Sans',
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 96,
             ]);
 
         $filename = $this->generateStandardFilename($p) . '.pdf';
@@ -73,14 +122,11 @@ class DocumentRenderService
     public function generateStandardFilename(Perizinan $p): string
     {
         $p->load(['lembaga', 'jenisPerizinan']);
-
         $lembaga = $p->lembaga->nama_lembaga ?? 'Lembaga';
         $jenis = $p->jenisPerizinan->nama ?? 'Perizinan';
         $tanggal = date('d-m-Y');
 
         $name = "{$lembaga}-{$jenis}-{$tanggal}";
-
-        // Sanitize: replace spaces with dash and remove special characters
         $name = str_replace(' ', '-', $name);
         $name = preg_replace('/[^A-Za-z0-9_-]/', '', $name);
 
@@ -91,7 +137,10 @@ class DocumentRenderService
     {
         $html = $this->renderHtml($perizinan);
 
-        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait')->setOptions([
+            'isRemoteEnabled' => true,
+            'isHtml5ParserEnabled' => true,
+        ]);
 
         $folder = 'issued_pdfs/' . date('Y/m');
         if (!Storage::disk('local')->exists($folder)) {
@@ -108,10 +157,7 @@ class DocumentRenderService
 
     private function buildPageCss($preset, $paperSizeOverride = null, $orientationOverride = null): string
     {
-        $size = 'A4 portrait';
-        $margin = '10mm 10mm 10mm 10mm';
-
-        $paperSize = strtoupper($paperSizeOverride ?: ($preset->paper_size ?? 'a4'));
+        $paperSize = strtoupper($paperSizeOverride ?: ($preset->paper_size ?? 'A4'));
         $orientation = strtolower($orientationOverride ?: ($preset->orientation ?? 'portrait'));
 
         if ($paperSize === 'F4') {
@@ -120,35 +166,34 @@ class DocumentRenderService
             $size = "{$paperSize} {$orientation}";
         }
 
-        if ($preset) {
-            // Use Null Coalesce (??) to allow 0 constant value
-            // Fallback to 1.0 cm if null
-            $mt = $preset->margin_top ?? 1.0;
-            $mr = $preset->margin_right ?? 1.0;
-            $mb = $preset->margin_bottom ?? 1.0;
-            $ml = $preset->margin_left ?? 1.0;
-
-            $margin = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
-        }
-
         return "
         @page {
             size: {$size};
-            margin: {$margin};
+            margin: 0px; 
         }
         ";
     }
 
-    private function toBase64Public(?string $path): ?string
+    private function getContentPadding($preset, $orientationOverride): string
     {
-        if (!$path || !Storage::disk('public')->exists($path)) {
-            return null;
+        $orientation = strtolower($orientationOverride ?: ($preset->orientation ?? 'portrait'));
+
+        // TRIK ANTI-LONCAT 4: SMART PADDING
+        // Menipiskan batas bawah (margin-bottom) agar teks tidak terdorong ke halaman baru
+        if ($preset) {
+            $mt = $preset->margin_top ?? ($orientation === 'landscape' ? 1.5 : 2.5);
+            $mr = $preset->margin_right ?? ($orientation === 'landscape' ? 2.5 : 3.0);
+            $mb = $preset->margin_bottom ?? ($orientation === 'landscape' ? 1.0 : 1.5); // Sengaja dibuat tipis (1cm) di bawah!
+            $ml = $preset->margin_left ?? ($orientation === 'landscape' ? 2.5 : 3.0);
+
+            return "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
 
-        $fullPath = Storage::disk('public')->path($path);
-        $type = pathinfo($fullPath, PATHINFO_EXTENSION);
-        $data = base64_encode(file_get_contents($fullPath));
+        // Default super aman jika preset tidak di-setting
+        if ($orientation === 'landscape') {
+            return "1.5cm 2.5cm 1.0cm 2.5cm";
+        }
 
-        return "data:image/{$type};base64,{$data}";
+        return "2.5cm 3cm 1.5cm 3cm";
     }
 }

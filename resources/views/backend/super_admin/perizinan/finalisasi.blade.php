@@ -20,6 +20,17 @@
         $width = $height;
         $height = $temp;
     }
+
+    // MENGAMBIL PADDING (SAFE AREA) DARI PRESET AGAR PREVIEW IDENTIK DENGAN PDF
+    if ($activePreset) {
+        $mt = $activePreset->margin_top ?? 2.5;
+        $mr = $activePreset->margin_right ?? 3.0;
+        $mb = $activePreset->margin_bottom ?? 2.0;
+        $ml = $activePreset->margin_left ?? 3.0;
+        $padding = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
+    } else {
+        $padding = "2.5cm 3cm 2cm 3cm";
+    }
 @endphp
 
 @push('styles')
@@ -28,7 +39,6 @@
             display: flex;
             flex-direction: row;
             height: calc(100vh - 57px - 57px);
-            /* Adjust based on header/footer height */
             overflow: hidden;
         }
 
@@ -73,19 +83,53 @@
             margin: 0 auto;
         }
 
+        /* =========================================================
+           CSS FIX UNTUK CANVAS AGAR 100% IDENTIK DENGAN PDF 
+           ========================================================= */
         #certificate-canvas {
             position: relative;
             width: 100%;
             min-height: {{ $height }};
-            background: white;
-            padding: 0;
+            background: transparent;
+            padding: {{ $padding }};
             margin: 0;
+            box-sizing: border-box; 
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.15;
+            color: #000;
         }
 
-        /* Force fixed elements in template (watermarks/borders) to be absolute within the preview canvas */
         #certificate-canvas div[style*="position: fixed"] {
             position: absolute !important;
         }
+
+        #certificate-canvas p { clear: both; margin-top: 2px; margin-bottom: 2px; }
+        #certificate-canvas p:last-child { margin-bottom: 0 !important; }
+        
+        #certificate-canvas table { border-collapse: collapse; width: 100%; }
+        #certificate-canvas td { vertical-align: top; padding: 2px 4px; border: none; }
+
+        #certificate-canvas figure { margin: 0; padding: 0; }
+        #certificate-canvas figure.image {
+            display: block !important;
+            width: 100% !important;
+            text-align: center !important;
+            margin-bottom: 10px !important;
+            clear: both !important;
+        }
+        #certificate-canvas figure.image img {
+            display: inline-block !important;
+            margin: 0 auto !important;
+            max-width: 100%;
+            height: auto;
+        }
+        #certificate-canvas .image-style-align-left { text-align: left !important; }
+        #certificate-canvas .image-style-align-left img { float: left !important; margin-right: 15px !important; }
+        #certificate-canvas .image-style-align-center { text-align: center !important; }
+        #certificate-canvas .image-style-align-center img { margin-left: auto !important; margin-right: auto !important; }
+        #certificate-canvas .image-style-align-right { text-align: right !important; }
+        #certificate-canvas .image-style-align-right img { float: right !important; margin-left: 15px !important; }
 
         @media (max-width: 991.98px) {
             .finalisasi-wrapper {
@@ -93,7 +137,6 @@
                 height: auto;
                 overflow: visible;
             }
-
             .left-panel {
                 width: 100%;
                 border-right: none;
@@ -108,7 +151,6 @@
         enctype="multipart/form-data">
         @csrf
         <div class="finalisasi-wrapper">
-            <!-- Left Panel: Form & Actions -->
             <div class="left-panel">
                 <div class="mb-4">
                     <nav aria-label="breadcrumb">
@@ -122,7 +164,6 @@
                     <p class="text-muted small">Verifikasi data dan terbitkan sertifikat resmi.</p>
                 </div>
 
-                <!-- Applicant Info Section -->
                 <div class="card card-sm mb-4 shadow-sm border">
                     <div class="card-header bg-light py-2 px-3">
                         <h3 class="card-title text-uppercase font-weight-bold small mb-0">Informasi Pemohon</h3>
@@ -145,7 +186,37 @@
                     </div>
                 </div>
 
-                <!-- Custom Input Fields -->
+                @if($perizinan->jenisPerizinan->form_config && count($perizinan->jenisPerizinan->form_config) > 0)
+                    <div class="card card-sm mb-4 shadow-sm border border-info">
+                        <div class="card-header bg-info text-white py-2 px-3 d-flex justify-content-between align-items-center">
+                            <h3 class="card-title text-uppercase font-weight-bold small mb-0">Lengkapi Data Izin</h3>
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="card-body p-3 bg-light">
+                            <p class="small text-muted mb-3">Periksa dan lengkapi data yang masih kosong sebelum dicetak (Spt: Nomor SK Lama, dll).</p>
+                            
+                            @foreach($perizinan->jenisPerizinan->form_config as $field)
+                                @php
+                                    $fieldName = $field['name'];
+                                    $fieldLabel = $field['label'];
+                                    $currentValue = $perizinan->perizinan_data[$fieldName] ?? '';
+                                    if(is_array($currentValue)) {
+                                        $currentValue = implode(', ', $currentValue);
+                                    }
+                                @endphp
+                                <div class="form-group mb-2">
+                                    <label class="font-weight-bold small text-dark mb-1">{{ $fieldLabel }}</label>
+                                    @if(($field['type'] ?? 'text') == 'textarea')
+                                        <textarea name="perizinan_data[{{ $fieldName }}]" class="form-control form-control-sm border" rows="2">{{ $currentValue }}</textarea>
+                                    @else
+                                        <input type="text" name="perizinan_data[{{ $fieldName }}]" class="form-control form-control-sm border" value="{{ $currentValue }}" placeholder="Isi {{ strtolower($fieldLabel) }}...">
+                                    @endif
+                                </div>
+                            @endforeach
+                            <small class="text-danger mt-2 d-block">* Mengubah data di sini akan memperbarui teks di dalam sertifikat secara permanen.</small>
+                        </div>
+                    </div>
+                @endif
                 <div class="form-group mb-4">
                     <label class="font-weight-bold small text-muted text-uppercase mb-2">
                         Nomor Registrasi SK <span class="text-danger">*</span>
@@ -177,7 +248,7 @@
                             <select id="masa_berlaku" name="masa_berlaku" class="form-control custom-select"
                                 onchange="updatePreview()">
                                 @php 
-                                    $defaultMasa = $perizinan->jenisPerizinan->masa_berlaku_nilai . ' ' . $perizinan->jenisPerizinan->masa_berlaku_unit;
+                                    $defaultMasa = ($perizinan->jenisPerizinan->masa_berlaku_nilai ?? 2) . ' ' . ($perizinan->jenisPerizinan->masa_berlaku_unit ?? 'Tahun');
                                 @endphp
                                 <option value="{{ $defaultMasa }}" selected>{{ $defaultMasa }} (Default)</option>
                                 <option value="5 Tahun">5 Tahun</option>
@@ -233,7 +304,6 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Live Preview -->
             <div class="right-panel">
                 <div class="bg-white border-bottom py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="z-index: 5;">
                     <div class="text-muted font-weight-bold small">
@@ -275,15 +345,14 @@
             document.getElementById('pimpinan_jabatan').value = option.dataset.jabatan || '';
             document.getElementById('pimpinan_nip').value = option.dataset.nip || '';
             document.getElementById('pimpinan_pangkat').value = option.dataset.pangkat || '';
-            updatePreview();
         }
 
         function updatePreview() {
-            // Re-render would normally happen via AJAX, but for now we rely on the initial render
-            // and the user can re-open/submit to see final.
+            // Karena perubahan input di sisi kiri baru akan merender PDF setelah disubmit ke Controller,
+            // Maka live preview tidak berubah seketika di Javascript. 
+            // Admin bisa melihat hasil fix-nya setelah menekan "Terbitkan" dan melihat file PDF-nya.
         }
 
-        // Initial load adjustment
         window.addEventListener('load', () => {
             const paper = document.getElementById('preview-paper');
             paper.style.transform = `scale(${currentZoom})`;

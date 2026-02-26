@@ -3,6 +3,208 @@
 @section('title', 'Verifikasi Perizinan')
 @section('breadcrumb', 'Verifikasi Administratif')
 
+@php
+  // AMBIL PENGATURAN PRESET AKTIF UNTUK UKURAN KERTAS & PADDING
+  $activePreset = \App\Models\CetakPreset::where('dinas_id', $perizinan->dinas_id)
+    ->where('is_active', true)
+    ->first();
+
+  $paperSize = strtoupper($activePreset->paper_size ?? 'A4');
+  $orientation = strtolower($activePreset->orientation ?? 'portrait');
+
+  $width = '210mm';
+  $height = '297mm';
+  $isF4 = $paperSize === 'F4';
+
+  if ($isF4) {
+    $width = '215mm';
+    $height = '330mm';
+  }
+
+  if ($orientation === 'landscape') {
+    $temp = $width;
+    $width = $height;
+    $height = $temp;
+  }
+
+  // MENGAMBIL PADDING (SAFE AREA) DARI PRESET AGAR PREVIEW IDENTIK DENGAN PDF
+  if ($activePreset) {
+    $mt = $activePreset->margin_top ?? 2.5;
+    $mr = $activePreset->margin_right ?? 3.0;
+    $mb = $activePreset->margin_bottom ?? 2.0;
+    $ml = $activePreset->margin_left ?? 3.0;
+    $padding = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
+  } else {
+    $padding = "2.5cm 3cm 2cm 3cm";
+  }
+@endphp
+
+@push('styles')
+  <style>
+    /* =========================================================
+             CSS FIX UNTUK KANVAS PRATINJAU DRAFT (IDENTIK PDF)
+             ========================================================= */
+    #draft-preview-canvas {
+      position: relative;
+      background: white;
+      width:
+        {{ $width }}
+      ;
+      min-height:
+        {{ $height }}
+      ;
+      padding:
+        {{ $padding }}
+      ;
+      margin: 0 auto;
+      box-sizing: border-box;
+      /* Agar padding memakan ke dalam, bukan keluar */
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+      transform-origin: top center;
+      transition: transform 0.3s ease;
+
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11pt;
+      line-height: 1.15;
+      color: #000;
+    }
+
+    /* Elemen fixed (seperti bingkai background) menjadi absolute dalam kanvas */
+    #draft-preview-canvas div[style*="position: fixed"] {
+      position: absolute !important;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Fix Spasi Paragraf */
+    #draft-preview-canvas p {
+      clear: both;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    #draft-preview-canvas p:last-child {
+      margin-bottom: 0 !important;
+    }
+
+    /* Fix Tabel */
+    #draft-preview-canvas table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #draft-preview-canvas td {
+      vertical-align: top;
+      padding: 2px 4px;
+      border: none;
+    }
+
+    /* Fix Logo CKEditor (Rata Tengah dll) */
+    #draft-preview-canvas figure {
+      margin: 0;
+      padding: 0;
+    }
+
+    #draft-preview-canvas figure.image {
+      display: block !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin-bottom: 10px !important;
+      clear: both !important;
+    }
+
+    #draft-preview-canvas figure.image img {
+      display: inline-block !important;
+      margin: 0 auto !important;
+      max-width: 100%;
+      height: auto;
+    }
+
+    #draft-preview-canvas .image-style-align-left {
+      text-align: left !important;
+    }
+
+    #draft-preview-canvas .image-style-align-left img {
+      float: left !important;
+      margin-right: 15px !important;
+    }
+
+    #draft-preview-canvas .image-style-align-center {
+      text-align: center !important;
+    }
+
+    #draft-preview-canvas .image-style-align-center img {
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    #draft-preview-canvas .image-style-align-right {
+      text-align: right !important;
+    }
+
+    #draft-preview-canvas .image-style-align-right img {
+      float: right !important;
+      margin-left: 15px !important;
+    }
+
+    .rotate-45 {
+      transform: rotate(-45deg);
+    }
+
+    #chat-container::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #chat-container::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #chat-container::-webkit-scrollbar-thumb {
+      background: #dee2e6;
+      border-radius: 10px;
+    }
+
+    @media print {
+
+      .main-header,
+      .main-sidebar,
+      .card-header,
+      .card-footer,
+      .btn,
+      .modal-header,
+      .card-tools {
+        display: none !important;
+      }
+
+      .content-wrapper {
+        margin-left: 0 !important;
+        padding: 0 !important;
+      }
+
+      #draft-preview-canvas {
+        transform: scale(1) !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+
+      .modal {
+        position: static !important;
+        overflow: visible !important;
+      }
+
+      .modal-dialog {
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+    }
+  </style>
+@endpush
+
 @section('content')
   <div class="container-fluid">
     <div class="row">
@@ -28,7 +230,6 @@
           </div>
           <div class="card-body">
             <div class="tab-content">
-              <!-- Tab Content: Data Lembaga -->
               <div class="tab-pane fade show active" id="tab-data-lembaga" role="tabpanel">
                 <div class="card card-info card-outline">
                   <div class="card-header">
@@ -108,7 +309,6 @@
                 </div>
               </div>
 
-              <!-- Tab Content: Diskusi -->
               <div class="tab-pane fade" id="tab-diskusi" role="tabpanel">
                 <div class="card direct-chat direct-chat-primary shadow-none border-0 mb-0">
                   <div class="card-body">
@@ -167,7 +367,6 @@
         </div>
       </div>
 
-      <!-- Sidebar Actions -->
       <div class="col-md-4">
         <div class="card card-{{ \App\Enums\PerizinanStatus::from($perizinan->status)->color() }} card-outline shadow-sm">
           <div class="card-header">
@@ -236,7 +435,6 @@
     </div>
   </div>
 
-  <!-- Modal Catatan Perbaikan -->
   <div class="modal fade" id="modalRevision" tabindex="-1" role="dialog" aria-labelledby="modalRevisionLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -271,16 +469,17 @@
     </div>
   </div>
 
-  <!-- Modal Print Draft -->
   <div class="modal fade" id="modalPrintDraft" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
       <div class="modal-content bg-light">
         <div class="modal-header bg-white shadow-sm py-3 px-4 position-sticky" style="top: 0; z-index: 10;">
           <div>
-            <h5 class="modal-title font-weight-bold text-dark text-uppercase"><i
-                class="fas fa-print mr-2 text-primary"></i> Pratinjau Draft Sertifikat</h5>
-            <p class="mb-0 small text-muted font-weight-bold uppercase tracking-widest">Dokumen ini belum bersifat resmi
-              (Watermarked)</p>
+            <h5 class="modal-title font-weight-bold text-dark text-uppercase">
+              <i class="fas fa-print mr-2 text-primary"></i> Pratinjau Draft Sertifikat
+            </h5>
+            <p class="mb-0 small text-muted font-weight-bold uppercase tracking-widest">
+              Dokumen ini belum bersifat resmi (Watermarked) - {{ $paperSize }} {{ strtoupper($orientation) }}
+            </p>
           </div>
           <div class="ml-auto d-flex align-items-center">
             <div class="btn-group mr-3 border rounded shadow-sm">
@@ -291,26 +490,23 @@
               <button type="button" class="btn btn-light btn-sm" onclick="zoomDraft(0.1)"><i
                   class="fas fa-plus"></i></button>
             </div>
-            <button type="button" class="btn btn-primary font-weight-bold shadow-sm mr-2" onclick="window.print()">
-              <i class="fas fa-print mr-2"></i> Cetak
-            </button>
             <button type="button" class="btn btn-tool" data-dismiss="modal">
               <i class="fas fa-times fa-lg"></i>
             </button>
           </div>
         </div>
-        <div class="modal-body p-5 d-flex justify-content-center bg-gray-dark">
-          <div id="draft-preview-canvas" class="bg-white shadow-lg origin-top"
-            style="width: 794px; min-height: 1123px; transform: scale(0.8);">
-            <div class="p-5 position-relative overflow-hidden">
-              <div
-                class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center opacity-1 rotate-45 select-none pointer-events-none"
-                style="z-index: 99; color: rgba(200,200,200,0.1); font-size: 100px; font-weight: 900;">
-                WADAH DRAFT
-              </div>
-              {!! $perizinan->rendered_template !!}
+        <div class="modal-body p-5 d-flex justify-content-center bg-gray-dark" style="overflow-x: auto;">
+
+          <div id="draft-preview-canvas" style="transform: scale(0.8);">
+            <div
+              class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center opacity-1 rotate-45 select-none pointer-events-none"
+              style="z-index: 99; color: rgba(200,200,200,0.3); font-size: 80px; font-weight: 900; top:0; left:0;">
+              WADAH DRAFT
             </div>
+
+            {!! $perizinan->rendered_template !!}
           </div>
+
         </div>
       </div>
     </div>
@@ -342,102 +538,5 @@
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
       });
     </script>
-    <style>
-      .rotate-45 {
-        transform: rotate(-45deg);
-      }
-
-      #draft-preview-canvas .position-relative {
-        position: relative !important;
-      }
-
-      /* Force fixed elements in template (watermarks/borders) to be absolute within the preview canvas */
-      #draft-preview-canvas div[style*="position: fixed"] {
-        position: absolute !important;
-      }
-
-      @media print {
-
-        .main-header,
-        .main-sidebar,
-        .card-header,
-        .card-footer,
-        .btn,
-        .modal-header,
-        .card-tools {
-          display: none !important;
-        }
-
-        .content-wrapper {
-          margin-left: 0 !important;
-          padding: 0 !important;
-        }
-
-        #draft-preview-canvas {
-          transform: scale(1) !important;
-          margin: 0 !important;
-          box-shadow: none !important;
-          border: none !important;
-        }
-
-        .modal {
-          position: static !important;
-          overflow: visible !important;
-        }
-
-        .modal-dialog {
-          max-width: 100% !important;
-          margin: 0 !important;
-        }
-      }
-
-      #chat-container::-webkit-scrollbar {
-        width: 4px;
-      }
-
-      #chat-container::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      #chat-container::-webkit-scrollbar-thumb {
-        background: #dee2e6;
-        border-radius: 10px;
-      }
-
-      @media print {
-
-        .main-header,
-        .main-sidebar,
-        .card-header,
-        .card-footer,
-        .btn,
-        .modal-header,
-        .card-tools {
-          display: none !important;
-        }
-
-        .content-wrapper {
-          margin-left: 0 !important;
-          padding: 0 !important;
-        }
-
-        #draft-preview-canvas {
-          transform: scale(1) !important;
-          margin: 0 !important;
-          box-shadow: none !important;
-          border: none !important;
-        }
-
-        .modal {
-          position: static !important;
-          overflow: visible !important;
-        }
-
-        .modal-dialog {
-          max-width: 100% !important;
-          margin: 0 !important;
-        }
-      }
-    </style>
   @endpush
 @endsection

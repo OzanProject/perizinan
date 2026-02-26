@@ -38,7 +38,7 @@
               </li>
               <li class="list-group-item px-0">
                 <b>Dinas</b> <a class="float-right text-dark truncate d-inline-block" style="max-width: 150px;"
-                  title="{{ $user->dinas->nama }}">{{ $user->dinas->nama }}</a>
+                  title="{{ $user->dinas->nama ?? 'Dinas Belum Diatur' }}">{{ $user->dinas->nama ?? 'Belum Diatur' }}</a>
               </li>
             </ul>
           </div>

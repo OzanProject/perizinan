@@ -162,6 +162,7 @@ class Perizinan extends Model
     };
 
     // 1. Map Core Global Variables (Always active)
+    // DISINI PERUBAHANNYA: inline-block ditambahkan agar gambar mengikuti align CKEditor
     $globalVars = [
       '[NOMOR_SURAT]' => $this->nomor_surat ?? '............................',
       '[TANGGAL_TERBIT]' => $this->tanggal_terbit ? $this->tanggal_terbit->translatedFormat('d F Y') : '............................',
@@ -177,9 +178,11 @@ class Perizinan extends Model
       '[PIMPINAN_JABATAN]' => $this->pimpinan_jabatan ?: ($dinas->pimpinan_jabatan ?: 'KEPALA DINAS PENDIDIKAN'),
       '[PIMPINAN_PANGKAT]' => $this->pimpinan_pangkat ?: ($dinas->pimpinan_pangkat ?? ''),
       '[PIMPINAN_NIP]' => $this->pimpinan_nip ?: ($dinas->pimpinan_nip ?: '............................'),
-      '[LOGO_DINAS]' => '<img src="' . $toBase64($dinas->logo) . '" width="70" height="70" style="display:block;">',
-      '[WATERMARK_LOGO]' => '<img src="' . $toBase64($dinas->watermark_img ?: $dinas->logo) . '" width="70" height="70">',
-      '[STEMPEL_DINAS]' => '<img src="' . $toBase64($this->stempel_img ?? $dinas->stempel_img) . '" width="80" height="80">',
+
+      // Perbaikan inline-block
+      '[LOGO_DINAS]' => '<img src="' . $toBase64($dinas->logo) . '" width="70" height="70" style="display:inline-block; max-width:100%;">',
+      '[WATERMARK_LOGO]' => '<img src="' . $toBase64($dinas->watermark_img ?: $dinas->logo) . '" width="70" height="70" style="display:inline-block; max-width:100%;">',
+      '[STEMPEL_DINAS]' => '<img src="' . $toBase64($this->stempel_img ?? $dinas->stempel_img) . '" width="80" height="80" style="display:inline-block; max-width:100%;">',
     ];
 
     // Helper: Build dynamic TTL if exists in data
@@ -202,7 +205,6 @@ class Perizinan extends Model
     }
 
     // Defensive: Handle <img> tags with onerror for any remaining or custom images
-    // This ensures if a placeholder results in empty/invalid src, it doesn't break layout
     if (str_contains($template, '<img')) {
       $template = preg_replace('/<img([^>]+)>/i', '<img$1 onerror="this.style.display=\'none\';">', $template);
     }
@@ -214,10 +216,12 @@ class Perizinan extends Model
         $label = $field['label'] ?? '';
         $val = $data[$key] ?? '';
 
-        if (is_array($val))
+        if (is_array($val)) {
           $val = implode(', ', $val);
-        if (!$val)
+        }
+        if (!$val) {
           $val = '................';
+        }
 
         // A. Direct Replacement by [DATA:key] or [key] (Standard)
         $template = str_ireplace('[DATA:' . strtoupper($key) . ']', $val, $template);
@@ -225,19 +229,12 @@ class Perizinan extends Model
         $template = str_ireplace('[' . strtoupper($key) . ']', $val, $template);
 
         // B. Instant Replacement by Label (Zero-Placeholder Logic)
-        // Matches: "Nama :" or "Nama  :" or "Nama:......" or "Nama: "
         if ($label) {
           $safeLabel = preg_quote($label, '/');
-          // Pattern: Label followed by optional whitespace, colon, then optional whitespace and dots
           $pattern = "/({$safeLabel}\s*:\s*[.\s]*)/i";
 
-          // We want to keep the label and colon, then put the value
-          // But if it's already a complex HTML, we be careful.
-          // Simple replace:
           $template = preg_replace($pattern, "{$label} : <strong>{$val}</strong>", $template);
 
-          // Also match naked Label if it is inside a table cell or similar tagged area
-          // But we prioritize the colon version for safety.
           $template = str_ireplace('[' . strtoupper($label) . ']', $val, $template);
           $template = str_ireplace('[' . $label . ']', $val, $template);
         }
@@ -258,29 +255,27 @@ class Perizinan extends Model
       $wmImg = $dinas->watermark_img ?: $dinas->logo;
       if ($wmImg) {
         $wmBase64 = $toBase64($wmImg);
-        // DomPDF doesn't support transform, use fixed position with negative margins to center
         $template .= '
-        <div style="position: fixed; top: 50%; left: 50%;
-                    width: ' . $wmSize . 'px; height: ' . $wmSize . 'px;
-                    margin-top: -' . $halfSize . 'px; margin-left: -' . $halfSize . 'px;
-                    opacity: ' . $wmOpacity . '; z-index: -1;">
-          <img src="' . $wmBase64 . '" width="' . $wmSize . '" height="' . $wmSize . '" />
-        </div>';
+                <div style="position: fixed; top: 50%; left: 50%;
+                            width: ' . $wmSize . 'px; height: ' . $wmSize . 'px;
+                            margin-top: -' . $halfSize . 'px; margin-left: -' . $halfSize . 'px;
+                            opacity: ' . $wmOpacity . '; z-index: -1;">
+                  <img src="' . $wmBase64 . '" width="' . $wmSize . '" height="' . $wmSize . '" />
+                </div>';
       }
 
       // Layer 2: Border/frame decoration (full-page ornament)
-      // Now dynamic: uses the configuration from the permit type
       $useBorder = $this->jenisPerizinan->use_border ?? false;
 
       if ($dinas->watermark_border_img && $useBorder) {
         $borderBase64 = $toBase64($dinas->watermark_border_img);
         $borderOpacity = $dinas->watermark_border_opacity ?? 0.2;
         $template .= '
-        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    width: 100%; height: 100%;
-                    opacity: ' . $borderOpacity . '; z-index: -2;">
-          <img src="' . $borderBase64 . '" width="100%" height="100%" />
-        </div>';
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                            width: 100%; height: 100%;
+                            opacity: ' . $borderOpacity . '; z-index: -2;">
+                  <img src="' . $borderBase64 . '" width="100%" height="100%" style="object-fit:cover;" />
+                </div>';
       }
     }
 
@@ -319,8 +314,9 @@ class Perizinan extends Model
       foreach ($formConfig as $field) {
         $label = $field['label'] ?? '';
         $val = $data[$field['name'] ?? ''] ?? '................';
-        if (is_array($val))
+        if (is_array($val)) {
           $val = implode(', ', $val);
+        }
         $html .= "<tr><td style='padding: 5px;'>{$label}</td><td>:</td><td style='padding: 5px; font-weight: bold;'>{$val}</td></tr>";
       }
     }

@@ -17,8 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleAndPermissionSeeder::class,
+            DinasSeeder::class,
             LembagaSeeder::class,
         ]);
+
+        $dinas = \App\Models\Dinas::first();
 
         // Create initial Super Admin if not exists
         if (!User::where('email', 'admin@dinas.go.id')->exists()) {
@@ -26,6 +29,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Super Admin Dinas',
                 'email' => 'admin@dinas.go.id',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'dinas_id' => $dinas?->id,
             ]);
             $user->assignRole('super_admin');
         }
