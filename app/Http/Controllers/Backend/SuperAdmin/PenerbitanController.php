@@ -107,15 +107,19 @@ class PenerbitanController extends Controller
     ]);
   }
 
-  public function exportPdf(Perizinan $perizinan)
+  public function exportPdf(Request $request, Perizinan $perizinan)
   {
     $this->authorize('view', $perizinan);
 
-    // This service now handles active presets automatically
-    return $this->renderService->generatePdf($perizinan);
+    // Accept overrides for paper size and orientation
+    $paperSize = $request->query('paper_size');
+    $orientation = $request->query('orientation');
+
+    // This service now handles active presets and overrides
+    return $this->renderService->generatePdf($perizinan, $paperSize, $orientation);
   }
 
-  public function exportWord(Perizinan $perizinan)
+  public function exportWord(Request $request, Perizinan $perizinan)
   {
     $this->authorize('view', $perizinan);
 
@@ -131,11 +135,11 @@ class PenerbitanController extends Controller
     $margins = '1cm';
 
     if ($activePreset) {
-      $paperSize = strtoupper($activePreset->paper_size);
-      $orientation = strtolower($activePreset->orientation);
+      $paperSize = $request->query('paper_size') ?: strtoupper($activePreset->paper_size);
+      $orientation = $request->query('orientation') ?: strtolower($activePreset->orientation);
 
       // Map "F4" to dimensions for Word CSS
-      if ($paperSize === 'F4') {
+      if (strtoupper($paperSize) === 'F4') {
         $paperSize = '21.5cm 33.0cm';
       }
 
@@ -144,10 +148,23 @@ class PenerbitanController extends Controller
       $mb = $activePreset->margin_bottom ?? 1.0;
       $ml = $activePreset->margin_left ?? 1.0;
       $margins = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
+    } else {
+      // Fallback for overrides without preset
+      $paperSize = $request->query('paper_size') ?: $paperSize;
+      $orientation = $request->query('orientation') ?: $orientation;
+      if (strtoupper($paperSize) === 'F4') {
+        $paperSize = '21.5cm 33.0cm';
+      }
     }
 
     // Use the user-designed template from template editor
     $finalHtml = $perizinan->replaceVariables();
+
+    // Inject Page CSS for Word
+    $htmlWithLayout = '
+    <div class="word-page" style="page: word-page;">
+        ' . $finalHtml . '
+    </div>';
 
     $filename = $this->renderService->generateStandardFilename($perizinan) . '.doc';
 
@@ -179,7 +196,7 @@ class PenerbitanController extends Controller
         .signature-block { page-break-inside: avoid; }
       </style>
     </head>
-    <body>' . $finalHtml . '</body>
+    <body>' . $htmlWithLayout . '</body>
     </html>';
 
     return response($wordHtml)

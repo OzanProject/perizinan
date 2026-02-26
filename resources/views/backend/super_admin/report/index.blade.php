@@ -178,11 +178,11 @@
             <h3 class="card-title font-weight-bold text-dark"><i class="fas fa-table mr-2 text-primary"></i> Statistik
               Aktivitas Lembaga</h3>
             <div class="card-tools">
-              <a href="{{ route('super_admin.laporan.export_excel') }}"
+              <a href="{{ route('super_admin.laporan.export_excel', request()->query()) }}"
                 class="btn btn-success btn-sm shadow-sm font-weight-bold mr-2">
                 <i class="fas fa-file-excel mr-1"></i> Excel
               </a>
-              <a href="{{ route('super_admin.laporan.export_pdf') }}"
+              <a href="{{ route('super_admin.laporan.export_pdf', request()->query()) }}"
                 class="btn btn-danger btn-sm shadow-sm font-weight-bold">
                 <i class="fas fa-file-pdf mr-1"></i> PDF
               </a>

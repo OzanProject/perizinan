@@ -28,11 +28,31 @@ class PerizinanController extends Controller
     $query = Perizinan::where('dinas_id', Auth::user()->dinas_id)
       ->with(['lembaga', 'jenisPerizinan']);
 
-    if ($request->has('status')) {
+    // Dynamic Search (ID, Institution Name, NPSN)
+    if ($request->filled('search')) {
+      $search = $request->search;
+      $query->where(function ($q) use ($search) {
+        $q->whereHas('lembaga', function ($ql) use ($search) {
+          $ql->where('nama_lembaga', 'like', "%{$search}%")
+            ->orWhere('npsn', 'like', "%{$search}%");
+        })->orWhere('id', 'like', "%{$search}%");
+      });
+    }
+
+    // Date Range Filter
+    if ($request->filled('start_date')) {
+      $query->whereDate('created_at', '>=', $request->start_date);
+    }
+    if ($request->filled('end_date')) {
+      $query->whereDate('created_at', '<=', $request->end_date);
+    }
+
+    // Status Filter
+    if ($request->filled('status')) {
       $query->where('status', $request->status);
     }
 
-    $perizinans = $query->latest()->get();
+    $perizinans = $query->latest()->paginate(15)->withQueryString();
 
     return view('backend.super_admin.perizinan.index', compact('perizinans'));
   }

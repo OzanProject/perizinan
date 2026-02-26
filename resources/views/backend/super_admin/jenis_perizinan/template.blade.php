@@ -16,6 +16,13 @@
           </div>
           <div class="col-md-8 text-right">
             <div class="btn-group mr-2">
+              <div class="custom-control custom-checkbox d-inline-flex align-items-center mr-3 bg-white px-2 rounded border shadow-sm" style="height: 31px;">
+                <input type="checkbox" class="custom-control-input" id="use-border-checkbox"
+                  {{ ($jenisPerizinan->use_border ?? false) ? 'checked' : '' }}>
+                <label class="custom-control-label small font-weight-bold text-dark pt-1" for="use-border-checkbox" style="cursor: pointer;">
+                  Gunakan Bingkai
+                </label>
+              </div>
               <button type="button" onclick="toggleWatermark()" id="btn-toggle-watermark"
                 class="btn btn-outline-secondary btn-sm shadow-sm font-weight-bold">
                 <i class="fas fa-eye-slash mr-1"></i> Sembunyikan Bingkai
@@ -120,6 +127,8 @@
           method="POST">
           @csrf
           <input type="hidden" name="template_html" id="template-input">
+          <input type="hidden" name="use_border" id="use-border-input"
+            value="{{ $jenisPerizinan->use_border ? '1' : '0' }}">
 
           @php
             $paper = $activePreset->paper_size ?? 'A4';
@@ -139,31 +148,34 @@
             $mb = $activePreset->margin_bottom ?? 20;
             $ml = $activePreset->margin_left ?? 20;
             $padding = "{$mt}mm {$mr}mm {$mb}mm {$ml}mm";
+
+            $isHerreg = $jenisPerizinan->use_border;
           @endphp
 
           <div id="canvas-wrapper" class="canvas-container mx-auto shadow-lg mb-5"
             style="width: {{ $w }}; position: relative; transition: width 0.3s ease;">
-            @if($watermarkEnabled && $frameUrl)
+            @if($frameUrl)
               <div id="frame-overlay" class="frame-overlay" style="
-                                                            position: absolute;
-                                                            top: 0; left: 0; width: 100%; height: 100%;
-                                                            pointer-events: none;
-                                                            z-index: 2;
-                                                            background-image: url('{{ $frameUrl }}');
-                                                            background-size: 100% 100%;
-                                                            opacity: {{ $dinas->watermark_border_opacity ?? 0.2 }};
-                                                          "></div>
+                                                                position: absolute;
+                                                                top: 0; left: 0; width: 100%; height: 100%;
+                                                                pointer-events: none;
+                                                                z-index: 2;
+                                                                background-image: url('{{ $frameUrl }}');
+                                                                background-size: 100% 100%;
+                                                                opacity: {{ $dinas->watermark_border_opacity ?? 0.2 }};
+                                                                display: {{ ($watermarkEnabled && $isHerreg) ? 'block' : 'none' }};
+                                                              "></div>
             @endif
 
             <div id="editor-canvas" contenteditable="true" class="a4-paper font-serif-doc bg-white border-0"
               style="padding: {{ $padding }}; width: 100%; min-height: {{ $minH }}; position: relative; z-index: 1;">
               {!! $jenisPerizinan->template_html ?? '
-                                                        <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
-                                                            <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
-                                                            <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
-                                                            <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
-                                                        </div>
-                                                    ' !!}
+                                                          <div class="text-center" style="border-bottom: 4px double black; padding-bottom: 15px; margin-bottom: 25px;">
+                                                              <h3 style="font-weight: bold; text-transform: uppercase;">Pemerintah Kabupaten Suka Maju</h3>
+                                                              <h2 style="font-weight: bold; text-transform: uppercase;">Dinas Pendidikan dan Kebudayaan</h2>
+                                                              <p style="margin: 0;">Jl. Contoh Alamat No. 123, Telp: (0262) 123456</p>
+                                                          </div>
+                                                      ' !!}
             </div>
           </div>
         </form>
@@ -448,21 +460,21 @@
 
       function insertSignatureBlock() {
         const block = `
-                                      <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
-                                          <tr>
-                                            <td width="55%"></td>
-                                            <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
-                                              <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
-                                              <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
-                                              <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
-                                              <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
-                                          <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
-                                            </td>
-                                          </tr>
-                                        </table>
-                                      </div>
-                                    `;
+                                          <div class="signature-block" style="page-break-inside: avoid; margin-top: 5px;">
+                                            <table width="100%" cellpadding="0" cellspacing="0" style="border: none;">
+                                              <tr>
+                                                <td width="55%"></td>
+                                                <td width="45%" style="text-align:center; font-size: 10pt; line-height: 1.1;">
+                                                  <div>[KOTA_DINAS], [TANGGAL_TERBIT]</div>
+                                                  <div style="margin-top:2px; font-weight:bold; text-transform:uppercase;">KEPALA</div>
+                                                  <div style="margin-top:35px; font-weight:bold;">[PIMPINAN_NAMA]</div>
+                                                  <div style="font-weight:bold;">[PIMPINAN_PANGKAT]</div>
+                                              <div style="margin-top: 1px;">NIP. [PIMPINAN_NIP]</div>
+                                                </td>
+                                              </tr>
+                                            </table>
+                                          </div>
+                                        `;
         document.execCommand('insertHTML', false, block);
         // Trigger processing to convert new variables into badges
         const canvas = document.getElementById('editor-canvas');
@@ -584,6 +596,11 @@
         const canvas = document.getElementById('editor-canvas');
         const content = revertTemplate(canvas.innerHTML);
         document.getElementById('template-input').value = content;
+
+        // Sync border checkbox to hidden input before submit
+        const useBorderCheckbox = document.getElementById('use-border-checkbox');
+        document.getElementById('use-border-input').value = useBorderCheckbox.checked ? '1' : '0';
+
         document.getElementById('template-form').submit();
       }
 
@@ -613,6 +630,16 @@
             canvas.style.padding = "20mm 20mm 20mm 20mm";
           }
 
+          // 3. Auto-enable border for HER-REGISTRASI (if use_border is not already on)
+          if (key === 'heregister') {
+            const cb = document.getElementById('use-border-checkbox');
+            if (cb) {
+              cb.checked = true;
+              const frame = document.getElementById('frame-overlay');
+              if (frame) frame.style.display = 'block';
+            }
+          }
+
           closePresetModal();
         }
       }
@@ -622,6 +649,24 @@
         if (canvas) {
           canvas.innerHTML = processTemplate(canvas.innerHTML);
           canvas.focus();
+        }
+
+        // Add Listener for Use Border Checkbox
+        const useBorderCheckbox = document.getElementById('use-border-checkbox');
+        if (useBorderCheckbox) {
+          useBorderCheckbox.addEventListener('change', function () {
+            const frame = document.getElementById('frame-overlay');
+            const btn = document.getElementById('btn-toggle-watermark');
+            if (frame) {
+              if (this.checked) {
+                frame.style.display = 'block';
+                if (btn) btn.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> Sembunyikan Bingkai';
+              } else {
+                frame.style.display = 'none';
+                if (btn) btn.innerHTML = '<i class="fas fa-eye mr-1"></i> Tampilkan Bingkai';
+              }
+            }
+          });
         }
       });
 

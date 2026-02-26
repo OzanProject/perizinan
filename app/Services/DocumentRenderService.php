@@ -9,14 +9,14 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DocumentRenderService
 {
-    public function renderHtml(Perizinan $p, $preset = null): string
+    public function renderHtml(Perizinan $p, $preset = null, $paperSize = null, $orientation = null): string
     {
         $p->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
         // Use the user-designed template from the template editor
         $body = $p->replaceVariables();
 
-        $pageCss = $this->buildPageCss($preset);
+        $pageCss = $this->buildPageCss($preset, $paperSize, $orientation);
 
         return '<!DOCTYPE html><html><head><meta charset="UTF-8">
         <style>
@@ -30,16 +30,16 @@ class DocumentRenderService
         </head><body>' . $body . '</body></html>';
     }
 
-    public function generatePdf(Perizinan $p)
+    public function generatePdf(Perizinan $p, $paperSize = null, $orientation = null)
     {
         $preset = \App\Models\CetakPreset::where('dinas_id', $p->dinas_id)
             ->where('is_active', true)
             ->first();
 
-        $html = $this->renderHtml($p, $preset);
+        $html = $this->renderHtml($p, $preset, $paperSize, $orientation);
 
-        $paperSize = $preset->paper_size ?? 'a4';
-        $orientation = $preset->orientation ?? 'portrait';
+        $paperSize = $paperSize ?: ($preset->paper_size ?? 'a4');
+        $orientation = $orientation ?: ($preset->orientation ?? 'portrait');
 
         // DomPDF doesn't natively support F4. We define it manually (210mm x 330mm in points).
         // 1mm = 2.83465 points
@@ -96,30 +96,26 @@ class DocumentRenderService
         return $path;
     }
 
-    private function buildPageCss($preset): string
+    private function buildPageCss($preset, $paperSizeOverride = null, $orientationOverride = null): string
     {
         $size = 'A4 portrait';
         $margin = '10mm 10mm 10mm 10mm';
 
+        $paperSize = strtoupper($paperSizeOverride ?: ($preset->paper_size ?? 'a4'));
+        $orientation = strtolower($orientationOverride ?: ($preset->orientation ?? 'portrait'));
+
+        if ($paperSize === 'F4') {
+            $size = "210mm 330mm {$orientation}";
+        } else {
+            $size = "{$paperSize} {$orientation}";
+        }
+
         if ($preset) {
-            $paperSize = strtoupper($preset->paper_size ?: 'a4');
-            $orientation = strtolower($preset->orientation ?: 'portrait');
-
-            if ($paperSize === 'F4') {
-                $size = "210mm 330mm {$orientation}";
-            } else {
-                $size = "{$paperSize} {$orientation}";
-            }
-
             $mt = $preset->margin_top ?: 20;
             $mr = $preset->margin_right ?: 20;
             $mb = $preset->margin_bottom ?: 20;
             $ml = $preset->margin_left ?: 20;
 
-            // Convert cm to mm if needed (user inputs cm in UI)
-            // But UI says margin (cm) so we should multiply by 10 if we want mm
-            // Currently preset stores it as cm in input-margin-top etc.
-            // Let's check how it's stored in database.
             $margin = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
 

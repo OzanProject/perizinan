@@ -18,6 +18,7 @@ class JenisPerizinan extends Model
     'masa_berlaku_unit',
     'deskripsi',
     'template_html',
+    'use_border',
     'form_config',
     'is_active',
   ];
@@ -25,6 +26,7 @@ class JenisPerizinan extends Model
   protected $casts = [
     'form_config' => 'array',
     'is_active' => 'boolean',
+    'use_border' => 'boolean',
   ];
 
   public function dinas()

@@ -33,7 +33,8 @@
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h5 class="mb-1"><i class="fas fa-sliders-h mr-2"></i> Preset Aktif:
-                <strong>{{ $activePreset->nama }}</strong></h5>
+                <strong>{{ $activePreset->nama }}</strong>
+              </h5>
               <p class="mb-0 text-muted">
                 Kertas: <strong>{{ strtoupper($activePreset->paper_size) }}</strong> |
                 Orientasi: <strong>{{ ucfirst($activePreset->orientation) }}</strong> |
@@ -189,18 +190,33 @@
                                 <span class="badge {{ $badgeClass }}">{{ $status->label() }}</span>
                               </td>
                               <td class="text-center" style="white-space: nowrap;">
-                                <a href="{{ route('super_admin.penerbitan.export_pdf', $perizinan) }}"
-                                  class="btn btn-xs btn-danger mr-1" title="Download PDF">
-                                  <i class="fas fa-file-pdf mr-1"></i> PDF
-                                </a>
-                                <a href="{{ route('super_admin.penerbitan.export_word', $perizinan) }}"
-                                  class="btn btn-xs btn-primary mr-1" title="Download Word">
-                                  <i class="fas fa-file-word mr-1"></i> Word
-                                </a>
-                                <a href="{{ route('super_admin.penerbitan.export_excel', $perizinan) }}"
-                                  class="btn btn-xs btn-success" title="Download Excel">
-                                  <i class="fas fa-file-excel mr-1"></i> Excel
-                                </a>
+                                <div class="d-flex align-items-center justify-content-center mb-2">
+                                  <select class="form-control form-control-sm mr-1 layout-override" data-id="{{ $perizinan->id }}"
+                                    data-type="paper_size" style="width: 60px;">
+                                    <option value="A4" {{ ($activePreset->paper_size ?? 'A4') == 'A4' ? 'selected' : '' }}>A4</option>
+                                    <option value="F4" {{ ($activePreset->paper_size ?? '') == 'F4' ? 'selected' : '' }}>F4</option>
+                                  </select>
+                                  <select class="form-control form-control-sm layout-override" data-id="{{ $perizinan->id }}"
+                                    data-type="orientation" style="width: 85px;">
+                                    <option value="portrait" {{ ($activePreset->orientation ?? 'portrait') == 'portrait' ? 'selected' : '' }}>Port:</option>
+                                    <option value="landscape" {{ ($activePreset->orientation ?? '') == 'landscape' ? 'selected' : '' }}>
+                                      Land:</option>
+                                  </select>
+                                </div>
+                                <div class="btn-group">
+                                  <a href="{{ route('super_admin.penerbitan.export_pdf', $perizinan) }}" id="pdf-{{ $perizinan->id }}"
+                                    class="btn btn-xs btn-danger" title="Download PDF">
+                                    <i class="fas fa-file-pdf mr-1"></i> PDF
+                                  </a>
+                                  <a href="{{ route('super_admin.penerbitan.export_word', $perizinan) }}"
+                                    id="word-{{ $perizinan->id }}" class="btn btn-xs btn-primary" title="Download Word">
+                                    <i class="fas fa-file-word mr-1"></i> Word
+                                  </a>
+                                  <a href="{{ route('super_admin.penerbitan.export_excel', $perizinan) }}"
+                                    class="btn btn-xs btn-success" title="Download Excel">
+                                    <i class="fas fa-file-excel mr-1"></i> Excel
+                                  </a>
+                                </div>
                               </td>
                             </tr>
                 @empty
@@ -226,4 +242,35 @@
     </div>
   </div>
 
+  @push('scripts')
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const selectionChange = function () {
+          const id = this.getAttribute('data-id');
+          const row = this.closest('tr');
+          const paperSize = row.querySelector('.layout-override[data-type="paper_size"]').value;
+          const orientation = row.querySelector('.layout-override[data-type="orientation"]').value;
+
+          const pdfLink = document.getElementById('pdf-' + id);
+          const wordLink = document.getElementById('word-' + id);
+
+          if (pdfLink) {
+            const baseUrl = pdfLink.getAttribute('href').split('?')[0];
+            pdfLink.setAttribute('href', `${baseUrl}?paper_size=${paperSize}&orientation=${orientation}`);
+          }
+
+          if (wordLink) {
+            const baseUrl = wordLink.getAttribute('href').split('?')[0];
+            wordLink.setAttribute('href', `${baseUrl}?paper_size=${paperSize}&orientation=${orientation}`);
+          }
+        };
+
+        document.querySelectorAll('.layout-override').forEach(select => {
+          select.addEventListener('change', selectionChange);
+          // Initial trigger to set correct links if defaults are different from base URL
+          selectionChange.call(select);
+        });
+      });
+    </script>
+  @endpush
 @endsection

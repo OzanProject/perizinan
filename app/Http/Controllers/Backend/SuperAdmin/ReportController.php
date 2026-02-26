@@ -110,54 +110,86 @@ class ReportController extends Controller
     return view('backend.super_admin.report.index', compact('stats', 'monthlyTrend', 'lembagaStats', 'listLembaga', 'perizinans'));
   }
 
-  public function exportExcel()
+  public function exportExcel(Request $request)
   {
-    $data = $this->getLembagaData();
+    $filters = $request->only(['start_date', 'end_date', 'lembaga_id']);
+    $data = $this->getLembagaData($filters);
     return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\LembagaStatsExport($data), 'Laporan_Perizinan_' . date('Y-m-d') . '.xlsx');
   }
 
-  public function exportPdf()
+  public function exportPdf(Request $request)
   {
     $user = Auth::user();
     $dinas = $user->dinas;
-    $stats = $this->getOverviewStats($user->dinas_id);
-    $lembagaStats = $this->getLembagaData();
+    $filters = $request->only(['start_date', 'end_date', 'lembaga_id']);
 
-    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('backend.super_admin.report.pdf', compact('stats', 'lembagaStats', 'dinas'));
+    $stats = $this->getOverviewStats($user->dinas_id, $filters);
+    $lembagaStats = $this->getLembagaData($filters);
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('backend.super_admin.report.pdf', compact('stats', 'lembagaStats', 'dinas', 'filters'));
     return $pdf->download('Laporan_Perizinan_' . date('Y-m-d') . '.pdf');
   }
 
-  private function getOverviewStats($dinasId)
+  private function getOverviewStats($dinasId, $filters = [])
   {
+    $query = Perizinan::where('dinas_id', $dinasId)->where('status', '!=', PerizinanStatus::DRAFT);
+
+    if (!empty($filters['start_date'])) {
+      $query->whereDate('created_at', '>=', $filters['start_date']);
+    }
+    if (!empty($filters['end_date'])) {
+      $query->whereDate('created_at', '<=', $filters['end_date']);
+    }
+    if (!empty($filters['lembaga_id'])) {
+      $query->where('lembaga_id', $filters['lembaga_id']);
+    }
+
     return [
-      'total' => Perizinan::where('dinas_id', $dinasId)->where('status', '!=', PerizinanStatus::DRAFT)->count(),
-      'approved' => Perizinan::where('dinas_id', $dinasId)->whereIn('status', [
+      'total' => (clone $query)->count(),
+      'approved' => (clone $query)->whereIn('status', [
         PerizinanStatus::DISETUJUI,
         PerizinanStatus::SIAP_DIAMBIL,
         PerizinanStatus::SELESAI
       ])->count(),
-      'rejected' => Perizinan::where('dinas_id', $dinasId)->where('status', PerizinanStatus::DITOLAK)->count(),
-      'processing' => Perizinan::where('dinas_id', $dinasId)->whereIn('status', [
+      'rejected' => (clone $query)->where('status', PerizinanStatus::DITOLAK)->count(),
+      'processing' => (clone $query)->whereIn('status', [
         PerizinanStatus::DIAJUKAN,
         PerizinanStatus::PERBAIKAN
       ])->count(),
     ];
   }
 
-  private function getLembagaData()
+  private function getLembagaData($filters = [])
   {
-    return Lembaga::where('dinas_id', Auth::user()->dinas_id)
-      ->withCount([
-        'perizinans as total_pengajuan' => function ($query) {
-          $query->where('status', '!=', PerizinanStatus::DRAFT);
-        },
-        'perizinans as selesai' => function ($query) {
-          $query->whereIn('status', [PerizinanStatus::DISETUJUI, PerizinanStatus::SIAP_DIAMBIL, PerizinanStatus::SELESAI]);
-        },
-        'perizinans as proses' => function ($query) {
-          $query->whereIn('status', [PerizinanStatus::DIAJUKAN, PerizinanStatus::PERBAIKAN]);
-        }
-      ])
+    $query = Lembaga::where('dinas_id', Auth::user()->dinas_id);
+
+    if (!empty($filters['lembaga_id'])) {
+      $query->where('id', $filters['lembaga_id']);
+    }
+
+    return $query->withCount([
+      'perizinans as total_pengajuan' => function ($q) use ($filters) {
+        $q->where('status', '!=', PerizinanStatus::DRAFT);
+        if (!empty($filters['start_date']))
+          $q->whereDate('created_at', '>=', $filters['start_date']);
+        if (!empty($filters['end_date']))
+          $q->whereDate('created_at', '<=', $filters['end_date']);
+      },
+      'perizinans as selesai' => function ($q) use ($filters) {
+        $q->whereIn('status', [PerizinanStatus::DISETUJUI, PerizinanStatus::SIAP_DIAMBIL, PerizinanStatus::SELESAI]);
+        if (!empty($filters['start_date']))
+          $q->whereDate('created_at', '>=', $filters['start_date']);
+        if (!empty($filters['end_date']))
+          $q->whereDate('created_at', '<=', $filters['end_date']);
+      },
+      'perizinans as proses' => function ($q) use ($filters) {
+        $q->whereIn('status', [PerizinanStatus::DIAJUKAN, PerizinanStatus::PERBAIKAN]);
+        if (!empty($filters['start_date']))
+          $q->whereDate('created_at', '>=', $filters['start_date']);
+        if (!empty($filters['end_date']))
+          $q->whereDate('created_at', '<=', $filters['end_date']);
+      }
+    ])
       ->orderBy('total_pengajuan', 'desc')
       ->get();
   }

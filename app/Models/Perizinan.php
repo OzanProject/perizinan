@@ -269,7 +269,10 @@ class Perizinan extends Model
       }
 
       // Layer 2: Border/frame decoration (full-page ornament)
-      if ($dinas->watermark_border_img) {
+      // Now dynamic: uses the configuration from the permit type
+      $useBorder = $this->jenisPerizinan->use_border ?? false;
+
+      if ($dinas->watermark_border_img && $useBorder) {
         $borderBase64 = $toBase64($dinas->watermark_border_img);
         $borderOpacity = $dinas->watermark_border_opacity ?? 0.2;
         $template .= '
