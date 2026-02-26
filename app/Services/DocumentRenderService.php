@@ -23,30 +23,21 @@ class DocumentRenderService
           ' . $pageCss . '
           body { 
             font-family: DejaVu Sans, sans-serif; 
-            font-size: 10.5pt; 
-            line-height: 1.35; 
+            font-size: 10pt; 
+            line-height: 1.15; 
             color: #000; 
             margin: 0; 
             padding: 0; 
-            -webkit-print-color-adjust: exact;
-          }
-          .certificate-wrapper {
-            position: relative;
-            width: 100%;
-            height: 99.5%; /* Slight buffer to prevent rounding-error page breaks */
-            overflow: hidden;
-            display: block;
-            box-sizing: border-box;
           }
           table { border-collapse: collapse; page-break-inside: avoid; }
           td { vertical-align: top; padding: 1px 0; }
           img { max-width: 100%; page-break-inside: avoid; }
-          .signature-block { page-break-inside: avoid; margin-top: 10px; }
+          .signature-block { page-break-inside: avoid; margin-top: 5px; }
           
-          /* Force single page rendering */
-          * { box-sizing: border-box; }
+          /* Force single page rendering by allowing hard clipping if needed */
+          html, body { overflow: hidden; }
         </style>
-        </head><body><div class="certificate-wrapper">' . $body . '</div></body></html>';
+        </head><body>' . $body . '</body></html>';
     }
 
     public function generatePdf(Perizinan $p, $paperSize = null, $orientation = null)
