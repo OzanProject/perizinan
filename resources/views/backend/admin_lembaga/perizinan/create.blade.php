@@ -15,8 +15,8 @@
             <li class="breadcrumb-item active small" aria-current="page">Buat Baru</li>
           </ol>
         </nav>
-        <h1 class="h3 font-weight-bold text-dark mb-1">Form Pengajuan Izin Baru</h1>
-        <p class="text-muted mb-0">Silakan lengkapi data lembaga PKBM Anda untuk proses verifikasi.</p>
+        <h1 class="h3 font-weight-bold text-dark mb-1">Form Pengajuan Pembaruan Izin</h1>
+        <p class="text-muted mb-0">Silakan lengkapi data lembaga Anda untuk proses pembaruan izin.</p>
       </div>
       <div class="col-md-3 text-md-right mt-3 mt-md-0">
         <a href="{{ route('admin_lembaga.perizinan.index') }}" class="btn btn-outline-secondary shadow-sm">

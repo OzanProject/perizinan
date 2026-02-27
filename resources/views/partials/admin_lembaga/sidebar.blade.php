@@ -82,7 +82,7 @@
           <a href="{{ route('admin_lembaga.perizinan.create') }}"
             class="nav-link {{ request()->routeIs('admin_lembaga.perizinan.create') ? 'active' : '' }}">
             <i class="nav-icon fas fa-plus-circle text-success"></i>
-            <p>Ajukan Izin Baru</p>
+            <p>Ajuan Pembaruan Izin</p>
           </a>
         </li>
         <li class="nav-item">
