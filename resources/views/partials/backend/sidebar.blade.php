@@ -1,18 +1,18 @@
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-  <!-- Brand Logo -->
-  <a href="{{ route('super_admin.dashboard') }}" class="brand-link">
+<aside class="main-sidebar sidebar-dark-primary elevation-4" style="overflow-x: hidden !important;">
+  <a href="{{ Auth::user()->hasRole('super_admin') ? route('super_admin.dashboard') : route('admin_lembaga.dashboard') }}" class="brand-link d-flex align-items-center">
     @if(Auth::user()->dinas && Auth::user()->dinas->logo)
       <img src="{{ Storage::url(Auth::user()->dinas->logo) }}" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
     @else
       <i class="fas fa-certificate brand-image img-circle elevation-3 mt-1 ml-2"></i>
     @endif
-    <span class="brand-text font-weight-light" style="white-space: normal; font-size: 14px; line-height: 1.3;">{{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}</span>
+    
+    <span class="brand-text font-weight-light text-truncate d-inline-block" style="max-width: 170px; font-size: 14px;" title="{{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}">
+        {{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}
+    </span>
   </a>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <!-- Sidebar user panel (optional) -->
-    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+  <div class="sidebar" style="overflow-x: hidden !important;">
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
       <div class="image">
         @if(Auth::user()->photo)
           <img src="{{ Storage::url(Auth::user()->photo) }}" class="img-circle elevation-2" alt="User Image">
@@ -20,12 +20,12 @@
           <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=7F9CF5&background=EBF4FF" class="img-circle elevation-2" alt="User Image">
         @endif
       </div>
-      <div class="info">
-        <a href="#" class="d-block">{{ Auth::user()->name }}</a>
+      
+      <div class="info text-truncate" style="max-width: 180px;">
+        <a href="#" class="d-block text-truncate" title="{{ Auth::user()->name }}">{{ Auth::user()->name }}</a>
       </div>
     </div>
 
-    <!-- Sidebar Menu -->
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-header">MAIN NAVIGATION</li>
@@ -147,7 +147,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{{ route('admin_lembaga.profile.index') }}" class="nav-link {{ request()->routeIs('admin_lembaga.profile.*') ? 'active' : '' }}">
+            <a href="{{ route('admin_lembaga.profile.index') }}" class="nav-link {{ request()->requestIs('admin_lembaga/profile*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-school"></i>
               <p>Profil Lembaga</p>
             </a>
@@ -160,16 +160,14 @@
           </li>
         @endif
 
-        <li class="nav-item mt-4">
+        <li class="nav-item mt-4 border-top pt-2">
           <form action="{{ route('logout') }}" method="POST" id="logout-form" class="d-none">@csrf</form>
           <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link text-danger">
             <i class="nav-icon fas fa-sign-out-alt"></i>
-            <p>Keluar</p>
+            <p class="font-weight-bold">Keluar Sistem</p>
           </a>
         </li>
       </ul>
     </nav>
-    <!-- /.sidebar-menu -->
-  </div>
-  <!-- /.sidebar -->
-</aside>
+    </div>
+  </aside>
