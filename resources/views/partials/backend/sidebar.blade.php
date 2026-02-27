@@ -1,13 +1,20 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4" style="overflow-x: hidden !important;">
-  <a href="{{ Auth::user()->hasRole('super_admin') ? route('super_admin.dashboard') : route('admin_lembaga.dashboard') }}" class="brand-link d-flex align-items-center">
-    @if(Auth::user()->dinas && Auth::user()->dinas->logo)
+  <a href="{{ Auth::user()->hasRole('super_admin') ? route('super_admin.dashboard') : route('admin_lembaga.dashboard') }}" class="brand-link d-flex align-items-center pb-3 pt-3">
+    
+    @if(Auth::user()->hasRole('super_admin') && Auth::user()->dinas && Auth::user()->dinas->logo)
       <img src="{{ Storage::url(Auth::user()->dinas->logo) }}" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+    @elseif(Auth::user()->hasRole('admin_lembaga'))
+      <i class="fas fa-school brand-image img-circle elevation-3 mt-1 ml-2 text-white bg-primary p-2" style="font-size: 14px;"></i>
     @else
       <i class="fas fa-certificate brand-image img-circle elevation-3 mt-1 ml-2"></i>
     @endif
     
-    <span class="brand-text font-weight-light text-truncate d-inline-block" style="max-width: 170px; font-size: 14px;" title="{{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}">
+    <span class="brand-text font-weight-bold" style="white-space: normal; font-size: 13px; line-height: 1.3; max-width: 170px;">
+      @if(Auth::user()->hasRole('super_admin'))
         {{ Auth::user()->dinas->app_name ?? 'Sistem Izin' }}
+      @else
+        {{ Auth::user()->lembaga->nama_lembaga ?? 'Sistem Perizinan' }}
+      @endif
     </span>
   </a>
 
@@ -21,12 +28,12 @@
         @endif
       </div>
       
-      <div class="info text-truncate" style="max-width: 180px;">
-        <a href="#" class="d-block text-truncate" title="{{ Auth::user()->name }}">{{ Auth::user()->name }}</a>
+      <div class="info" style="white-space: normal; line-height: 1.2; padding-left: 10px;">
+        <a href="#" class="d-block font-weight-bold" style="font-size: 14px;">{{ Auth::user()->name }}</a>
       </div>
     </div>
 
-    <nav class="mt-2">
+    <nav class="mt-2 pb-5">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-header">MAIN NAVIGATION</li>
         <li class="nav-item">
@@ -55,7 +62,6 @@
           <li class="nav-header">MODUL PERIZINAN</li>
           
           @php
-            // Logika untuk mendeteksi apakah salah satu sub-menu sedang aktif
             $isPerizinanActive = request()->routeIs('super_admin.jenis_perizinan.*') || 
                                  request()->routeIs('super_admin.perizinan.*') || 
                                  request()->routeIs('super_admin.penerbitan.*');
@@ -147,7 +153,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{{ route('admin_lembaga.profile.index') }}" class="nav-link {{ request()->requestIs('admin_lembaga/profile*') ? 'active' : '' }}">
+            <a href="{{ route('admin_lembaga.profile.index') }}" class="nav-link {{ request()->routeIs('admin_lembaga.profile.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-school"></i>
               <p>Profil Lembaga</p>
             </a>
@@ -164,7 +170,7 @@
           <form action="{{ route('logout') }}" method="POST" id="logout-form" class="d-none">@csrf</form>
           <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-link text-danger">
             <i class="nav-icon fas fa-sign-out-alt"></i>
-            <p class="font-weight-bold">Keluar Sistem</p>
+            <p class="font-weight-bold">Keluar</p>
           </a>
         </li>
       </ul>
