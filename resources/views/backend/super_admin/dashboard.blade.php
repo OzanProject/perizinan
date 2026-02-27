@@ -8,9 +8,21 @@
     <div class="col-sm-12">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="h3 font-weight-bold text-dark">Dashboard Dinas Pendidikan</h1>
-        <button class="btn btn-primary shadow-sm">
-          <i class="fas fa-download mr-1"></i> Export Laporan
-        </button>
+        <div class="btn-group">
+          <a href="{{ route('super_admin.laporan.index') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-file-invoice mr-1"></i> Buka Laporan
+          </a>
+          <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split shadow-sm"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right shadow border-0">
+            <a class="dropdown-item" href="{{ route('super_admin.laporan.export_excel') }}"><i
+                class="fas fa-file-excel mr-2 text-success"></i> Export Excel</a>
+            <a class="dropdown-item" href="{{ route('super_admin.laporan.export_pdf') }}"><i
+                class="fas fa-file-pdf mr-2 text-danger"></i> Export PDF</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -27,7 +39,8 @@
         <div class="icon">
           <i class="fas fa-university"></i>
         </div>
-        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('super_admin.lembaga.index') }}" class="small-box-footer">Lihat Detail <i
+            class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -56,7 +69,8 @@
         <div class="icon">
           <i class="fas fa-check-circle"></i>
         </div>
-        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('super_admin.perizinan.index', ['status' => 'DISETUJUI']) }}" class="small-box-footer">Lihat
+          Detail <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -70,7 +84,8 @@
         <div class="icon">
           <i class="fas fa-exclamation-triangle"></i>
         </div>
-        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+        <a href="{{ route('super_admin.perizinan.index', ['status' => 'PERBAIKAN']) }}" class="small-box-footer">Lihat
+          Detail <i class="fas fa-arrow-circle-right"></i></a>
       </div>
     </div>
     <!-- ./col -->
@@ -79,8 +94,23 @@
 
   <!-- Main row -->
   <div class="row">
-    <div class="col-md-12">
-      <div class="card card-outline card-primary shadow">
+    <div class="col-md-7">
+      <div class="card card-outline card-info shadow">
+        <div class="card-header">
+          <h3 class="card-title font-weight-bold"><i class="fas fa-chart-line mr-2"></i> Statistik Pengajuan (6 Bulan
+            Terakhir)</h3>
+        </div>
+        <div class="card-body">
+          <div class="chart">
+            <canvas id="permitChart"
+              style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="card card-outline card-success shadow">
         <div class="card-header border-transparent">
           <h3 class="card-title font-weight-bold"><i class="fas fa-list mr-2"></i> Pengajuan Terbaru</h3>
 
@@ -164,3 +194,54 @@
     </div>
   </div>
 @endsection
+
+@push('scripts')
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    $(function () {
+      var ctx = document.getElementById('permitChart').getContext('2d');
+      var permitChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: @json($chartData['labels']),
+          datasets: [{
+            label: 'Jumlah Pengajuan',
+            data: @json($chartData['data']),
+            backgroundColor: 'rgba(23, 162, 184, 0.2)',
+            borderColor: 'rgba(23, 162, 184, 1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: 'rgba(23, 162, 184, 1)',
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              },
+              grid: {
+                borderDash: [5, 5]
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    });
+  </script>
+@endpush

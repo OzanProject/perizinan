@@ -45,7 +45,25 @@ class DashboardController extends Controller
       ->limit(5)
       ->get();
 
-    return view('backend.super_admin.dashboard', compact('stats', 'pengajuanTerbaru'));
+    // Chart Data: 6 Bulan Terakhir
+    $chartData = [
+      'labels' => [],
+      'data' => []
+    ];
+
+    for ($i = 5; $i >= 0; $i--) {
+      $date = now()->subMonths($i);
+      $monthName = $date->translatedFormat('F');
+      $count = Perizinan::where('dinas_id', $user->dinas_id)
+        ->whereMonth('created_at', $date->month)
+        ->whereYear('created_at', $date->year)
+        ->count();
+
+      $chartData['labels'][] = $monthName;
+      $chartData['data'][] = $count;
+    }
+
+    return view('backend.super_admin.dashboard', compact('stats', 'pengajuanTerbaru', 'chartData'));
   }
 
   private function adminLembagaDashboard($user)

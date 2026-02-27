@@ -149,7 +149,7 @@
                                 </div>
                                 <div class="media-body">
                                     <h6 class="mb-0 font-weight-bold">SK Izin Siap Diambil</h6>
-                                    <p class="mb-0 text-muted small">Konfirmasi di sini jika Anda sudah menerima dokumen fisik.
+                                    <p class="mb-0 text-muted small">Konfirmasi sudah selesai mengajukan pembaruan izin
                                     </p>
                                 </div>
                             </div>
