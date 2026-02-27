@@ -14,70 +14,46 @@ class DocumentRenderService
 
         $body = $p->replaceVariables();
 
-        // =========================================================================
-        // TRIK ANTI-LONCAT 1: PEMBERSIH SPASI GAIB
-        // Menghapus tag <p> kosong atau <br> berlebih di paling bawah dokumen 
-        // yang sering ditambahkan otomatis oleh CKEditor dan memicu halaman ke-2.
-        // =========================================================================
+        // Pembersih Spasi Gaib CKEditor
         $body = preg_replace('/(<p>(&nbsp;|\s|<br\s*\/?>)*<\/p>\s*)+$/i', '', $body);
         $body = preg_replace('/(<br\s*\/?>\s*)+$/i', '', $body);
 
         $pageCss = $this->buildPageCss($preset, $paperSize, $orientation);
-
-        // Ambil padding cerdas yang menyesuaikan orientasi kertas
         $padding = $this->getContentPadding($preset, $orientation);
+
+        // SUNTIKAN PAKSA: Jika Landscape, kecilkan font jadi 9.5pt agar tabel muat 1 lembar di Hosting!
+        $isLandscape = strtolower($orientation ?: ($preset->orientation ?? 'portrait')) === 'landscape';
+        $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
 
         return '<!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
             <style>
-                /* Kertas 0 Margin agar Bingkai Full */
                 ' . $pageCss . '
                 
                 body { 
                     font-family: "Times New Roman", Times, serif; 
-                    /* TRIK ANTI-LONCAT 2: Font dikecilkan jadi 10.5pt agar tabel muat */
-                    font-size: 10.5pt; 
-                    line-height: 1.15; 
+                    font-size: ' . $fontSize . ' !important; 
+                    line-height: 1.1; /* Line height super rapat */
                     color: #000; 
                     margin: 0; 
                     padding: ' . $padding . '; 
                 }
 
-                /* Fix Logo CKEditor */
                 figure { margin: 0; padding: 0; }
-                figure.image {
-                    display: block !important;
-                    width: 100% !important;
-                    text-align: center !important;
-                    margin-bottom: 5px !important;
-                    clear: both !important;
-                }
-                figure.image img {
-                    display: inline-block !important;
-                    margin: 0 auto !important;
-                    max-width: 100%;
-                    height: auto;
-                }
-                .image-style-align-left { text-align: left !important; }
-                .image-style-align-left img { float: left !important; margin-right: 15px !important; }
-                .image-style-align-center { text-align: center !important; }
-                .image-style-align-center img { margin-left: auto !important; margin-right: auto !important; }
-                .image-style-align-right { text-align: right !important; }
-                .image-style-align-right img { float: right !important; margin-left: 15px !important; }
+                figure.image { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 5px !important; clear: both !important; }
+                figure.image img { display: inline-block !important; margin: 0 auto !important; max-width: 100%; height: auto; }
 
-                /* TRIK ANTI-LONCAT 3: Memampatkan jarak margin paragraf */
+                /* Paksaan Spasi Paragraf */
                 p { clear: both; margin-top: 0; margin-bottom: 4px; }
                 p:last-child { margin-bottom: 0 !important; }
-                div:last-child { margin-bottom: 0 !important; }
 
-                /* Tabel & Tanda Tangan */
-                table { border-collapse: collapse; width: 100%; page-break-inside: avoid; }
+                /* Paksaan Tabel */
+                table { border-collapse: collapse; width: 100%; page-break-inside: avoid; margin-bottom: 5px; }
                 tr { page-break-inside: avoid; page-break-after: auto; }
-                td { vertical-align: top; padding: 2px 4px; border: none; }
+                td { vertical-align: top; padding: 1px 3px; border: none; }
                 
-                /* Tanda tangan tidak boleh terbelah */
                 .signature-block { page-break-inside: avoid; margin-top: 5px; }
             </style>
         </head>
@@ -93,14 +69,13 @@ class DocumentRenderService
             ->where('is_active', true)
             ->first();
 
-        // Pastikan orientation terdefinisi agar Smart Padding berfungsi
         $paperSize = $paperSize ?: ($preset->paper_size ?? 'A4');
         $orientation = $orientation ?: ($preset->orientation ?? 'portrait');
 
         $html = $this->renderHtml($p, $preset, $paperSize, $orientation);
 
         if (strtoupper($paperSize) === 'F4') {
-            $paperSizeArray = [0, 0, 595.28, 935.43]; // 210mm x 330mm
+            $paperSizeArray = [0, 0, 595.28, 935.43];
         } else {
             $paperSizeArray = strtolower($paperSize);
         }
@@ -166,34 +141,32 @@ class DocumentRenderService
             $size = "{$paperSize} {$orientation}";
         }
 
-        return "
-        @page {
-            size: {$size};
-            margin: 0px; 
-        }
-        ";
+        return "@page { size: {$size}; margin: 0px; }";
     }
 
     private function getContentPadding($preset, $orientationOverride): string
     {
         $orientation = strtolower($orientationOverride ?: ($preset->orientation ?? 'portrait'));
 
-        // TRIK ANTI-LONCAT 4: SMART PADDING
-        // Menipiskan batas bawah (margin-bottom) agar teks tidak terdorong ke halaman baru
         if ($preset) {
-            $mt = $preset->margin_top ?? ($orientation === 'landscape' ? 1.5 : 2.5);
+            $mt = $preset->margin_top ?? ($orientation === 'landscape' ? 1.0 : 2.5);
             $mr = $preset->margin_right ?? ($orientation === 'landscape' ? 2.5 : 3.0);
-            $mb = $preset->margin_bottom ?? ($orientation === 'landscape' ? 1.0 : 1.5); // Sengaja dibuat tipis (1cm) di bawah!
+            $mb = $preset->margin_bottom ?? ($orientation === 'landscape' ? 0.5 : 1.5);
             $ml = $preset->margin_left ?? ($orientation === 'landscape' ? 2.5 : 3.0);
+
+            // FORCE OVERRIDE: Jika di database setting margin atas/bawahnya terlalu besar untuk landscape, KITA PAKSA TIPIS!
+            if ($orientation === 'landscape') {
+                if ($mt > 1.2)
+                    $mt = 1.0;
+                if ($mb > 1.0)
+                    $mb = 0.5; // Batas bawah maksimal hanya 0.5cm
+            }
 
             return "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
 
-        // Default super aman jika preset tidak di-setting
-        if ($orientation === 'landscape') {
-            return "1.5cm 2.5cm 1.0cm 2.5cm";
-        }
-
+        if ($orientation === 'landscape')
+            return "1.0cm 2.5cm 0.5cm 2.5cm";
         return "2.5cm 3cm 1.5cm 3cm";
     }
 }

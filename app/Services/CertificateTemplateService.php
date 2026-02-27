@@ -271,41 +271,41 @@ class CertificateTemplateService
     }
 
     // =========================================================================
-    // 4. HER-REGISTRASI (Landscape) - SPASI SUPER RAPAT
+    // 4. HER-REGISTRASI (Landscape) - SPASI SUPER RAPAT & TTD DIKUNCI
     // =========================================================================
     private static function getHerregistrasi(): string
     {
         return self::kopSuratLandscape() . '
-        <p style="text-align: center; margin: 0 0 15px 0;">
+        <p style="text-align: center; margin: 0 0 10px 0;">
             <span style="font-size: 13pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN DAFTAR ULANG (HER-REGISTRASI)</span><br>
             <span style="font-size: 11pt; font-weight: bold;">Nomor: [NOMOR_SURAT]</span>
         </p>
         
-        <p style="margin: 0 0 8px 0;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</p>
+        <p style="margin: 0 0 5px 0;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</p>
         
-        <table style="width: 95%; border-collapse: collapse; margin-left: 20px; margin-bottom: 10px;">
+        <table style="width: 95%; border-collapse: collapse; margin-left: 20px; margin-bottom: 5px;">
             <tbody>
-                <tr><td style="width: 28%; font-weight: bold; padding: 2px 0;">Nama Lembaga</td><td style="width: 2%; padding: 2px 0;">:</td><td style="width: 70%; font-weight: bold; padding: 2px 0;">[NAMA_LEMBAGA]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">Nama Pimpinan</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:NAMA_PIMPINAN]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">Nama Penyelenggara</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:NAMA_PENYELENGGARA]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">NPSN</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[NPSN]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">Kode/Jenis Pendidikan</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:JENIS_PENDIDIKAN]</td></tr>
-                <tr><td style="font-weight: bold; vertical-align: top; padding: 2px 0;">Alamat Lembaga</td><td style="vertical-align: top; padding: 2px 0;">:</td><td style="padding: 2px 0;">[ALAMAT_LEMBAGA]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">Kecamatan</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:KECAMATAN]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">Kabupaten</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[KOTA_DINAS]</td></tr>
+                <tr><td style="width: 28%; font-weight: bold; padding: 1px 0;">Nama Lembaga</td><td style="width: 2%; padding: 1px 0;">:</td><td style="width: 70%; font-weight: bold; padding: 1px 0;">[NAMA_LEMBAGA]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">Nama Pimpinan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:NAMA_PIMPINAN]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">Nama Penyelenggara</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:NAMA_PENYELENGGARA]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">NPSN</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[NPSN]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">Kode/Jenis Pendidikan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:JENIS_PENDIDIKAN]</td></tr>
+                <tr><td style="font-weight: bold; vertical-align: top; padding: 1px 0;">Alamat Lembaga</td><td style="vertical-align: top; padding: 1px 0;">:</td><td style="padding: 1px 0;">[ALAMAT_LEMBAGA]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">Kecamatan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:KECAMATAN]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">Kabupaten</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[KOTA_DINAS]</td></tr>
             </tbody>
         </table>
         
-        <p style="margin: 0 0 8px 0;">Telah memiliki Izin Pendirian Kepala Dinas Kabupaten [KOTA_DINAS]:</p>
+        <p style="margin: 0 0 5px 0;">Telah memiliki Izin Pendirian Kepala Dinas Kabupaten [KOTA_DINAS]:</p>
         
-        <table style="width: 95%; border-collapse: collapse; margin-left: 20px; margin-bottom: 10px;">
+        <table style="width: 95%; border-collapse: collapse; margin-left: 20px; margin-bottom: 5px;">
             <tbody>
-                <tr><td style="width: 28%; font-weight: bold; padding: 2px 0;">Nomor</td><td style="width: 2%; padding: 2px 0;">:</td><td style="width: 70%; padding: 2px 0;">[DATA:NOMOR_IZIN_PENDIRIAN]</td></tr>
-                <tr><td style="font-weight: bold; padding: 2px 0;">Tanggal</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:TANGGAL_IZIN_PENDIRIAN]</td></tr>
+                <tr><td style="width: 28%; font-weight: bold; padding: 1px 0;">Nomor</td><td style="width: 2%; padding: 1px 0;">:</td><td style="width: 70%; padding: 1px 0;">[DATA:NOMOR_IZIN_PENDIRIAN]</td></tr>
+                <tr><td style="font-weight: bold; padding: 1px 0;">Tanggal</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:TANGGAL_IZIN_PENDIRIAN]</td></tr>
             </tbody>
         </table>
         
-        <p style="text-align: justify; margin: 0 0 15px 0; line-height: 1.15;">
+        <p style="text-align: justify; margin: 0 0 10px 0; line-height: 1.1;">
             Berdasarkan kelengkapan proposal permohonan izin operasional Lembaga Kursus dan Pelatihan (LKP), LKP tersebut telah melakukan daftar ulang (her-registrasi) pada Bidang Pendidikan Anak Usia Dini (PAUD) dan DIKMAS Dinas Pendidikan Kabupaten [KOTA_DINAS]. Surat keterangan ini berlaku selama <strong>[MASA_BERLAKU]</strong> sejak diterbitkan.
         </p>
         
@@ -314,8 +314,11 @@ class CertificateTemplateService
                 <tr>
                     <td style="width: 60%;"></td>
                     <td style="width: 40%; text-align: left;">
-                        [KOTA_DINAS], [TANGGAL_TERBIT]<br><br>
-                        <strong style="text-transform: uppercase;">[PIMPINAN_JABATAN]</strong><br><br><br>
+                        [KOTA_DINAS], [TANGGAL_TERBIT]<br>
+                        <strong style="text-transform: uppercase;">[PIMPINAN_JABATAN]</strong>
+                        
+                        <div style="height: 55px;"></div>
+                        
                         <strong><u>[PIMPINAN_NAMA]</u></strong><br>
                         [PIMPINAN_PANGKAT]<br>
                         NIP. [PIMPINAN_NIP]
