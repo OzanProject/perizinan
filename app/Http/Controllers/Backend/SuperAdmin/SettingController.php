@@ -67,6 +67,7 @@ class SettingController extends Controller
       'stempel_img' => 'nullable|image|mimes:png|max:2048', // PNG only for transparency
       'watermark_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
       'watermark_border_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
+      'watermark_border_paud_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048', // Validasi Bingkai PAUD
       'watermark_enabled' => 'nullable|string', // Checkbox
       'watermark_opacity' => 'required|numeric|min:0.01|max:1',
       'watermark_border_opacity' => 'required|numeric|min:0.01|max:1',
@@ -120,6 +121,15 @@ class SettingController extends Controller
         Storage::disk('public')->delete($oldBorder);
       }
       $dinas->watermark_border_img = $request->file('watermark_border_img')->store('watermarks', 'public');
+    }
+
+    // LOGIKA UPLOAD BINGKAI PAUD
+    if ($request->hasFile('watermark_border_paud_img')) {
+      if ($dinas->watermark_border_paud_img) {
+        $oldBorderPaud = str_replace('public/', '', $dinas->watermark_border_paud_img);
+        Storage::disk('public')->delete($oldBorderPaud);
+      }
+      $dinas->watermark_border_paud_img = $request->file('watermark_border_paud_img')->store('watermarks', 'public');
     }
 
     $dinas->save();
@@ -201,7 +211,8 @@ class SettingController extends Controller
 
   public function deleteImage(Request $request)
   {
-    $allowedFields = ['watermark_img', 'watermark_border_img', 'logo', 'stempel_img'];
+    // Tambahkan watermark_border_paud_img ke daftar Field yang diizinkan untuk dihapus
+    $allowedFields = ['watermark_img', 'watermark_border_img', 'watermark_border_paud_img', 'logo', 'stempel_img'];
     $field = $request->input('field');
 
     if (!in_array($field, $allowedFields)) {
@@ -219,4 +230,3 @@ class SettingController extends Controller
     return back()->with('success', 'Gambar berhasil dihapus.');
   }
 }
-

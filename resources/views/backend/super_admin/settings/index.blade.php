@@ -6,7 +6,6 @@
 @section('content')
   <div class="container-fluid">
     <div class="row">
-      <!-- Profile Summary Column -->
       <div class="col-md-3">
         <div class="card card-primary card-outline shadow-sm">
           <div class="card-body box-profile">
@@ -58,7 +57,6 @@
         </div>
       </div>
 
-      <!-- Settings Content Column -->
       <div class="col-md-9">
         <div class="card card-primary card-outline card-tabs shadow-sm">
           <div class="card-header p-0 pt-1 border-bottom-0">
@@ -92,7 +90,6 @@
           <div class="card-body">
             <div class="tab-content" id="settingTabsContent">
 
-              <!-- Profil Tab -->
               <div class="tab-pane fade show active" id="tab-profile" role="tabpanel">
                 <div class="mb-4">
                   <h4 class="font-weight-bold text-dark mb-1">Profil Saya</h4>
@@ -144,7 +141,6 @@
                 </form>
               </div>
 
-              <!-- Instansi Tab -->
               <div class="tab-pane fade" id="tab-instansi" role="tabpanel">
                 <div class="mb-4">
                   <h4 class="font-weight-bold text-dark mb-1">Instansi & Aplikasi</h4>
@@ -257,23 +253,24 @@
                       </div>
 
                       <hr class="my-4">
-                      <h6 class="font-weight-bold mb-3"><i class="fas fa-certificate text-primary mr-2"></i> Watermark
-                        Sertifikat</h6>
+                      <h6 class="font-weight-bold mb-3"><i class="fas fa-certificate text-primary mr-2"></i> Watermark &
+                        Bingkai</h6>
 
                       <div class="bg-light p-3 rounded border">
-                        {{-- Row 1: Two watermark upload fields side by side --}}
+                        {{-- Row 1: THREE watermark upload fields side by side --}}
                         <div class="row mb-3">
-                          <div class="col-md-6">
+
+                          {{-- Watermark Tengah --}}
+                          <div class="col-md-4">
                             <div class="form-group mb-0">
                               <label class="small font-weight-bold text-muted text-uppercase">
-                                <i class="fas fa-shield-alt mr-1"></i> Watermark Tengah (Logo)
+                                <i class="fas fa-shield-alt mr-1"></i> WtrMrk Tengah
                               </label>
-                              <p class="x-small text-muted mb-2">Tampil di tengah halaman, semi-transparan di belakang
-                                teks.</p>
+                              <p class="x-small text-muted mb-2">Logo transparan.</p>
                               <div class="d-flex align-items-center bg-white p-2 rounded border">
                                 <div id="watermark-preview-container"
                                   class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 rounded overflow-hidden"
-                                  style="width: 60px; height: 60px; padding: 5px;">
+                                  style="width: 50px; height: 50px; padding: 5px;">
                                   @if($dinas->watermark_img)
                                     <img src="{{ Storage::url($dinas->watermark_img) }}"
                                       style="max-width: 100%; max-height: 100%; object-fit: contain;">
@@ -281,31 +278,33 @@
                                     <i class="fas fa-tint text-muted"></i>
                                   @endif
                                 </div>
-                                <label class="btn btn-xs btn-outline-primary mb-0">
-                                  Pilih File
-                                  <input type="file" name="watermark_img" class="d-none" accept="image/*">
-                                </label>
-                                @if($dinas->watermark_img)
-                                  <button type="button" onclick="confirmDeleteImage('watermark_img', 'watermark tengah')"
-                                    class="btn btn-xs btn-outline-danger ml-1">
-                                    <i class="fas fa-trash-alt"></i> Hapus
-                                  </button>
-                                @endif
+                                <div class="d-flex flex-column">
+                                  <label class="btn btn-xs btn-outline-primary mb-1">
+                                    Pilih File
+                                    <input type="file" name="watermark_img" class="d-none" accept="image/*">
+                                  </label>
+                                  @if($dinas->watermark_img)
+                                    <button type="button" onclick="confirmDeleteImage('watermark_img', 'watermark tengah')"
+                                      class="btn btn-xs btn-outline-danger">
+                                      <i class="fas fa-trash-alt"></i> Hapus
+                                    </button>
+                                  @endif
+                                </div>
                               </div>
-                              <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: logo kabupaten, lambang
-                                dinas.</p>
                             </div>
                           </div>
-                          <div class="col-md-6">
+
+                          {{-- Bingkai Default / PKBM --}}
+                          <div class="col-md-4">
                             <div class="form-group mb-0">
                               <label class="small font-weight-bold text-muted text-uppercase">
-                                <i class="fas fa-border-style mr-1"></i> Bingkai / Border
+                                <i class="fas fa-border-style mr-1"></i> Bingkai Utama
                               </label>
-                              <p class="x-small text-muted mb-2">Ornamen bingkai sekeliling halaman surat.</p>
+                              <p class="x-small text-muted mb-2">Border (Default/PKBM).</p>
                               <div class="d-flex align-items-center bg-white p-2 rounded border">
                                 <div id="watermark-border-preview-container"
                                   class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 rounded overflow-hidden"
-                                  style="width: 60px; height: 60px; padding: 5px;">
+                                  style="width: 50px; height: 50px; padding: 5px;">
                                   @if($dinas->watermark_border_img)
                                     <img src="{{ Storage::url($dinas->watermark_border_img) }}"
                                       style="max-width: 100%; max-height: 100%; object-fit: contain;">
@@ -313,22 +312,58 @@
                                     <i class="fas fa-vector-square text-muted"></i>
                                   @endif
                                 </div>
-                                <label class="btn btn-xs btn-outline-primary mb-0">
-                                  Pilih File
-                                  <input type="file" name="watermark_border_img" class="d-none" accept="image/*">
-                                </label>
-                                @if($dinas->watermark_border_img)
-                                  <button type="button"
-                                    onclick="confirmDeleteImage('watermark_border_img', 'gambar bingkai')"
-                                    class="btn btn-xs btn-outline-danger ml-1">
-                                    <i class="fas fa-trash-alt"></i> Hapus
-                                  </button>
-                                @endif
+                                <div class="d-flex flex-column">
+                                  <label class="btn btn-xs btn-outline-primary mb-1">
+                                    Pilih File
+                                    <input type="file" name="watermark_border_img" class="d-none" accept="image/*">
+                                  </label>
+                                  @if($dinas->watermark_border_img)
+                                    <button type="button"
+                                      onclick="confirmDeleteImage('watermark_border_img', 'gambar bingkai')"
+                                      class="btn btn-xs btn-outline-danger">
+                                      <i class="fas fa-trash-alt"></i> Hapus
+                                    </button>
+                                  @endif
+                                </div>
                               </div>
-                              <p class="x-small text-muted mt-1 mb-0">PNG transparan. Contoh: ornamen emas, bingkai resmi.
-                              </p>
                             </div>
                           </div>
+
+                          {{-- Bingkai Khusus PAUD --}}
+                          <div class="col-md-4">
+                            <div class="form-group mb-0">
+                              <label class="small font-weight-bold text-primary text-uppercase">
+                                <i class="fas fa-border-style mr-1"></i> Bingkai PAUD
+                              </label>
+                              <p class="x-small text-muted mb-2">Khusus PAUD/TK.</p>
+                              <div class="d-flex align-items-center bg-white p-2 rounded border border-primary">
+                                <div id="watermark-border-paud-preview-container"
+                                  class="bg-light border text-center d-flex align-items-center justify-content-center mr-2 rounded overflow-hidden"
+                                  style="width: 50px; height: 50px; padding: 5px;">
+                                  @if($dinas->watermark_border_paud_img)
+                                    <img src="{{ Storage::url($dinas->watermark_border_paud_img) }}"
+                                      style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                  @else
+                                    <i class="fas fa-child text-primary"></i>
+                                  @endif
+                                </div>
+                                <div class="d-flex flex-column">
+                                  <label class="btn btn-xs btn-outline-primary mb-1">
+                                    Pilih File
+                                    <input type="file" name="watermark_border_paud_img" class="d-none" accept="image/*">
+                                  </label>
+                                  @if($dinas->watermark_border_paud_img)
+                                    <button type="button"
+                                      onclick="confirmDeleteImage('watermark_border_paud_img', 'bingkai khusus PAUD')"
+                                      class="btn btn-xs btn-outline-danger">
+                                      <i class="fas fa-trash-alt"></i> Hapus
+                                    </button>
+                                  @endif
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                         </div>
 
                         {{-- Row 2: Settings --}}
@@ -359,12 +394,19 @@
                                 class="form-control form-control-sm">
                             </div>
                           </div>
+                        </div>
+                        <div class="row mt-2">
                           <div class="col-md-4">
                             <div class="form-group mb-0">
                               <label class="x-small font-weight-bold text-muted mb-1">Ukuran Watermark (px)</label>
                               <input type="number" name="watermark_size" min="50" max="1000"
                                 value="{{ old('watermark_size', $dinas->watermark_size ?? 400) }}"
-                                class="form-control form-control-sm">
+                                class="form-control form-control-sm @error('watermark_size') is-invalid @enderror">
+                              @error('watermark_size')
+                                <span class="invalid-feedback" role="alert">
+                                  <strong>{{ $message }}</strong>
+                                </span>
+                              @enderror
                             </div>
                           </div>
                         </div>
@@ -579,7 +621,6 @@
                 </div>
               </div>
 
-              <!-- Keamanan Tab -->
               <div class="tab-pane fade" id="tab-security" role="tabpanel">
                 <div class="mb-4">
                   <h4 class="font-weight-bold text-dark mb-1">Ubah Password</h4>
@@ -622,7 +663,6 @@
                 </form>
               </div>
 
-              <!-- Pemeliharaan Tab -->
               <div class="tab-pane fade" id="tab-maintenance" role="tabpanel">
                 <div class="mb-4">
                   <h4 class="font-weight-bold text-dark mb-1">Pemeliharaan & Database</h4>
@@ -782,6 +822,8 @@
         setupImagePreview('stempel_img', 'stempel-preview-container');
         setupImagePreview('watermark_img', 'watermark-preview-container');
         setupImagePreview('watermark_border_img', 'watermark-border-preview-container');
+        // Script tambahan untuk trigger preview BINGKAI PAUD
+        setupImagePreview('watermark_border_paud_img', 'watermark-border-paud-preview-container');
 
         // BS Custom File Input (for restore database)
         if (typeof bsCustomFileInput !== 'undefined') {
@@ -792,6 +834,8 @@
       // Auto-switch to tab if error exists or session specific
       @if($errors->hasAny(['current_password', 'password']))
         $('#tab-security-link').tab('show');
+      @elseif($errors->hasAny(['app_name', 'kode_surat', 'pimpinan_nama', 'pimpinan_jabatan', 'watermark_size']))
+        $('#tab-instansi-link').tab('show');
       @endif
 
       // Delete Image Logic via Hidden Form

@@ -19,6 +19,7 @@ class JenisPerizinan extends Model
     'deskripsi',
     'template_html',
     'use_border',
+    'border_type',
     'form_config',
     'is_active',
   ];

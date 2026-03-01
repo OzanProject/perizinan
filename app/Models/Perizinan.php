@@ -267,15 +267,54 @@ class Perizinan extends Model
       // Layer 2: Border/frame decoration (full-page ornament)
       $useBorder = $this->jenisPerizinan->use_border ?? false;
 
-      if ($dinas->watermark_border_img && $useBorder) {
-        $borderBase64 = $toBase64($dinas->watermark_border_img);
-        $borderOpacity = $dinas->watermark_border_opacity ?? 0.2;
-        $template .= '
-                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                            width: 100%; height: 100%;
-                            opacity: ' . $borderOpacity . '; z-index: -2;">
-                  <img src="' . $borderBase64 . '" width="100%" height="100%" style="object-fit:cover;" />
-                </div>';
+      if ($useBorder) {
+        $namaIzin = strtolower($this->jenisPerizinan->nama ?? '');
+        $borderType = $this->jenisPerizinan->border_type;
+        $borderPath = $dinas->watermark_border_img; // Default
+
+        // LOGIKA DETEKSI: PRIORITASKAN PILIHAN MANUAL (BORDER_TYPE)
+        if ($borderType === 'paud') {
+          $borderPath = $dinas->watermark_border_paud_img ?: 'images/bingkai-paud.jpg';
+        } elseif ($borderType === 'pkbm') {
+          $borderPath = 'images/bingkai-pkbm.jpg';
+        } elseif ($borderType === 'default') {
+          $borderPath = $dinas->watermark_border_img ?: 'images/default-border.png';
+        } else {
+          // LOGIKA DETEKSI OTOMATIS (FALLBACK):
+          if (strpos($namaIzin, 'paud') !== false || strpos($namaIzin, 'tk') !== false) {
+            $borderPath = $dinas->watermark_border_paud_img ?: 'images/bingkai-paud.jpg';
+          } elseif (strpos($namaIzin, 'pkbm') !== false) {
+            $borderPath = 'images/bingkai-pkbm.jpg';
+          }
+        }
+
+        if ($borderPath) {
+          // Check if it's a storage path or public path
+          $isPublic = !str_starts_with($borderPath, 'watermarks/') && !str_starts_with($borderPath, 'logos/') && !str_starts_with($borderPath, 'stempels/');
+
+          if ($isPublic) {
+            $fullPath = public_path($borderPath);
+            if (file_exists($fullPath) && !is_dir($fullPath)) {
+              $type = pathinfo($fullPath, PATHINFO_EXTENSION);
+              $data = file_get_contents($fullPath);
+              $borderBase64 = 'data:image/' . ($type ?: 'png') . ';base64,' . base64_encode($data);
+            } else {
+              $borderBase64 = null;
+            }
+          } else {
+            $borderBase64 = $toBase64($borderPath);
+          }
+
+          if ($borderBase64) {
+            $borderOpacity = $dinas->watermark_border_opacity ?? 0.2;
+            $template .= '
+                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                                width: 100%; height: 100%;
+                                opacity: ' . $borderOpacity . '; z-index: -2;">
+                      <img src="' . $borderBase64 . '" width="100%" height="100%" style="object-fit:cover;" />
+                    </div>';
+          }
+        }
       }
     }
 

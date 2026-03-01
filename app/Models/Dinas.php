@@ -30,6 +30,7 @@ class Dinas extends Model
     'watermark_opacity',
     'watermark_border_opacity',
     'watermark_size',
+    'watermark_border_paud_img',
   ];
 
   protected $casts = [

@@ -90,7 +90,8 @@ class JenisPerizinanController extends Controller
             'frameUrl',
             'watermarkEnabled',
             'watermarkOpacity',
-            'activePreset'
+            'activePreset',
+            'dinas'
         ));
     }
 
@@ -106,6 +107,7 @@ class JenisPerizinanController extends Controller
             $jenisPerizinan->update([
                 'template_html' => $request->template_html,
                 'use_border' => $request->has('use_border') ? ($request->use_border == '1') : false,
+                'border_type' => $request->border_type,
             ]);
 
             return redirect()->route('super_admin.jenis_perizinan.index')
