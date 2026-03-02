@@ -92,13 +92,13 @@
               @endphp
 
               <div id="frame-overlay" style="
-                      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                      pointer-events: none; z-index: 2;
-                      background-image: url('{{ $overlayUrl }}');
-                      background-size: 100% 100%; background-repeat: no-repeat;
-                      opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
-                      display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
-                  "></div>
+                                        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                                        pointer-events: none; z-index: 2;
+                                        background-image: url('{{ $overlayUrl }}');
+                                        background-size: 100% 100%; background-repeat: no-repeat;
+                                        opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
+                                        display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
+                                    "></div>
 
               <div id="editor-canvas" class="document-editor__editable paper-a4-portrait" contenteditable="true">
                 {!! $jenisPerizinan->template_html ?? '<div style="text-align:center; padding-top:50px; color:#ccc;"><h2>Kanvas Kosong</h2><p>Klik tombol kuning "Pilih Layout" di atas untuk memulai desain secara otomatis.</p></div>' !!}
@@ -305,6 +305,8 @@
     .document-editor__editable th {
       padding: 2px 4px !important;
       line-height: 1.15 !important;
+      border: 1px dashed #ccc;
+      /* Tampilkan border dashed tipis saat di editor agar mudah dilihat */
     }
 
     .document-editor__editable figure {
@@ -343,27 +345,41 @@
       const presets = @json($presets ?? []);
       const logoUrl = @json($logoUrl ?? '');
 
+      // Wajib agar CKEditor tidak auto-init sebelum konfigurasi kita jalan
       CKEDITOR.disableAutoInline = true;
 
       $(document).ready(function () {
-        // Otomatis Tutup Sidebar Admin Lte (Jika Ada)
+        // Otomatis Tutup Sidebar Admin Lte
         $('body').addClass('sidebar-collapse');
 
         editorInstance = CKEDITOR.inline('editor-canvas', {
-          extraPlugins: 'sharedspace,justify,font,colorbutton,colordialog,horizontalrule,table,tabletools',
+          // PENAMBAHAN PLUGIN SUPER LENGKAP: 
+          // font, format, colorbutton, justify, list, table, find, pastefromword, dll
+          extraPlugins: 'sharedspace,justify,font,colorbutton,colordialog,horizontalrule,table,tabletools,contextmenu,list,liststyle,indent,indentblock,indentlist,sourcedialog,find,pastefromword,pagebreak,copyformatting',
           removePlugins: 'exportpdf,exportword',
           sharedSpaces: { top: 'toolbar-container' },
           allowedContent: true,
           enterMode: CKEDITOR.ENTER_P,
           shiftEnterMode: CKEDITOR.ENTER_BR,
 
+          // TOOLBAR SUPER LENGKAP (GAYA MICROSOFT WORD)
           toolbar: [
-            { name: 'document', items: ['Source', '-', 'Undo', 'Redo'] },
-            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', '-', 'RemoveFormat'] },
-            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
-            { name: 'insert', items: ['Table', 'HorizontalRule', 'SpecialChar'] },
-            { name: 'styles', items: ['Font', 'FontSize'] },
-            { name: 'colors', items: ['TextColor', 'BGColor'] }
+            // --- BARIS 1 ---
+            { name: 'document', items: ['Sourcedialog', 'Print', '-', 'Undo', 'Redo'] },
+            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'CopyFormatting', 'RemoveFormat'] },
+            { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+            '/', // Simbol '/' artinya pindah ke baris baru
+
+            // --- BARIS 2 ---
+            { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'] },
+            { name: 'colors', items: ['TextColor', 'BGColor'] },
+            '/', // Pindah ke baris baru lagi
+
+            // --- BARIS 3 ---
+            { name: 'paragraph_list', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
+            { name: 'paragraph_align', items: ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+            { name: 'insert', items: ['Table', 'HorizontalRule', 'SpecialChar', 'PageBreak'] }
           ],
 
           on: {
@@ -378,7 +394,6 @@
 
       function openPresetModal() { $('#presetModal').modal('show'); }
 
-      // FUNGSI TOGGLE PANEL BAWAH (Slide Up / Down)
       function toggleVariablePanel() {
         $('#variable-content').slideToggle('fast', function () {
           if ($(this).is(':visible')) {
@@ -419,7 +434,6 @@
           overlay.style.backgroundImage = `url('${framePaths[type]}')`;
           if (borderTypeInput) borderTypeInput.value = type;
 
-          // Update active button state
           ['default', 'paud', 'pkbm'].forEach(t => {
             const btn = document.getElementById(`btn-frame-${t}`);
             if (btn) {
@@ -439,7 +453,6 @@
         }
       }
 
-      // Initialize active frame button
       $(document).ready(function () {
         const savedType = '{{ $jenisPerizinan->border_type }}';
         if (savedType) {
@@ -489,7 +502,6 @@
         editorInstance.insertHtml(`<span class="var-badge" contenteditable="false">${val}</span>&nbsp;`);
       }
 
-      // SISIP GARIS KOP SEKARANG MENGGUNAKAN <hr> ASLI (CKEDITOR 4 MENGIZINKANNYA!)
       function insertGarisKop() {
         if (!editorInstance) return;
         editorInstance.focus();
@@ -523,7 +535,6 @@
         document.getElementById('template-form').submit();
       }
 
-      // Filter pencarian data otomatis
       document.getElementById('search-var').addEventListener('input', e => {
         const term = e.target.value.toLowerCase();
         document.querySelectorAll('.var-btn').forEach(btn => {
