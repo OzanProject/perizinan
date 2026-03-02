@@ -66,12 +66,13 @@
 
     <!-- Login Box Container -->
     <div class="w-full max-w-[400px] px-4 z-10 relative">
-        <div class="text-center mb-4">
+        <div class="text-center mb-6">
             @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
-                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-3 drop-shadow-lg"
-                    style="width: 70px; height: 70px; object-fit: contain;">
+                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-4 drop-shadow-xl"
+                    style="width: 80px; height: 80px; object-fit: contain;">
             @endif
-            <h1 class="text-3xl font-bold text-white tracking-tight drop-shadow-md">
+            <h1
+                class="text-xl md:text-2xl font-extrabold text-white tracking-tight drop-shadow-lg uppercase leading-tight px-4">
                 {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
             </h1>
         </div>

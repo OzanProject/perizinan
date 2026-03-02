@@ -5,7 +5,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Atur Ulang Password -
-        {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}</title>
+        {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
+    </title>
     @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
         <link rel="shortcut icon" href="{{ Storage::url($globalDinas->logo) }}" />
         <link rel="icon" type="image/png" href="{{ Storage::url($globalDinas->logo) }}">
@@ -64,12 +65,13 @@
 
     <!-- Container -->
     <div class="w-full max-w-[400px] px-4 z-10 relative">
-        <div class="text-center mb-4">
+        <div class="text-center mb-6">
             @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
-                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-3 drop-shadow-lg"
-                    style="width: 70px; height: 70px; object-fit: contain;">
+                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-4 drop-shadow-xl"
+                    style="width: 80px; height: 80px; object-fit: contain;">
             @endif
-            <h1 class="text-3xl font-bold text-white tracking-tight drop-shadow-md">
+            <h1
+                class="text-2xl md:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg uppercase leading-tight px-4">
                 Reset Password
             </h1>
         </div>

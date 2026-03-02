@@ -64,18 +64,19 @@
   class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display relative overflow-hidden">
   <!-- Blurred Background Image -->
   <div class="absolute inset-0 bg-cover bg-center z-0 filter blur-[4px] scale-105"
-    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7UaVMsRGjmeHAHjWLfdIRFtbFV2ADV0B7lJAhznHqZAADO2_xOMyV4MnpT15HU7xYcvx_7sH3JZfhB5yWOsxEvMpdRAO9fjT_wW6hOuknNSAG2G9USWwSw-qB5Erd49kiUZlIk-LxJhoQ6No-nEwfO0nphPbwBVy-yYN0hP0f2Csqah0nm5dS0c2HmIYChPAFZp0LaOyGGNWLhaITJSUlxzxVdG3uNO8bSCGGnOvo_0FDLMJD0E9Ghivw4OObFN3_inWrGxmr-qQH');">
+    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7UaVMsRGjmeHAHjWLfdIRFtbFV2ADV0B7lJAhznHqZAADO2_xOMyV4MnpT15HU7xYcvx_7sH3JZfhB5yWOsXEvMpdRAO9fjT_wW6hOuknNSAG2G9USWwSw-qB5Erd49kiUZlIk-LxJhoQ6No-nEwfO0nphPbwBVy-yYN0hP0f2Csqah0nm5dS0c2HmIYChPAFZp0LaOyGGNWLhaITJSUlxzxVdG3uNO8bSCGGnOvo_0FDLMJD0E9Ghivw4OObFN3_inWrGxmr-qQH');">
     <div class="absolute inset-0 bg-black/30 dark:bg-black/50"></div>
   </div>
 
   <!-- Container -->
   <div class="w-full max-w-[400px] px-4 z-10 relative">
-    <div class="text-center mb-4">
+    <div class="text-center mb-6">
       @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
-        <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-3 drop-shadow-lg"
-          style="width: 70px; height: 70px; object-fit: contain;">
+        <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-4 drop-shadow-xl"
+          style="width: 80px; height: 80px; object-fit: contain;">
       @endif
-      <h1 class="text-3xl font-bold text-white tracking-tight drop-shadow-md">
+      <h1
+        class="text-2xl md:text-3xl font-extrabold text-white tracking-tight drop-shadow-lg uppercase leading-tight px-4">
         Verifikasi OTP
       </h1>
     </div>
