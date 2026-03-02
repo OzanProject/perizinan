@@ -92,13 +92,13 @@
               @endphp
 
               <div id="frame-overlay" style="
-                                        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                                        pointer-events: none; z-index: 2;
-                                        background-image: url('{{ $overlayUrl }}');
-                                        background-size: 100% 100%; background-repeat: no-repeat;
-                                        opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
-                                        display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
-                                    "></div>
+                                                            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                                                            pointer-events: none; z-index: 2;
+                                                            background-image: url('{{ $overlayUrl }}');
+                                                            background-size: 100% 100%; background-repeat: no-repeat;
+                                                            opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
+                                                            display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
+                                                        "></div>
 
               <div id="editor-canvas" class="document-editor__editable paper-a4-portrait" contenteditable="true">
                 {!! $jenisPerizinan->template_html ?? '<div style="text-align:center; padding-top:50px; color:#ccc;"><h2>Kanvas Kosong</h2><p>Klik tombol kuning "Pilih Layout" di atas untuk memulai desain secara otomatis.</p></div>' !!}
@@ -237,20 +237,27 @@
   </div>
 
   <style>
-    /* KERTAS KANVAS CKEDITOR 4 */
+    /* TUKAR KERTAS KANVAS TINYMCE */
+    .tox-tinymce {
+      border: none !important;
+      border-radius: 0 !important;
+    }
+
     .document-editor__editable {
       background: white;
       border: 1px solid #d3d3d3;
-      padding: 2cm 2cm;
+      padding: 1.5cm 1.5cm;
+      /* Adjust padding slightly for TinyMCE */
       font-family: 'Times New Roman', Times, serif;
       font-size: 11pt;
       line-height: 1.15;
       color: black;
       overflow: visible;
-      /* Penting agar ttd tidak kepotong */
       position: relative;
       z-index: 1;
       transition: all 0.3s ease;
+      min-height: auto !important;
+      /* TinyMCE uses its own height management */
     }
 
     .document-editor__editable:focus {
@@ -338,56 +345,46 @@
     }
   </style>
 
+  {{-- TinyMCE Integration --}}
   @push('scripts')
-    <script src="https://cdn.ckeditor.com/4.22.1/full-all/ckeditor.js"></script>
+    <script src="https://cdn.tiny.cloud/1/nuww14eec90ohvwjq67sjn9fcqkn5mmyywap0caie6rk7xhs/tinymce/7/tinymce.min.js"
+      referrerpolicy="origin"></script>
+
     <script>
       let editorInstance;
       const presets = @json($presets ?? []);
       const logoUrl = @json($logoUrl ?? '');
 
-      // Wajib agar CKEditor tidak auto-init sebelum konfigurasi kita jalan
-      CKEDITOR.disableAutoInline = true;
-
       $(document).ready(function () {
         // Otomatis Tutup Sidebar Admin Lte
         $('body').addClass('sidebar-collapse');
 
-        editorInstance = CKEDITOR.inline('editor-canvas', {
-          // PENAMBAHAN PLUGIN SUPER LENGKAP: 
-          // font, format, colorbutton, justify, list, table, find, pastefromword, dll
-          extraPlugins: 'sharedspace,justify,font,colorbutton,colordialog,horizontalrule,table,tabletools,contextmenu,list,liststyle,indent,indentblock,indentlist,sourcedialog,find,pastefromword,pagebreak,copyformatting',
-          removePlugins: 'exportpdf,exportword',
-          sharedSpaces: { top: 'toolbar-container' },
-          allowedContent: true,
-          enterMode: CKEDITOR.ENTER_P,
-          shiftEnterMode: CKEDITOR.ENTER_BR,
+        tinymce.init({
+          selector: '#editor-canvas',
+          inline: true,
+          fixed_toolbar_container: '#toolbar-container',
+          toolbar_persist: true, // Toolbar selalu tampil, tidak perlu klik editor dulu
 
-          // TOOLBAR SUPER LENGKAP (GAYA MICROSOFT WORD)
+          plugins: 'advlist autolink lists link charmap preview searchreplace visualblocks code fullscreen table help wordcount directionality nonbreaking',
+
           toolbar: [
-            // --- BARIS 1 ---
-            { name: 'document', items: ['Sourcedialog', 'Print', '-', 'Undo', 'Redo'] },
-            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'CopyFormatting', 'RemoveFormat'] },
-            { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
-            '/', // Simbol '/' artinya pindah ke baris baru
-
-            // --- BARIS 2 ---
-            { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
-            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'] },
-            { name: 'colors', items: ['TextColor', 'BGColor'] },
-            '/', // Pindah ke baris baru lagi
-
-            // --- BARIS 3 ---
-            { name: 'paragraph_list', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
-            { name: 'paragraph_align', items: ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
-            { name: 'insert', items: ['Table', 'HorizontalRule', 'SpecialChar', 'PageBreak'] }
+            'undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | removeformat',
+            'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table | charmap code preview'
           ],
 
-          on: {
-            instanceReady: function (evt) {
-              const currentData = evt.editor.getData();
-              evt.editor.setData(processVariablesForView(currentData));
+          font_family_formats: 'Times New Roman=times new roman,times,serif; Arial=arial,helvetica,sans-serif; Courier New=courier new,courier,monospace; Tahoma=tahoma,arial,helvetica,sans-serif;',
+          font_size_formats: '8pt 10pt 11pt 12pt 14pt 18pt 24pt 36pt 48pt',
+          menubar: false,
+
+          content_style: "body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.15; } .var-badge { display: inline-block; padding: 1px 4px; font-weight: bold; color: #004085; background: #cce5ff; border: 1px solid #b8daff; border-radius: 3px; font-family: monospace; }",
+
+          setup: function (editor) {
+            editorInstance = editor;
+            editor.on('init', function () {
+              const currentData = editor.getContent();
+              editor.setContent(processVariablesForView(currentData));
               updatePaperSize();
-            }
+            });
           }
         });
       });
@@ -472,7 +469,7 @@
       function applyPreset(key) {
         if (confirm(`Apakah Anda yakin ingin mengganti desain saat ini dengan preset "${presets[key].name}"? Semua teks manual yang belum disimpan akan terganti.`)) {
           const preset = presets[key];
-          editorInstance.setData(processVariablesForView(preset.html));
+          editorInstance.setContent(processVariablesForView(preset.html));
 
           document.getElementById('paper-size-selector').value = preset.paper_size || 'F4';
           document.getElementById('paper-orientation').value = preset.orientation || 'portrait';
@@ -498,15 +495,14 @@
 
       function insertVar(val) {
         if (!editorInstance) return;
-        editorInstance.focus();
-        editorInstance.insertHtml(`<span class="var-badge" contenteditable="false">${val}</span>&nbsp;`);
+        // Penyesuaian sintaks insert untuk TinyMCE
+        editorInstance.execCommand('mceInsertContent', false, `<span class="var-badge" contenteditable="false">${val}</span>&nbsp;`);
       }
 
       function insertGarisKop() {
         if (!editorInstance) return;
-        editorInstance.focus();
         const htmlLined = '<hr style="border: none; border-top: 3px solid black; border-bottom: 1px solid black; height: 5px; background: transparent; margin: 10px 0;">';
-        editorInstance.insertHtml(htmlLined);
+        editorInstance.execCommand('mceInsertContent', false, htmlLined);
       }
 
       function processVariablesForView(html) {
@@ -531,7 +527,7 @@
 
       function submitTemplate() {
         if (!editorInstance) return;
-        document.getElementById('template-input').value = revertVariablesForSave(editorInstance.getData());
+        document.getElementById('template-input').value = revertVariablesForSave(editorInstance.getContent());
         document.getElementById('template-form').submit();
       }
 
