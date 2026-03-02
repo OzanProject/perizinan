@@ -138,7 +138,7 @@
                 <div class="mt-4 border-t border-slate-100 dark:border-slate-700 pt-4">
                     <p class="mb-2">
                         <a class="text-slate-600 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors text-sm"
-                            href="#">
+                            href="{{ route('password.request') }}">
                             Lupa kata sandi?
                         </a>
                     </p>

@@ -137,6 +137,81 @@ class SettingController extends Controller
     return back()->with('success', 'Pengaturan aplikasi berhasil diperbarui.');
   }
 
+  public function updateSmtp(Request $request)
+  {
+    $dinas = Auth::user()->dinas;
+
+    $request->validate([
+      'mail_host' => 'required|string',
+      'mail_port' => 'required|string',
+      'mail_username' => 'required|string',
+      'mail_password' => 'required|string',
+      'mail_from_address' => 'required|email',
+      'mail_from_name' => 'required|string',
+    ]);
+
+    $dinas->update($request->only([
+      'mail_host',
+      'mail_port',
+      'mail_username',
+      'mail_password',
+      'mail_encryption',
+      'mail_from_address',
+      'mail_from_name'
+    ]));
+
+    return back()->with('success', 'Konfigurasi SMTP berhasil diperbarui.');
+  }
+
+  public function testEmail(Request $request)
+  {
+    $request->validate([
+      'email' => 'required|email',
+      'mail_host' => 'nullable|string',
+      'mail_port' => 'nullable|string',
+      'mail_username' => 'nullable|string',
+      'mail_password' => 'nullable|string',
+      'mail_encryption' => 'nullable|string',
+      'mail_from_address' => 'nullable|email',
+      'mail_from_name' => 'nullable|string',
+    ]);
+
+    $dinas = Auth::user()->dinas;
+
+    // Create a temporary object if host is provided to test before saving
+    if ($request->filled('mail_host')) {
+      $configTarget = (object) [
+        'mail_host' => $request->mail_host,
+        'mail_port' => $request->mail_port,
+        'mail_username' => $request->mail_username,
+        'mail_password' => $request->mail_password,
+        'mail_encryption' => $request->mail_encryption,
+        'mail_from_address' => $request->mail_from_address,
+        'mail_from_name' => $request->mail_from_name,
+        'app_name' => $dinas->app_name
+      ];
+    } else {
+      $configTarget = $dinas;
+    }
+
+    if (!$configTarget->mail_host) {
+      return response()->json(['success' => false, 'message' => 'Konfigurasi SMTP belum lengkap.']);
+    }
+
+    try {
+      \App\Helpers\MailConfigHelper::set($configTarget);
+
+      \Illuminate\Support\Facades\Mail::raw('Ini adalah email percobaan dari Sistem Perizinan OzanProject. Jika Anda menerima ini, konfigurasi SMTP Anda sudah benar.', function ($message) use ($request, $configTarget) {
+        $message->to($request->email)
+          ->subject('Tes Koneksi SMTP - ' . $configTarget->app_name);
+      });
+
+      return response()->json(['success' => true, 'message' => 'Email percobaan berhasil dikirim ke ' . $request->email]);
+    } catch (\Exception $e) {
+      return response()->json(['success' => false, 'message' => 'Gagal mengirim email: ' . $e->getMessage()]);
+    }
+  }
+
   public function updateSecurity(Request $request)
   {
     $request->validate([

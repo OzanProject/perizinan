@@ -116,6 +116,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/backup', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'backupDb'])->name('settings.backup');
         Route::post('/settings/restore', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'restoreDb'])->name('settings.restore');
         Route::post('/settings/delete-image', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'deleteImage'])->name('settings.delete_image');
+        Route::post('/settings/smtp', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'updateSmtp'])->name('settings.smtp.update');
+        Route::post('/settings/smtp-test', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'testEmail'])->name('settings.smtp.test');
 
     });
 });

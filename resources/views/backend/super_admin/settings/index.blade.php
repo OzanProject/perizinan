@@ -80,6 +80,12 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a class="nav-link font-link font-weight-bold" id="tab-smtp-link" data-toggle="pill" href="#tab-smtp"
+                  role="tab">
+                  <i class="fas fa-envelope mr-1"></i> Email & SMTP
+                </a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link font-weight-bold" id="tab-maintenance-link" data-toggle="pill" href="#tab-maintenance"
                   role="tab">
                   <i class="fas fa-tools mr-1"></i> Pemeliharaan
@@ -663,6 +669,100 @@
                 </form>
               </div>
 
+              <div class="tab-pane fade" id="tab-smtp" role="tabpanel">
+                <div class="mb-4">
+                  <h4 class="font-weight-bold text-dark mb-1">Pengaturan Email & SMTP</h4>
+                  <p class="text-muted small">Konfigurasi server email untuk pengiriman OTP dan notifikasi sistem.</p>
+                </div>
+
+                <form action="{{ route('super_admin.settings.smtp.update') }}" method="POST">
+                  @csrf
+                  <div class="row">
+                    <div class="col-md-6 border-right">
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">SMTP Host</label>
+                        <input type="text" name="mail_host" value="{{ old('mail_host', $dinas->mail_host) }}"
+                          class="form-control" placeholder="smtp.gmail.com atau mailtrap.io" required>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label class="small font-weight-bold text-muted text-uppercase">SMTP Port</label>
+                            <input type="text" name="mail_port" value="{{ old('mail_port', $dinas->mail_port) }}"
+                              class="form-control" placeholder="465, 587, atau 25" required>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label class="small font-weight-bold text-muted text-uppercase">Encryption</label>
+                            <select name="mail_encryption" class="form-control">
+                              <option value="tls" {{ old('mail_encryption', $dinas->mail_encryption) == 'tls' ? 'selected' : '' }}>TLS</option>
+                              <option value="ssl" {{ old('mail_encryption', $dinas->mail_encryption) == 'ssl' ? 'selected' : '' }}>SSL</option>
+                              <option value="" {{ old('mail_encryption', $dinas->mail_encryption) == '' ? 'selected' : '' }}>None</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">SMTP Username</label>
+                        <input type="text" name="mail_username" value="{{ old('mail_username', $dinas->mail_username) }}"
+                          class="form-control" placeholder="Email atau username SMTP" required>
+                      </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">SMTP Password</label>
+                        <div class="input-group">
+                          <input type="password" name="mail_password"
+                            value="{{ old('mail_password', $dinas->mail_password) }}" class="form-control"
+                            placeholder="Password aplikasi/SMTP" required id="smtpPassword">
+                          <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button"
+                              onclick="togglePassword('smtpPassword')">
+                              <i class="fas fa-eye"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Email Pengirim (From
+                          Address)</label>
+                        <input type="email" name="mail_from_address"
+                          value="{{ old('mail_from_address', $dinas->mail_from_address) }}" class="form-control"
+                          placeholder="noreply@domain.com" required>
+                      </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">Nama Pengirim (From Name)</label>
+                        <input type="text" name="mail_from_name"
+                          value="{{ old('mail_from_name', $dinas->mail_from_name) }}" class="form-control"
+                          placeholder="Nama Dinas atau Aplikasi" required>
+                      </div>
+
+                      <div class="bg-light p-3 rounded border mt-4">
+                        <h6 class="font-weight-bold small text-uppercase mb-2"><i class="fas fa-vial text-info mr-2"></i>
+                          Uji Koneksi SMTP</h6>
+                        <p class="x-small text-muted mb-3">Kirim email percobaan ke alamat Anda untuk memastikan
+                          konfigurasi sudah benar.</p>
+                        <div class="input-group input-group-sm">
+                          <input type="email" id="testEmailAddress" class="form-control"
+                            placeholder="Email tujuan tes...">
+                          <div class="input-group-append">
+                            <button type="button" onclick="testSmtpConnection()" class="btn btn-info font-weight-bold">
+                              Kirim Tes
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-right mt-4">
+                    <button type="submit" class="btn btn-primary px-4 font-weight-bold">
+                      <i class="fas fa-save mr-1"></i> Simpan Konfigurasi
+                    </button>
+                  </div>
+                </form>
+              </div>
+
               <div class="tab-pane fade" id="tab-maintenance" role="tabpanel">
                 <div class="mb-4">
                   <h4 class="font-weight-bold text-dark mb-1">Pemeliharaan & Database</h4>
@@ -838,12 +938,70 @@
         $('#tab-instansi-link').tab('show');
       @endif
 
-      // Delete Image Logic via Hidden Form
-      function confirmDeleteImage(field, label) {
-        if (confirm(`Apakah Anda yakin ingin menghapus ${label}?`)) {
-          document.getElementById('delete-field').value = field;
-          document.getElementById('delete-image-form').submit();
+        // Delete Image Logic via Hidden Form
+        function confirmDeleteImage(field, label) {
+          if (confirm(`Apakah Anda yakin ingin menghapus ${label}?`)) {
+            document.getElementById('delete-field').value = field;
+            document.getElementById('delete-image-form').submit();
+          }
         }
+
+      function togglePassword(id) {
+        const input = document.getElementById(id);
+        const icon = event.currentTarget.querySelector('i');
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      }
+
+      function testSmtpConnection() {
+        const email = $('#testEmailAddress').val();
+        if (!email) {
+          Swal.fire('Error', 'Harap masukkan email tujuan tes.', 'error');
+          return;
+        }
+
+        // Ambil semua data dari form SMTP agar bisa ditest sebelum simpan
+        const smtpData = {
+          _token: '{{ csrf_token() }}',
+          email: email,
+          mail_host: $('input[name="mail_host"]').val(),
+          mail_port: $('input[name="mail_port"]').val(),
+          mail_username: $('input[name="mail_username"]').val(),
+          mail_password: $('input[name="mail_password"]').val(),
+          mail_encryption: $('select[name="mail_encryption"]').val(),
+          mail_from_address: $('input[name="mail_from_address"]').val(),
+          mail_from_name: $('input[name="mail_from_name"]').val()
+        };
+
+        Swal.fire({
+          title: 'Mengirim Email Tes...',
+          text: 'Mohon tunggu sebentar',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        $.post('{{ route("super_admin.settings.smtp.test") }}', smtpData, function (response) {
+          if (response.success) {
+            Swal.fire('Berhasil', response.message, 'success');
+          } else {
+            Swal.fire('Gagal', response.message, 'error');
+          }
+        }).fail(function (xhr) {
+          let errorMsg = 'Terjadi kesalahan sistem.';
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            errorMsg = xhr.responseJSON.message;
+          }
+          Swal.fire('Error', errorMsg, 'error');
+        });
       }
     </script>
   @endpush

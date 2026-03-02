@@ -31,6 +31,13 @@ class Dinas extends Model
     'watermark_border_opacity',
     'watermark_size',
     'watermark_border_paud_img',
+    'mail_host',
+    'mail_port',
+    'mail_username',
+    'mail_password',
+    'mail_encryption',
+    'mail_from_address',
+    'mail_from_name',
   ];
 
   protected $casts = [
