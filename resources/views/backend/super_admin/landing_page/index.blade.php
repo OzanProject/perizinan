@@ -170,8 +170,8 @@
                       @foreach($setting->license_types ?? [] as $index => $license)
                         <div class="license-row card card-light border mb-3">
                           <div class="card-body p-3 position-relative">
-                            <button type="button" class="btn btn-xs btn-danger position-absolute"
-                              style="top: 10px; right: 10px;" onclick="this.closest('.license-row').remove()">
+                            <button type="button" class="btn btn-xs btn-danger position-absolute remove-license"
+                              style="top: 10px; right: 10px;">
                               <i class="fas fa-times"></i>
                             </button>
                             <div class="row">
@@ -233,8 +233,8 @@
                       @foreach($setting->faq ?? [] as $index => $faq)
                         <div class="faq-row card border-left-info mb-3 shadow-sm">
                           <div class="card-body p-3 position-relative">
-                            <button type="button" class="btn btn-xs btn-danger position-absolute"
-                              style="top: 10px; right: 10px;" onclick="this.closest('.faq-row').remove()">
+                            <button type="button" class="btn btn-xs btn-danger position-absolute remove-faq"
+                              style="top: 10px; right: 10px;">
                               <i class="fas fa-times"></i>
                             </button>
                             <div class="form-group mb-2">
@@ -381,18 +381,20 @@
       let faqIndex = $('#faq-container .faq-row').length;
       $('#add-faq').click(function () {
         let html = `
-                              <div class="faq-row border p-3 mb-3 rounded position-relative">
-                                  <button type="button" class="btn btn-sm btn-danger position-absolute" style="top:5px; right:5px;" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
-                                  <div class="form-group">
-                                      <label>Pertanyaan</label>
-                                      <input type="text" name="faq[${faqIndex}][question]" class="form-control">
-                                  </div>
-                                  <div class="form-group mb-0">
-                                      <label>Jawaban</label>
-                                      <textarea name="faq[${faqIndex}][answer]" class="form-control" rows="2"></textarea>
-                                  </div>
-                              </div>
-                          `;
+                                <div class="faq-row card border-left-info mb-3 shadow-sm">
+                                    <div class="card-body p-3 position-relative">
+                                        <button type="button" class="btn btn-xs btn-danger position-absolute remove-faq" style="top:5px; right:5px;"><i class="fas fa-times"></i></button>
+                                        <div class="form-group mb-2">
+                                            <label class="text-xs font-bold uppercase tracking-wider text-primary">Pertanyaan</label>
+                                            <input type="text" name="faq[${faqIndex}][question]" class="form-control">
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label class="text-xs font-bold uppercase tracking-wider text-muted">Jawaban</label>
+                                            <textarea name="faq[${faqIndex}][answer]" class="form-control" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
         $('#faq-container').append(html);
         faqIndex++;
       });
@@ -400,30 +402,43 @@
       let licenseIndex = $('#license-container .license-row').length;
       $('#add-license').click(function () {
         let html = `
-                              <div class="license-row border p-3 mb-3 rounded position-relative">
-                                  <button type="button" class="btn btn-sm btn-danger position-absolute" style="top:5px; right:5px;" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
-                                  <div class="row">
-                                      <div class="col-8">
-                                          <div class="form-group">
-                                              <label>Nama Izin</label>
-                                              <input type="text" name="license_types[${licenseIndex}][title]" class="form-control">
-                                          </div>
-                                      </div>
-                                      <div class="col-4">
-                                          <div class="form-group">
-                                              <label>Ikon (Material)</label>
-                                              <input type="text" name="license_types[${licenseIndex}][icon]" class="form-control" value="add_card">
-                                          </div>
-                                      </div>
-                                  </div>
-                                  <div class="form-group">
-                                      <label>Deskripsi Singkat</label>
-                                      <textarea name="license_types[${licenseIndex}][description]" class="form-control" rows="2"></textarea>
-                                  </div>
-                              </div>
-                          `;
+                                <div class="license-row card card-light border mb-3">
+                                    <div class="card-body p-3 position-relative">
+                                        <button type="button" class="btn btn-xs btn-danger position-absolute remove-license" style="top:5px; right:5px;"><i class="fas fa-times"></i></button>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="form-group mb-2">
+                                                    <label class="text-xs">Nama Izin</label>
+                                                    <input type="text" name="license_types[${licenseIndex}][title]" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <label class="text-xs">Ikon (Material)</label>
+                                                    <input type="text" name="license_types[${licenseIndex}][icon]" class="form-control" value="add_card">
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group mb-0">
+                                                    <label class="text-xs">Deskripsi Singkat</label>
+                                                    <textarea name="license_types[${licenseIndex}][description]" class="form-control" rows="2"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
         $('#license-container').append(html);
         licenseIndex++;
+      });
+
+      // Robust Deletion using Event Delegation
+      $(document).on('click', '.remove-license', function () {
+        $(this).closest('.license-row').remove();
+      });
+
+      $(document).on('click', '.remove-faq', function () {
+        $(this).closest('.faq-row').remove();
       });
     });
   </script>
