@@ -8,6 +8,10 @@
     {{ $dinas->footer_text ?? $dinas->nama ?? 'Official Portal' }}
   </title>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon"
+    href="{{ isset($dinas->logo) ? asset('storage/' . $dinas->logo) : asset('favicon.ico') }}">
+
   <!-- SEO Meta Tags -->
   <meta name="description"
     content="@yield('meta_description', 'Portal Resmi Perizinan PKBM. Layanan terpadu untuk pengajuan dan pemantauan izin operasional lembaga pendidikan.')">
@@ -186,8 +190,13 @@
     }
 
     @keyframes marqueeRight {
-      0% { transform: translateX(-50%); }
-      100% { transform: translateX(0); }
+      0% {
+        transform: translateX(-50%);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
     }
   </style>
 </head>
