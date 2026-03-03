@@ -1,26 +1,29 @@
 <header id="main-header"
-  class="flex items-center justify-between whitespace-nowrap px-6 md:px-20 py-5 bg-transparent fixed top-0 w-full z-[100] transition-all duration-500">
-  <div class="flex items-center gap-10">
-    <a href="{{ route('landing') }}" class="flex items-center gap-3 text-primary group">
+  class="flex items-center justify-between px-6 md:px-20 py-5 bg-transparent fixed top-0 w-full z-[100] transition-all duration-500">
+  <div class="flex items-center gap-10 min-w-0">
+    <a href="{{ route('landing') }}" class="flex items-center gap-3 text-primary group min-w-0">
       <div
-        class="size-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300 border border-slate-100 dark:border-slate-700">
+        class="size-10 min-w-[40px] flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300 border border-slate-100 dark:border-slate-700">
         @if(isset($dinas->logo))
           <img src="{{ asset('storage/' . $dinas->logo) }}" alt="Logo" class="max-h-6">
         @else
           <span class="material-symbols-outlined text-2xl">account_balance</span>
         @endif
       </div>
-      <div class="flex flex-col">
-        <h2 class="text-slate-900 dark:text-slate-100 text-lg font-black leading-tight tracking-tighter">
+      <div class="flex flex-col min-w-0">
+        <h2
+          class="text-slate-900 dark:text-slate-100 text-base md:text-lg font-black leading-tight tracking-tighter truncate max-w-[200px] md:max-w-md">
           {{ $dinas->app_name ?? 'PKBM Licensing' }}
         </h2>
         <span
-          class="text-[10px] uppercase tracking-widest font-black text-slate-500/80 group-hover:text-primary transition-colors">{{ $dinas->footer_text ?? $dinas->nama ?? 'Official Portal' }}</span>
+          class="text-[9px] md:text-[10px] uppercase tracking-widest font-black text-slate-500/80 group-hover:text-primary transition-colors truncate max-w-[180px] md:max-w-sm">
+          {{ $dinas->footer_text ?? $dinas->nama ?? 'Official Portal' }}
+        </span>
       </div>
     </a>
 
     <!-- Desktop Navigation -->
-    <nav class="hidden lg:flex items-center gap-10">
+    <nav class="hidden xl:flex items-center gap-8 whitespace-nowrap">
       <a class="text-slate-600 dark:text-slate-400 text-sm font-bold hover:text-primary transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary hover:after:w-full after:transition-all {{ request()->routeIs('landing') ? 'text-primary after:w-full' : '' }}"
         href="{{ route('landing') }}">Beranda</a>
       <a class="text-slate-600 dark:text-slate-400 text-sm font-bold hover:text-primary transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary hover:after:w-full after:transition-all {{ request()->routeIs('perizinan.jenis') ? 'text-primary after:w-full' : '' }}"

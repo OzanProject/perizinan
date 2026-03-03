@@ -4,20 +4,21 @@
   <div class="max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-20">
       <!-- Brand Section -->
-      <div class="lg:col-span-4 flex flex-col gap-8">
-        <a href="{{ route('landing') }}" class="flex items-center gap-3 text-white group">
+      <div class="lg:col-span-4 flex flex-col gap-8 min-w-0">
+        <a href="{{ route('landing') }}" class="flex items-center gap-3 text-white group min-w-0">
           <div
-            class="size-12 rounded-2xl bg-white flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+            class="size-12 min-w-[48px] rounded-2xl bg-white flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
             @if(isset($dinas->logo))
               <img src="{{ asset('storage/' . $dinas->logo) }}" alt="Logo" class="max-h-8">
             @else
               <span class="material-symbols-outlined text-3xl text-primary">account_balance</span>
             @endif
           </div>
-          <div class="flex flex-col">
-            <h2 class="text-2xl font-black leading-tight tracking-tighter">{{ $dinas->app_name ?? 'PKBM Licensing' }}
+          <div class="flex flex-col min-w-0">
+            <h2 class="text-xl md:text-2xl font-black leading-[1.1] tracking-tighter mb-1">
+              {{ $dinas->app_name ?? 'PKBM Licensing' }}
             </h2>
-            <p class="text-[10px] uppercase tracking-[0.2em] font-black text-slate-500">
+            <p class="text-[9px] md:text-[10px] uppercase tracking-[0.2em] font-black text-slate-500 leading-relaxed">
               {{ $dinas->nama ?? 'Official Portal' }}
             </p>
           </div>
