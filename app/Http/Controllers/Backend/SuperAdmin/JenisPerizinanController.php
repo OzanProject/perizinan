@@ -10,152 +10,150 @@ use Illuminate\Support\Facades\Auth;
 
 class JenisPerizinanController extends Controller
 {
-    public function index()
-    {
-        $jenisPerizinans = JenisPerizinan::where('dinas_id', Auth::user()->dinas_id)
-            ->latest()
-            ->paginate(10);
+  public function index()
+  {
+    $jenisPerizinans = JenisPerizinan::where('dinas_id', Auth::user()->dinas_id)
+      ->latest()
+      ->paginate(10);
 
-        return view('backend.super_admin.jenis_perizinan.index', compact('jenisPerizinans'));
+    return view('backend.super_admin.jenis_perizinan.index', compact('jenisPerizinans'));
+  }
+
+  public function store(Request $request)
+  {
+    $request->validate([
+      'nama' => 'required|string|max:255',
+      'kode' => 'nullable|string|max:50',
+      'masa_berlaku_nilai' => 'required|integer|min:1',
+      'masa_berlaku_unit' => 'required|in:Tahun,Bulan',
+      'deskripsi' => 'nullable|string',
+    ]);
+
+    JenisPerizinan::create([
+      'dinas_id' => Auth::user()->dinas_id,
+      'nama' => $request->nama,
+      'kode' => $request->kode,
+      'masa_berlaku_nilai' => $request->masa_berlaku_nilai,
+      'masa_berlaku_unit' => $request->masa_berlaku_unit,
+      'deskripsi' => $request->deskripsi,
+      'is_active' => $request->has('is_active'),
+    ]);
+
+    return back()->with('success', 'Jenis perizinan berhasil ditambahkan.');
+  }
+
+  public function update(Request $request, JenisPerizinan $jenisPerizinan)
+  {
+    $request->validate([
+      'nama' => 'required|string|max:255',
+      'kode' => 'nullable|string|max:50',
+      'masa_berlaku_nilai' => 'required|integer|min:1',
+      'masa_berlaku_unit' => 'required|in:Tahun,Bulan',
+      'deskripsi' => 'nullable|string',
+    ]);
+
+    $jenisPerizinan->update([
+      'nama' => $request->nama,
+      'kode' => $request->kode,
+      'masa_berlaku_nilai' => $request->masa_berlaku_nilai,
+      'masa_berlaku_unit' => $request->masa_berlaku_unit,
+      'deskripsi' => $request->deskripsi,
+      'is_active' => $request->has('is_active'),
+    ]);
+
+    return back()->with('success', 'Jenis perizinan berhasil diperbarui.');
+  }
+
+  public function destroy(JenisPerizinan $jenisPerizinan)
+  {
+    $jenisPerizinan->delete();
+    return back()->with('success', 'Jenis perizinan berhasil dihapus.');
+  }
+
+  public function template(JenisPerizinan $jenisPerizinan)
+  {
+    $presets = CertificateTemplateService::getPresets();
+    $dinas = Auth::user()->dinas;
+    $logoUrl = $dinas && $dinas->logo ? asset('storage/' . $dinas->logo) : null;
+    $frameUrl = $dinas && $dinas->watermark_border_img ? asset('storage/' . $dinas->watermark_border_img) : null;
+    $watermarkEnabled = $dinas->watermark_enabled ?? true;
+    $watermarkOpacity = $dinas->watermark_opacity ?? 0.1;
+
+    $activePreset = \App\Models\CetakPreset::where('dinas_id', $dinas->id)
+      ->where('is_active', true)
+      ->first();
+
+    return view('backend.super_admin.jenis_perizinan.template', compact(
+      'jenisPerizinan',
+      'presets',
+      'logoUrl',
+      'frameUrl',
+      'watermarkEnabled',
+      'watermarkOpacity',
+      'activePreset',
+      'dinas'
+    ));
+  }
+
+  public function updateTemplate(Request $request, JenisPerizinan $jenisPerizinan)
+  {
+    $request->validate([
+      'template_html' => 'required|string',
+    ]);
+
+    try {
+      $jenisPerizinan->validateTemplate($request->template_html);
+
+      // Sanitize: ganti semua img tag yang berisi URL logo dengan placeholder [LOGO_DINAS]
+      // agar saat dicetak ke PDF, placeholder ini diganti base64 oleh replaceVariables()
+      $html = $request->template_html;
+
+      // Cara paling andal: deteksi via data-logo marker yang ditambahkan oleh JS editor
+      $html = preg_replace('/<img[^>]*data-logo=["\']1["\'][^>]*\/?>/i', '[LOGO_DINAS]', $html);
+
+      // Fallback: cari img yang src-nya mengarah ke /storage/ path logo dinas
+      $dinas = Auth::user()->dinas;
+      if ($dinas && $dinas->logo) {
+        $logoFileName = basename($dinas->logo);
+        $html = preg_replace(
+          '/<img[^>]*src=["\'][^"\']*' . preg_quote($logoFileName, '/') . '[^"\']*["\'][^>]*\/?>/i',
+          '[LOGO_DINAS]',
+          $html
+        );
+      }
+
+      $jenisPerizinan->update([
+        'template_html' => $html,
+        'use_border' => $request->has('use_border') ? ($request->use_border == '1') : false,
+        'border_type' => $request->border_type,
+      ]);
+
+      return redirect()->route('super_admin.jenis_perizinan.index')
+        ->with('success', 'Template sertifikat berhasil diperbarui.');
+    } catch (\Exception $e) {
+      return back()->withInput()->with('error', $e->getMessage());
     }
+  }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'kode' => 'nullable|string|max:50',
-            'masa_berlaku_nilai' => 'required|integer|min:1',
-            'masa_berlaku_unit' => 'required|in:Tahun,Bulan',
-            'deskripsi' => 'nullable|string',
-        ]);
+  public function formConfig(JenisPerizinan $jenisPerizinan)
+  {
+    return view('backend.super_admin.jenis_perizinan.form', compact('jenisPerizinan'));
+  }
 
-        JenisPerizinan::create([
-            'dinas_id' => Auth::user()->dinas_id,
-            'nama' => $request->nama,
-            'kode' => $request->kode,
-            'masa_berlaku_nilai' => $request->masa_berlaku_nilai,
-            'masa_berlaku_unit' => $request->masa_berlaku_unit,
-            'deskripsi' => $request->deskripsi,
-            'is_active' => $request->has('is_active'),
-        ]);
+  public function updateFormConfig(Request $request, JenisPerizinan $jenisPerizinan)
+  {
+    $request->validate([
+      'fields' => 'required|array',
+      'fields.*.name' => 'required|string|alpha_dash',
+      'fields.*.label' => 'required|string',
+      'fields.*.type' => 'required|in:text,number,date,textarea',
+    ]);
 
-        return back()->with('success', 'Jenis perizinan berhasil ditambahkan.');
-    }
+    $jenisPerizinan->update([
+      'form_config' => $request->fields,
+    ]);
 
-    public function update(Request $request, JenisPerizinan $jenisPerizinan)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'kode' => 'nullable|string|max:50',
-            'masa_berlaku_nilai' => 'required|integer|min:1',
-            'masa_berlaku_unit' => 'required|in:Tahun,Bulan',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        $jenisPerizinan->update([
-            'nama' => $request->nama,
-            'kode' => $request->kode,
-            'masa_berlaku_nilai' => $request->masa_berlaku_nilai,
-            'masa_berlaku_unit' => $request->masa_berlaku_unit,
-            'deskripsi' => $request->deskripsi,
-            'is_active' => $request->has('is_active'),
-        ]);
-
-        return back()->with('success', 'Jenis perizinan berhasil diperbarui.');
-    }
-
-    public function destroy(JenisPerizinan $jenisPerizinan)
-    {
-        $jenisPerizinan->delete();
-        return back()->with('success', 'Jenis perizinan berhasil dihapus.');
-    }
-
-    public function template(JenisPerizinan $jenisPerizinan)
-    {
-        $presets = CertificateTemplateService::getPresets();
-        $dinas = Auth::user()->dinas;
-        $logoUrl = $dinas && $dinas->logo ? asset('storage/' . $dinas->logo) : null;
-        $frameUrl = $dinas && $dinas->watermark_border_img ? asset('storage/' . $dinas->watermark_border_img) : null;
-        $watermarkEnabled = $dinas->watermark_enabled ?? true;
-        $watermarkOpacity = $dinas->watermark_opacity ?? 0.1;
-
-        $activePreset = \App\Models\CetakPreset::where('dinas_id', $dinas->id)
-            ->where('is_active', true)
-            ->first();
-
-        return view('backend.super_admin.jenis_perizinan.template', compact(
-            'jenisPerizinan',
-            'presets',
-            'logoUrl',
-            'frameUrl',
-            'watermarkEnabled',
-            'watermarkOpacity',
-            'activePreset',
-            'dinas'
-        ));
-    }
-
-    public function updateTemplate(Request $request, JenisPerizinan $jenisPerizinan)
-    {
-        $request->validate([
-            'template_html' => 'required|string',
-        ]);
-
-        try {
-            $jenisPerizinan->validateTemplate($request->template_html);
-
-            // Sanitize: ganti semua img tag yang berisi URL logo dengan placeholder [LOGO_DINAS]
-            // agar saat dicetak ke PDF, placeholder ini diganti base64 oleh replaceVariables()
-            $html = $request->template_html;
-
-            // Cara paling andal: hapus semua <img> di dalam td/div yang kemungkinan adalah logo kop surat
-            // (deteksi via data-logo marker yang ditambahkan oleh JS editor)
-            $html = preg_replace('/<img[^>]*data-logo=["\']1["\'][^>]*\/?>/i', '[LOGO_DINAS]', $html);
-
-            // Fallback: cari img yang src-nya mengarah ke /storage/ path logo dinas
-            $dinas = Auth::user()->dinas;
-            if ($dinas && $dinas->logo) {
-                $logoFileName = basename($dinas->logo);
-                // Tangkap img tag yang src-nya mengandung nama file logo, apapun base URL-nya
-                $html = preg_replace(
-                    '/<img[^>]*src=["\'][^"\']*' . preg_quote($logoFileName, '/') . '[^"\']*["\'][^>]*\/?>/i',
-                    '[LOGO_DINAS]',
-                    $html
-                );
-            }
-
-            $jenisPerizinan->update([
-                'template_html' => $html,
-                'use_border' => $request->has('use_border') ? ($request->use_border == '1') : false,
-                'border_type' => $request->border_type,
-            ]);
-
-            return redirect()->route('super_admin.jenis_perizinan.index')
-                ->with('success', 'Template sertifikat berhasil diperbarui.');
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', $e->getMessage());
-        }
-    }
-
-    public function formConfig(JenisPerizinan $jenisPerizinan)
-    {
-        return view('backend.super_admin.jenis_perizinan.form', compact('jenisPerizinan'));
-    }
-
-    public function updateFormConfig(Request $request, JenisPerizinan $jenisPerizinan)
-    {
-        $request->validate([
-            'fields' => 'required|array',
-            'fields.*.name' => 'required|string|alpha_dash',
-            'fields.*.label' => 'required|string',
-            'fields.*.type' => 'required|in:text,number,date,textarea',
-        ]);
-
-        $jenisPerizinan->update([
-            'form_config' => $request->fields,
-        ]);
-
-        return redirect()->route('super_admin.jenis_perizinan.index')
-            ->with('success', 'Konfigurasi formulir berhasil diperbarui.');
-    }
+    return redirect()->route('super_admin.jenis_perizinan.index')
+      ->with('success', 'Konfigurasi formulir berhasil diperbarui.');
+  }
 }

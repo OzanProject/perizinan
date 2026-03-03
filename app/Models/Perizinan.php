@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use App\Enums\PerizinanStatus;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class Perizinan extends Model
 {
@@ -17,11 +18,9 @@ class Perizinan extends Model
   {
     parent::boot();
 
-    // Immutability Guard: Prevent editing final document data
     static::updating(function ($perizinan) {
-      if ($perizinan->allowImmutableUpdate) {
+      if ($perizinan->allowImmutableUpdate)
         return;
-      }
 
       if (in_array($perizinan->getOriginal('status'), [PerizinanStatus::SIAP_DIAMBIL->value, PerizinanStatus::SELESAI->value])) {
         $protected = ['snapshot_html', 'document_hash', 'pdf_path', 'nomor_surat'];
@@ -65,104 +64,59 @@ class Perizinan extends Model
     'taken_at' => 'datetime',
   ];
 
+  // Relasi
   public function dinas()
   {
     return $this->belongsTo(Dinas::class);
   }
-
   public function lembaga()
   {
     return $this->belongsTo(Lembaga::class);
   }
-
   public function jenisPerizinan()
   {
     return $this->belongsTo(JenisPerizinan::class);
   }
 
-  public function dokumens()
-  {
-    return $this->hasMany(Dokumen::class);
-  }
-
-  public function statusLogs()
-  {
-    return $this->hasMany(StatusLog::class);
-  }
-
-  public function discussions()
-  {
-    return $this->hasMany(PerizinanDiscussion::class);
-  }
-
   /**
-   * Render Template Attribute
-   */
-  public function getRenderedTemplateAttribute()
-  {
-    if ($this->snapshot_html) {
-      return $this->snapshot_html;
-    }
-    return $this->replaceVariables();
-  }
-
-  /**
-   * Freezes the current state of the certificate into a permanent snapshot.
-   */
-  public function freezeSnapshot()
-  {
-    $html = $this->replaceVariables();
-    $this->snapshot_html = $html;
-    $this->document_hash = hash('sha256', $html);
-    $this->save();
-    return $this->snapshot_html;
-  }
-
-  public $rendered_template;
-
-  /**
-   * Main logic to replace [VARIABLES] or direct labels with actual data
-   * This is the "Instant Engine" that allows Zero-Placeholder usage.
+   * Engine Utama Pengganti Variabel
    */
   public function replaceVariables()
   {
     $template = $this->jenisPerizinan->template_html;
-    $formConfig = $this->jenisPerizinan->form_config; // Assumes this is cast to array or json
+    $formConfig = $this->jenisPerizinan->form_config;
     $data = $this->perizinan_data ?? [];
 
     if (!$template || trim(strip_tags($template)) == '') {
-      // Instant Generation if template is empty
-      $this->rendered_template = $this->generateDefaultTable();
-      return $this->rendered_template;
+      return $this->generateDefaultTable();
     }
 
     $dinas = $this->dinas;
     $lembaga = $this->lembaga;
 
-    // Helper for base64 images with defensive check
+    // Helper Base64 yang lebih tangguh untuk Hosting
     $toBase64 = function ($path) {
-      if (!$path || !\Storage::disk('public')->exists($path)) {
-        return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // Transparent pixel
+      if (!$path)
+        return '';
+
+      // Bersihkan path dari prefix storage jika ada
+      $cleanPath = str_replace(['/storage/', 'storage/'], '', $path);
+      $fullPath = storage_path('app/public/' . $cleanPath);
+
+      if (!file_exists($fullPath) || is_dir($fullPath)) {
+        return '';
       }
+
       try {
-        $fullPath = \Storage::disk('public')->path($path);
         $type = pathinfo($fullPath, PATHINFO_EXTENSION);
-        $data = file_get_contents($fullPath);
-        $base64 = base64_encode($data);
-
-        // Defensive: Check if base64 is not empty
-        if (!$base64) {
-          return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-        }
-
-        return 'data:image/' . ($type ?: 'png') . ';base64,' . $base64;
+        $imageData = file_get_contents($fullPath);
+        return 'data:image/' . ($type ?: 'png') . ';base64,' . base64_encode($imageData);
       } catch (\Exception $e) {
-        return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        return '';
       }
     };
 
-    // 1. Map Core Global Variables (Always active)
-    // DISINI PERUBAHANNYA: inline-block ditambahkan agar gambar mengikuti align CKEditor
+    // 1. Variabel Global (Gunakan str_ireplace agar tidak peka huruf besar/kecil)
     $globalVars = [
       '[NOMOR_SURAT]' => $this->nomor_surat ?? '............................',
       '[TANGGAL_TERBIT]' => $this->tanggal_terbit ? $this->tanggal_terbit->translatedFormat('d F Y') : '............................',
@@ -179,20 +133,20 @@ class Perizinan extends Model
       '[PIMPINAN_PANGKAT]' => $this->pimpinan_pangkat ?: ($dinas->pimpinan_pangkat ?? ''),
       '[PIMPINAN_NIP]' => $this->pimpinan_nip ?: ($dinas->pimpinan_nip ?: '............................'),
 
-      // Perbaikan inline-block
+      // Gambar — base64 agar bisa dirender oleh dompdf
       '[LOGO_DINAS]' => '<img src="' . $toBase64($dinas->logo) . '" width="70" height="70" style="display:inline-block; max-width:100%;">',
       '[WATERMARK_LOGO]' => '<img src="' . $toBase64($dinas->watermark_img ?: $dinas->logo) . '" width="70" height="70" style="display:inline-block; max-width:100%;">',
       '[STEMPEL_DINAS]' => '<img src="' . $toBase64($this->stempel_img ?? $dinas->stempel_img) . '" width="80" height="80" style="display:inline-block; max-width:100%;">',
     ];
 
-    // Helper: Build dynamic TTL if exists in data
+    // TTL dinamis jika ada
     $tempatLahir = $data['tempat_lahir'] ?? null;
     $tglLahir = $data['tanggal_lahir'] ?? null;
     if ($tempatLahir && $tglLahir) {
-      $globalVars['[TTL]'] = "{$tempatLahir}, " . \Carbon\Carbon::parse($tglLahir)->translatedFormat('d F Y');
+      $globalVars['[TTL]'] = "{$tempatLahir}, " . Carbon::parse($tglLahir)->translatedFormat('d F Y');
     }
 
-    // Common Dynamic Data Mapping (Auto-Fallback)
+    // Auto-repair: key umum di form yang sering muncul langsung
     $commonKeys = ['NAMA', 'PENDIDIKAN', 'JABATAN', 'UNIT_KERJA'];
     foreach ($commonKeys as $ck) {
       if (isset($data[strtolower($ck)])) {
@@ -201,78 +155,68 @@ class Perizinan extends Model
     }
 
     foreach ($globalVars as $key => $val) {
-      $template = str_replace($key, $val, $template);
+      $template = str_ireplace($key, $val, $template);
     }
 
-    // Defensive: Handle <img> tags with onerror for any remaining or custom images
-    if (str_contains($template, '<img')) {
-      $template = preg_replace('/<img([^>]+)>/i', '<img$1 onerror="this.style.display=\'none\';">', $template);
+    // === AUTO-REPAIR: Konversi img URL /storage/ yang masih tersisa ke base64 ===
+    // Menangani template lama yang tersimpan dengan URL img (bukan placeholder)
+    if (str_contains($template, '/storage/') && str_contains($template, '<img')) {
+      $template = preg_replace_callback(
+        '/<img([^>]*)src=["\']([^"\']*\/storage\/[^"\']+)["\']([^>]*)>/i',
+        function ($matches) use ($toBase64) {
+          $storagePath = preg_replace('/^.*\/storage\//', '', $matches[2]);
+          $base64Src = $toBase64($storagePath);
+          return '<img' . $matches[1] . 'src="' . $base64Src . '"' . $matches[3] . '>';
+        },
+        $template
+      );
     }
 
-    // 2. INSTANT ENGINE: Map by Labels & Automatic Tags
+    // 2. Mapping Data Dinamis dari Form
     if (is_array($formConfig)) {
       foreach ($formConfig as $field) {
         $key = $field['name'] ?? '';
-        $label = $field['label'] ?? '';
-        $val = $data[$key] ?? '';
-
-        if (is_array($val)) {
+        $val = $data[$key] ?? '................';
+        if (is_array($val))
           $val = implode(', ', $val);
-        }
-        if (!$val) {
-          $val = '................';
-        }
 
-        // A. Direct Replacement by [DATA:key] or [key] (Standard)
         $template = str_ireplace('[DATA:' . strtoupper($key) . ']', $val, $template);
         $template = str_ireplace('[DATA:' . $key . ']', $val, $template);
         $template = str_ireplace('[' . strtoupper($key) . ']', $val, $template);
-
-        // B. Instant Replacement by Label (Zero-Placeholder Logic)
-        if ($label) {
-          $safeLabel = preg_quote($label, '/');
-          $pattern = "/({$safeLabel}\s*:\s*[.\s]*)/i";
-
-          $template = preg_replace($pattern, "{$label} : <strong>{$val}</strong>", $template);
-
-          $template = str_ireplace('[' . strtoupper($label) . ']', $val, $template);
-          $template = str_ireplace('[' . $label . ']', $val, $template);
-        }
       }
     }
 
-
-    // 3. Fallback/Cleanup
+    // 3. Bersihkan sisa placeholder [DATA:xxx] yang tidak terpetakan
     $template = preg_replace('/\[DATA:[^\]]+\]/i', '................', $template);
 
-    // 4. Auto-inject full-page watermark layers if enabled
+    // 4. Watermark tengah + Bingkai/Border
     if ($dinas->watermark_enabled ?? true) {
       $wmOpacity = $dinas->watermark_opacity ?? 0.08;
       $wmSize = $dinas->watermark_size ?? 400;
       $halfSize = $wmSize / 2;
 
-      // Layer 1: Center watermark (logo behind text)
+      // Layer 1: Watermark logo di tengah
       $wmImg = $dinas->watermark_img ?: $dinas->logo;
       if ($wmImg) {
         $wmBase64 = $toBase64($wmImg);
-        $template .= '
-                <div style="position: fixed; top: 50%; left: 50%;
-                            width: ' . $wmSize . 'px; height: ' . $wmSize . 'px;
-                            margin-top: -' . $halfSize . 'px; margin-left: -' . $halfSize . 'px;
-                            opacity: ' . $wmOpacity . '; z-index: -1;">
-                  <img src="' . $wmBase64 . '" width="' . $wmSize . '" height="' . $wmSize . '" />
-                </div>';
+        if ($wmBase64) {
+          $template .= '
+          <div style="position: fixed; top: 50%; left: 50%;
+                      width: ' . $wmSize . 'px; height: ' . $wmSize . 'px;
+                      margin-top: -' . $halfSize . 'px; margin-left: -' . $halfSize . 'px;
+                      opacity: ' . $wmOpacity . '; z-index: -1;">
+            <img src="' . $wmBase64 . '" width="' . $wmSize . '" height="' . $wmSize . '" style="object-fit:contain;" />
+          </div>';
+        }
       }
 
-      // Layer 2: Border/frame decoration (full-page ornament)
+      // Layer 2: Bingkai/frame full-page
       $useBorder = $this->jenisPerizinan->use_border ?? false;
-
       if ($useBorder) {
         $namaIzin = strtolower($this->jenisPerizinan->nama ?? '');
         $borderType = $this->jenisPerizinan->border_type;
-        $borderPath = $dinas->watermark_border_img; // Default
+        $borderPath = $dinas->watermark_border_img;
 
-        // LOGIKA DETEKSI: PRIORITASKAN PILIHAN MANUAL (BORDER_TYPE)
         if ($borderType === 'paud') {
           $borderPath = $dinas->watermark_border_paud_img ?: 'images/bingkai-paud.jpg';
         } elseif ($borderType === 'pkbm') {
@@ -280,24 +224,23 @@ class Perizinan extends Model
         } elseif ($borderType === 'default') {
           $borderPath = $dinas->watermark_border_img ?: 'images/default-border.png';
         } else {
-          // LOGIKA DETEKSI OTOMATIS (FALLBACK):
-          if (strpos($namaIzin, 'paud') !== false || strpos($namaIzin, 'tk') !== false) {
+          if (str_contains($namaIzin, 'paud') || str_contains($namaIzin, 'tk')) {
             $borderPath = $dinas->watermark_border_paud_img ?: 'images/bingkai-paud.jpg';
-          } elseif (strpos($namaIzin, 'pkbm') !== false) {
+          } elseif (str_contains($namaIzin, 'pkbm')) {
             $borderPath = 'images/bingkai-pkbm.jpg';
           }
         }
 
         if ($borderPath) {
-          // Check if it's a storage path or public path
-          $isPublic = !str_starts_with($borderPath, 'watermarks/') && !str_starts_with($borderPath, 'logos/') && !str_starts_with($borderPath, 'stempels/');
+          $isPublic = !str_starts_with($borderPath, 'watermarks/')
+            && !str_starts_with($borderPath, 'logos/')
+            && !str_starts_with($borderPath, 'stempels/');
 
           if ($isPublic) {
-            $fullPath = public_path($borderPath);
-            if (file_exists($fullPath) && !is_dir($fullPath)) {
-              $type = pathinfo($fullPath, PATHINFO_EXTENSION);
-              $data = file_get_contents($fullPath);
-              $borderBase64 = 'data:image/' . ($type ?: 'png') . ';base64,' . base64_encode($data);
+            $fullBorderPath = public_path($borderPath);
+            if (file_exists($fullBorderPath) && !is_dir($fullBorderPath)) {
+              $type = pathinfo($fullBorderPath, PATHINFO_EXTENSION);
+              $borderBase64 = 'data:image/' . ($type ?: 'jpg') . ';base64,' . base64_encode(file_get_contents($fullBorderPath));
             } else {
               $borderBase64 = null;
             }
@@ -308,59 +251,21 @@ class Perizinan extends Model
           if ($borderBase64) {
             $borderOpacity = $dinas->watermark_border_opacity ?? 0.2;
             $template .= '
-                    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                                width: 100%; height: 100%;
-                                opacity: ' . $borderOpacity . '; z-index: -2;">
-                      <img src="' . $borderBase64 . '" width="100%" height="100%" style="object-fit:cover;" />
-                    </div>';
+            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                        width: 100%; height: 100%;
+                        opacity: ' . $borderOpacity . '; z-index: -2;">
+              <img src="' . $borderBase64 . '" width="100%" height="100%" style="object-fit:cover;" />
+            </div>';
           }
         }
       }
     }
 
-    $this->rendered_template = $template;
     return $template;
   }
 
-  /**
-   * Generates a clean professional table of all data if no template is provided.
-   */
   private function generateDefaultTable()
   {
-    $lembaga = $this->lembaga;
-    $data = $this->perizinan_data ?? [];
-    $formConfig = $this->jenisPerizinan->form_config;
-
-    $html = "<div style='text-align: center; margin-bottom: 30px;'>";
-    $html .= "<h2 style='text-transform: uppercase; margin-bottom: 5px;'>" . $this->jenisPerizinan->nama . "</h2>";
-    $html .= "<p>Nomor : " . ($this->nomor_surat ?? '................') . "</p></div>";
-
-    $html .= "<table style='width: 100%; border-collapse: collapse;'><tbody>";
-
-    // Institutional fixed data
-    $items = [
-      'Nama Lembaga' => $lembaga->nama_lembaga ?: $lembaga->nama,
-      'NPSN' => $lembaga->npsn,
-      'Alamat' => $lembaga->alamat,
-    ];
-
-    foreach ($items as $l => $v) {
-      $html .= "<tr><td style='padding: 5px; width: 200px;'>{$l}</td><td>:</td><td style='padding: 5px;'>{$v}</td></tr>";
-    }
-
-    // Dynamic Form Data
-    if (is_array($formConfig)) {
-      foreach ($formConfig as $field) {
-        $label = $field['label'] ?? '';
-        $val = $data[$field['name'] ?? ''] ?? '................';
-        if (is_array($val)) {
-          $val = implode(', ', $val);
-        }
-        $html .= "<tr><td style='padding: 5px;'>{$label}</td><td>:</td><td style='padding: 5px; font-weight: bold;'>{$val}</td></tr>";
-      }
-    }
-
-    $html .= "</tbody></table>";
-    return $html;
+    return "<h2>" . $this->jenisPerizinan->nama . "</h2><p>Template belum dikonfigurasi.</p>";
   }
 }
