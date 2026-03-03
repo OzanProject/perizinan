@@ -92,13 +92,13 @@
               @endphp
 
               <div id="frame-overlay" style="
-                                                            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                                                            pointer-events: none; z-index: 2;
-                                                            background-image: url('{{ $overlayUrl }}');
-                                                            background-size: 100% 100%; background-repeat: no-repeat;
-                                                            opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
-                                                            display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
-                                                        "></div>
+                                                                position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                                                                pointer-events: none; z-index: 2;
+                                                                background-image: url('{{ $overlayUrl }}');
+                                                                background-size: 100% 100%; background-repeat: no-repeat;
+                                                                opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
+                                                                display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
+                                                            "></div>
 
               <div id="editor-canvas" class="document-editor__editable paper-a4-portrait" contenteditable="true">
                 {!! $jenisPerizinan->template_html ?? '<div style="text-align:center; padding-top:50px; color:#ccc;"><h2>Kanvas Kosong</h2><p>Klik tombol kuning "Pilih Layout" di atas untuk memulai desain secara otomatis.</p></div>' !!}
@@ -378,6 +378,9 @@
 
           content_style: "body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.15; } .var-badge { display: inline-block; padding: 1px 4px; font-weight: bold; color: #004085; background: #cce5ff; border: 1px solid #b8daff; border-radius: 3px; font-family: monospace; }",
 
+          // Pastikan TinyMCE tidak menghapus atribut data-logo pada img tag
+          extended_valid_elements: 'img[src|alt|style|width|height|contenteditable|data-logo|data-mce-src]',
+
           setup: function (editor) {
             editorInstance = editor;
             editor.on('init', function () {
@@ -507,7 +510,8 @@
 
       function processVariablesForView(html) {
         if (!html) return '';
-        if (logoUrl) html = html.replace(/\[LOGO_DINAS\]/g, `<img src="${logoUrl}" style="width:75px; height:auto; display:inline-block;" contenteditable="false">`);
+        // Add data-logo="1" so we can reliably revert back even if TinyMCE mutates the tag
+        if (logoUrl) html = html.replace(/\[LOGO_DINAS\]/g, `<img src="${logoUrl}" data-logo="1" style="width:75px; height:auto; display:inline-block;" contenteditable="false">`);
         return html.replace(/\[([A-Z0-9_:]+)\]/g, function (match, p1) {
           if (p1 === 'LOGO_DINAS') return match;
           return `<span class="var-badge" contenteditable="false">[${p1}]</span>`;
@@ -516,7 +520,10 @@
 
       function revertVariablesForSave(html) {
         if (!html) return '';
+        // Use data-logo="1" marker for reliable detection regardless of TinyMCE attribute mutations
         if (logoUrl) {
+          html = html.replace(/<img[^>]*data-logo=["|']1["|'][^>]*>/gi, '[LOGO_DINAS]');
+          // Fallback: also match by src in case data-logo is stripped
           const escapedUrl = logoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const regex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi');
           html = html.replace(regex, '[LOGO_DINAS]');

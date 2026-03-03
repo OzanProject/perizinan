@@ -14,16 +14,51 @@ class DocumentRenderService
 
         $body = $p->replaceVariables();
 
-        // Pembersih Spasi Gaib CKEditor
+        // Pembersih Spasi Gaib
         $body = preg_replace('/(<p>(&nbsp;|\s|<br\s*\/?>)*<\/p>\s*)+$/i', '', $body);
-        $body = preg_replace('/(<br\s*\/?>\s*)+$/i', '', $body);
+        $body = preg_replace('/(<br\s*\/?>(\s)*)+$/i', '', $body);
 
         $pageCss = $this->buildPageCss($preset, $paperSize, $orientation);
         $padding = $this->getContentPadding($preset, $orientation);
 
-        // SUNTIKAN PAKSA: Jika Landscape, kecilkan font jadi 9.5pt agar tabel muat 1 lembar di Hosting!
         $isLandscape = strtolower($orientation ?: ($preset->orientation ?? 'portrait')) === 'landscape';
         $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
+
+        // Watermark: logo dinas di tengah halaman dengan opacity rendah
+        $dinas = $p->dinas;
+        $watermarkHtml = '';
+        $watermarkCss = '';
+        $watermarkEnabled = $dinas->watermark_enabled ?? true;
+        if ($watermarkEnabled && $dinas && $dinas->watermark_img) {
+            $wmPath = Storage::disk('public')->path($dinas->watermark_img);
+            $wmOpacity = $dinas->watermark_opacity ?? 0.08;
+        } elseif ($watermarkEnabled && $dinas && $dinas->logo) {
+            $wmPath = Storage::disk('public')->path($dinas->logo);
+            $wmOpacity = 0.08;
+        } else {
+            $wmPath = null;
+            $wmOpacity = 0;
+        }
+
+        if ($wmPath && file_exists($wmPath)) {
+            $wmType = strtolower(pathinfo($wmPath, PATHINFO_EXTENSION)) ?: 'png';
+            $wmBase64 = base64_encode(file_get_contents($wmPath));
+            $wmSrc = "data:image/{$wmType};base64,{$wmBase64}";
+
+            $watermarkCss = '
+                .watermark-overlay {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 200px;
+                    height: 200px;
+                    opacity: ' . $wmOpacity . ';
+                    z-index: -1;
+                }
+            ';
+            $watermarkHtml = '<div class="watermark-overlay"><img src="' . $wmSrc . '" style="width:200px; height:200px; object-fit:contain;"></div>';
+        }
 
         return '<!DOCTYPE html>
         <html>
@@ -31,33 +66,33 @@ class DocumentRenderService
             <meta charset="UTF-8">
             <style>
                 ' . $pageCss . '
-                
-                body { 
-                    font-family: "Times New Roman", Times, serif; 
-                    font-size: ' . $fontSize . ' !important; 
-                    line-height: 1.1; /* Line height super rapat */
-                    color: #000; 
-                    margin: 0; 
-                    padding: ' . $padding . '; 
+                ' . $watermarkCss . '
+
+                body {
+                    font-family: "Times New Roman", Times, serif;
+                    font-size: ' . $fontSize . ' !important;
+                    line-height: 1.1;
+                    color: #000;
+                    margin: 0;
+                    padding: ' . $padding . ';
                 }
 
                 figure { margin: 0; padding: 0; }
                 figure.image { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 5px !important; clear: both !important; }
                 figure.image img { display: inline-block !important; margin: 0 auto !important; max-width: 100%; height: auto; }
 
-                /* Paksaan Spasi Paragraf */
                 p { clear: both; margin-top: 0; margin-bottom: 4px; }
                 p:last-child { margin-bottom: 0 !important; }
 
-                /* Paksaan Tabel */
                 table { border-collapse: collapse; width: 100%; page-break-inside: avoid; margin-bottom: 5px; }
                 tr { page-break-inside: avoid; page-break-after: auto; }
                 td { vertical-align: top; padding: 1px 3px; border: none; }
-                
+
                 .signature-block { page-break-inside: avoid; margin-top: 5px; }
             </style>
         </head>
         <body>
+            ' . $watermarkHtml . '
             ' . $body . '
         </body>
         </html>';

@@ -104,8 +104,28 @@ class JenisPerizinanController extends Controller
         try {
             $jenisPerizinan->validateTemplate($request->template_html);
 
+            // Sanitize: ganti semua img tag yang berisi URL logo dengan placeholder [LOGO_DINAS]
+            // agar saat dicetak ke PDF, placeholder ini diganti base64 oleh replaceVariables()
+            $html = $request->template_html;
+
+            // Cara paling andal: hapus semua <img> di dalam td/div yang kemungkinan adalah logo kop surat
+            // (deteksi via data-logo marker yang ditambahkan oleh JS editor)
+            $html = preg_replace('/<img[^>]*data-logo=["\']1["\'][^>]*\/?>/i', '[LOGO_DINAS]', $html);
+
+            // Fallback: cari img yang src-nya mengarah ke /storage/ path logo dinas
+            $dinas = Auth::user()->dinas;
+            if ($dinas && $dinas->logo) {
+                $logoFileName = basename($dinas->logo);
+                // Tangkap img tag yang src-nya mengandung nama file logo, apapun base URL-nya
+                $html = preg_replace(
+                    '/<img[^>]*src=["\'][^"\']*' . preg_quote($logoFileName, '/') . '[^"\']*["\'][^>]*\/?>/i',
+                    '[LOGO_DINAS]',
+                    $html
+                );
+            }
+
             $jenisPerizinan->update([
-                'template_html' => $request->template_html,
+                'template_html' => $html,
                 'use_border' => $request->has('use_border') ? ($request->use_border == '1') : false,
                 'border_type' => $request->border_type,
             ]);
