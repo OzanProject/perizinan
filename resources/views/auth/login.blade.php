@@ -4,162 +4,171 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Login - {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}</title>
-    @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
+    <meta name="robots" content="noindex, nofollow">
+    <title>Login | {{ $globalDinas->app_name ?? 'Sistem Perizinan' }}</title>
+    @if(isset($globalDinas) && $globalDinas->logo)
         <link rel="shortcut icon" href="{{ Storage::url($globalDinas->logo) }}" />
-        <link rel="icon" type="image/png" href="{{ Storage::url($globalDinas->logo) }}">
     @endif
-    <!-- Material Symbols -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap"
-        rel="stylesheet" />
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <!-- Theme Configuration -->
-    <script id="tailwind-config">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
         tailwind.config = {
-            darkMode: "class",
+            darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#0c48c0",
-                        "primary-hover": "#0a3a9b",
-                        "background-light": "#f5f6f8",
-                        "background-dark": "#101622",
-                    },
-                    fontFamily: {
-                        "display": ["Public Sans", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    backgroundImage: {
-                        'checkbox-tick': "url(\"data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e\")",
-                    }
-                },
-            },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { primary: { DEFAULT: '#0f172a', hover: '#1e293b' } }
+                }
+            }
         }
     </script>
+
     <style>
-        body {
-            font-family: 'Public Sans', sans-serif;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mesh-gradient {
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 58, 138, 0.5) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(124, 58, 237, 0.4) 0px, transparent 50%);
         }
     </style>
 </head>
 
-<body
-    class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display relative overflow-hidden">
-    <!-- Blurred Background Image -->
-    <div class="absolute inset-0 bg-cover bg-center z-0 filter blur-[4px] scale-105"
-        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7UaVMsRGjmeHAHjWLfdIRFtbFV2ADV0B7lJAhznHqZAADO2_xOMyV4MnpT15HU7xYcvx_7sH3JZfhB5yWOsxEvMpdRAO9fjT_wW6hOuknNSAG2G9USWwSw-qB5Erd49kiUZlIk-LxJhoQ6No-nEwfO0nphPbwBVy-yYN0hP0f2Csqah0nm5dS0c2HmIYChPAFZp0LaOyGGNWLhaITJSUlxzxVdG3uNO8bSCGGnOvo_0FDLMJD0E9Ghivw4OObFN3_inWrGxmr-qQH');">
-        <div class="absolute inset-0 bg-black/30 dark:bg-black/50"></div>
-    </div>
+<body class="mesh-gradient min-h-screen flex items-center justify-center p-6 font-sans antialiased overflow-x-hidden">
+    <!-- Back to Home Floating Button -->
+    <a href="{{ route('landing') }}"
+        class="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white text-sm font-semibold transition-all hover:-translate-x-1 group">
+        <span
+            class="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-1">arrow_back</span>
+        Kembali ke Beranda
+    </a>
 
-    <!-- Login Box Container -->
-    <div class="w-full max-w-[400px] px-4 z-10 relative">
-        <div class="text-center mb-6">
-            @if(isset($globalDinas) && $globalDinas && $globalDinas->logo)
-                <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="mx-auto mb-4 drop-shadow-xl"
-                    style="width: 80px; height: 80px; object-fit: contain;">
-            @endif
-            <h1
-                class="text-xl md:text-2xl font-extrabold text-white tracking-tight drop-shadow-lg uppercase leading-tight px-4">
-                {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
-            </h1>
-        </div>
+    <div class="w-full max-w-md relative">
+        <!-- Decorative Blobs -->
+        <div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl animate-pulse"
+            style="animation-delay: 1s"></div>
 
-        <div class="bg-white dark:bg-[#1e2530] rounded-lg shadow-xl overflow-hidden border-t-4 border-primary">
-            <div class="p-8">
-                <p class="text-slate-500 dark:text-slate-400 text-center mb-6 font-normal">Masuk untuk memulai sesi Anda
-                </p>
+        <!-- Login Card -->
+        <div
+            class="glass-card rounded-3xl shadow-2xl overflow-hidden relative z-10 transition-all duration-500 hover:shadow-primary/20">
+            <div class="p-8 md:p-10">
+                <!-- Header -->
+                <div class="text-center mb-10">
+                    @if(isset($globalDinas) && $globalDinas->logo)
+                        <div
+                            class="inline-flex p-3 rounded-2xl bg-white shadow-lg mb-6 ring-4 ring-slate-100 dark:ring-slate-800">
+                            <img src="{{ Storage::url($globalDinas->logo) }}" alt="Logo" class="w-16 h-16 object-contain">
+                        </div>
+                    @endif
+                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">
+                        Selamat Datang
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                        Silakan masuk ke akun {{ $globalDinas->app_name ?? 'Portal Perizinan' }} Anda
+                    </p>
+                </div>
 
+                <!-- Alert Error -->
                 @if($errors->any())
-                    <div class="mb-4 p-3 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm">
-                        {{ $errors->first() }}
+                    <div
+                        class="mb-6 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-red-500 mt-0.5">error</span>
+                        <span class="text-red-700 dark:text-red-400 text-sm font-medium">{{ $errors->first() }}</span>
                     </div>
                 @endif
 
-                <form action="{{ route('login') }}" method="post">
+                <!-- Login Form -->
+                <form action="{{ route('login') }}" method="post" class="space-y-6">
                     @csrf
-                    <!-- Email Input Group -->
-                    <div class="mb-4">
-                        <div class="relative flex w-full flex-wrap items-stretch">
-                            <input name="email" aria-label="Email"
-                                class="relative m-0 block w-[1px] min-w-0 flex-auto rounded-l border border-r-0 border-slate-300 bg-transparent bg-clip-padding px-3 py-[0.5rem] text-base font-normal leading-[1.6] text-slate-700 outline-none transition duration-200 ease-in-out placeholder:text-slate-400 focus:z-[3] focus:border-primary focus:text-slate-700 focus:shadow-[inset_0_0_0_1px_rgb(12,72,192)] focus:outline-none dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-primary"
-                                placeholder="Email" required="" type="email" value="{{ old('email') }}" />
-                            <span
-                                class="input-group-text flex items-center whitespace-nowrap rounded-r border border-l-0 border-slate-300 px-3 py-[0.5rem] text-center text-base font-normal text-slate-500 dark:border-slate-600 dark:text-slate-400 bg-white dark:bg-[#1e2530]">
-                                <span class="material-symbols-outlined text-[20px]">mail</span>
-                            </span>
+                    <div class="space-y-2">
+                        <label
+                            class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 ml-1">Email
+                            Address</label>
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500 text-slate-400">
+                                <span class="material-symbols-outlined text-xl">mail</span>
+                            </div>
+                            <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                                placeholder="nama@lembaga.com">
                         </div>
                     </div>
-                    <!-- Password Input Group -->
-                    <div class="mb-4">
-                        <div class="relative flex w-full flex-wrap items-stretch">
-                            <input name="password" aria-label="Password"
-                                class="relative m-0 block w-[1px] min-w-0 flex-auto rounded-l border border-r-0 border-slate-300 bg-transparent bg-clip-padding px-3 py-[0.5rem] text-base font-normal leading-[1.6] text-slate-700 outline-none transition duration-200 ease-in-out placeholder:text-slate-400 focus:z-[3] focus:border-primary focus:text-slate-700 focus:shadow-[inset_0_0_0_1px_rgb(12,72,192)] focus:outline-none dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-500 dark:focus:border-primary"
-                                placeholder="Password" required="" type="password" />
-                            <span
-                                class="input-group-text flex items-center whitespace-nowrap rounded-r border border-l-0 border-slate-300 px-3 py-[0.5rem] text-center text-base font-normal text-slate-500 dark:border-slate-600 dark:text-slate-400 bg-white dark:bg-[#1e2530]">
-                                <span class="material-symbols-outlined text-[20px]">lock</span>
-                            </span>
-                        </div>
-                    </div>
-                    <!-- Row: Remember Me & Sign In Button -->
-                    <div class="flex items-center justify-between mt-6 mb-4">
-                        <div class="flex items-center min-h-[1.5rem] pl-[1.5rem] relative">
-                            <input name="remember"
-                                class="absolute left-0 top-0 h-5 w-5 rounded border-slate-300 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 transition-all checked:bg-primary checked:border-primary checked:bg-checkbox-tick"
-                                id="rememberMe" type="checkbox" />
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center px-1">
                             <label
-                                class="inline-block pl-2 hover:cursor-pointer text-slate-700 dark:text-slate-300 text-sm font-medium"
-                                for="rememberMe">
-                                Ingat Saya
-                            </label>
+                                class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Password</label>
+                            <a href="{{ route('password.request') }}"
+                                class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">Lupa
+                                Password?</a>
                         </div>
-                        <div class="w-1/3">
-                            <button
-                                class="w-full inline-block rounded bg-primary px-6 py-2 text-sm font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:bg-primary-hover hover:shadow-lg focus:bg-primary-hover focus:shadow-lg focus:outline-none focus:ring-0 active:bg-primary-hover active:shadow-lg"
-                                type="submit">
-                                Masuk
-                            </button>
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500 text-slate-400">
+                                <span class="material-symbols-outlined text-xl">lock</span>
+                            </div>
+                            <input type="password" name="password" required
+                                class="block w-full pl-11 pr-4 py-3.5 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                                placeholder="••••••••">
                         </div>
                     </div>
+
+                    <label class="flex items-center gap-3 cursor-pointer group w-fit">
+                        <input type="checkbox" name="remember"
+                            class="w-5 h-5 rounded-lg border-slate-300 dark:border-slate-700 text-blue-600 focus:ring-blue-500/20 transition-all dark:bg-slate-900">
+                        <span
+                            class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Ingat
+                            saya untuk sesi berikutnya</span>
+                    </label>
+
+                    <button type="submit"
+                        class="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-white/5 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-all transform hover:-translate-y-1 active:translate-y-0">
+                        Masuk Sekarang
+                    </button>
                 </form>
 
-                <div class="mt-4 border-t border-slate-100 dark:border-slate-700 pt-4">
-                    <p class="mb-2">
-                        <a class="text-slate-600 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors text-sm"
-                            href="{{ route('password.request') }}">
-                            Lupa kata sandi?
-                        </a>
-                    </p>
-                    <p class="mb-0">
-                        <a class="text-slate-600 hover:text-primary dark:text-slate-400 dark:hover:text-primary transition-colors text-sm"
-                            href="{{ route('register') }}">
-                            Daftar akun baru
-                        </a>
+                <div class="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">
+                        Belum punya akun lembaga?
+                        <a href="{{ route('register') }}"
+                            class="text-blue-600 dark:text-blue-400 font-bold hover:underline">Daftar Akun Baru</a>
                     </p>
                 </div>
             </div>
         </div>
 
-        <div class="mt-4 text-center">
-            <p class="text-white/80 text-xs font-light">
-                © {{ date('Y') }} {{ isset($globalDinas) && $globalDinas ? $globalDinas->nama : 'Dinas Pemerintahan' }}.
-                All rights reserved.
+        <!-- Footer Copyright -->
+        <div class="mt-8 text-center animate-pulse">
+            <p class="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em]">
+                © {{ date('Y') }} {{ $globalDinas->footer_text ?? $globalDinas->nama ?? 'Dinas Pendidikan Kota' }}
             </p>
         </div>
     </div>
+
     @include('partials.sweetalert')
 </body>
 

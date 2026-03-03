@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="robots" content="noindex, nofollow">
     <title>Atur Ulang Password -
         {{ isset($globalDinas) && $globalDinas ? $globalDinas->app_name : 'Sistem Perizinan Dinas' }}
     </title>

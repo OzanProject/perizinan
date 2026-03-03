@@ -3,9 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+Route::get('/', [\App\Http\Controllers\Public\LandingPageController::class, 'index'])->name('landing');
+Route::get('/jenis-perizinan', [\App\Http\Controllers\Public\LandingPageController::class, 'jenisPerizinan'])->name('perizinan.jenis');
+Route::get('/faq', [\App\Http\Controllers\Public\LandingPageController::class, 'faq'])->name('landing.faq');
+Route::get('/lacak-status', [\App\Http\Controllers\Public\LandingPageController::class, 'lacakStatus'])->name('landing.track');
+Route::get('/track', [\App\Http\Controllers\Public\TrackingController::class, 'track'])->name('track.check');
 
 // Public Verification Route (Anti-Tamper & Immutable)
 Route::get('/verify/{hash}', [\App\Http\Controllers\Public\VerificationController::class, 'verify'])->name('perizinan.verify');
@@ -118,6 +120,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings/delete-image', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'deleteImage'])->name('settings.delete_image');
         Route::post('/settings/smtp', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'updateSmtp'])->name('settings.smtp.update');
         Route::post('/settings/smtp-test', [\App\Http\Controllers\Backend\SuperAdmin\SettingController::class, 'testEmail'])->name('settings.smtp.test');
+
+        // Landing Page settings
+        Route::get('/landing-page', [\App\Http\Controllers\Backend\SuperAdmin\LandingPageController::class, 'index'])->name('landing_page.index');
+        Route::post('/landing-page', [\App\Http\Controllers\Backend\SuperAdmin\LandingPageController::class, 'update'])->name('landing_page.update');
 
     });
 });

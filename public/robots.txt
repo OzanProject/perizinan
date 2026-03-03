@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /admin
+Disallow: /super-admin
+Disallow: /admin-lembaga
+Disallow: /verifikator
+Disallow: /pimpinan

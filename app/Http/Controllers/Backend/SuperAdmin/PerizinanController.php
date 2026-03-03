@@ -62,7 +62,7 @@ class PerizinanController extends Controller
   public function show(Perizinan $perizinan): View
   {
     $this->authorize('view', $perizinan);
-    $perizinan->load(['lembaga', 'jenisPerizinan', 'discussions.user', 'dinas']);
+    $perizinan->load(['lembaga', 'jenisPerizinan', 'discussions.user', 'dinas', 'dokumens']);
     $perizinan->replaceVariables();
 
     return view('backend.super_admin.perizinan.show', compact('perizinan'));
@@ -79,8 +79,9 @@ class PerizinanController extends Controller
     try {
       DB::beginTransaction();
 
+      $catatan = request('catatan', 'Disetujui oleh Dinas');
       $perizinan->update(['approved_at' => now()]);
-      $this->workflowService->transitionTo($perizinan, PerizinanStatus::DISETUJUI, 'Disetujui oleh Dinas');
+      $this->workflowService->transitionTo($perizinan, PerizinanStatus::DISETUJUI, $catatan);
 
       DB::commit();
       return back()->with('success', 'Perizinan berhasil disetujui.');
@@ -128,7 +129,8 @@ class PerizinanController extends Controller
     try {
       DB::beginTransaction();
 
-      $this->workflowService->transitionTo($perizinan, PerizinanStatus::DITOLAK, 'Pengajuan ditolak oleh Dinas');
+      $catatan = request('catatan', 'Pengajuan ditolak oleh Dinas');
+      $this->workflowService->transitionTo($perizinan, PerizinanStatus::DITOLAK, $catatan);
 
       DB::commit();
       return back()->with('success', 'Pengajuan berhasil ditolak.');

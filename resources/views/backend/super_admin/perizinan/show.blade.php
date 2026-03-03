@@ -42,8 +42,8 @@
 @push('styles')
   <style>
     /* =========================================================
-             CSS FIX UNTUK KANVAS PRATINJAU DRAFT (IDENTIK PDF)
-             ========================================================= */
+               CSS FIX UNTUK KANVAS PRATINJAU DRAFT (IDENTIK PDF)
+               ========================================================= */
     #draft-preview-canvas {
       position: relative;
       background: white;
@@ -388,26 +388,20 @@
                 <i class="fas fa-info-circle mr-2"></i> Pengajuan ini menanti verifikasi administratif dari Anda.
               </div>
               <div class="space-y-3">
-                <form action="{{ route('super_admin.perizinan.approve', $perizinan) }}" method="POST" class="mb-2">
-                  @csrf
-                  <button type="submit" class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm"
-                    onclick="return confirm('Apakah Anda yakin dokumen sudah lengkap dan menyetujui pengajuan ini untuk diproses lebih lanjut?')">
-                    <i class="fas fa-check-double mr-2"></i> SETUJUI PENGAJUAN
-                  </button>
-                </form>
+                <button type="button" class="btn btn-success btn-lg btn-block font-weight-bold shadow-sm"
+                  data-toggle="modal" data-target="#modalApprove">
+                  <i class="fas fa-check-double mr-2"></i> SETUJUI PENGAJUAN
+                </button>
 
                 <button type="button" class="btn btn-warning btn-block font-weight-bold text-dark" data-toggle="modal"
                   data-target="#modalRevision">
                   <i class="fas fa-exclamation-triangle mr-2"></i> PERLU PERBAIKAN
                 </button>
 
-                <form action="{{ route('super_admin.perizinan.reject', $perizinan) }}" method="POST" class="mt-2">
-                  @csrf
-                  <button type="submit" class="btn btn-danger btn-block font-weight-bold"
-                    onclick="return confirm('Apakah Anda yakin ingin menolak pengajuan ini?')">
-                    <i class="fas fa-times-circle mr-2"></i> TOLAK PERIZINAN
-                  </button>
-                </form>
+                <button type="button" class="btn btn-danger btn-block font-weight-bold" data-toggle="modal"
+                  data-target="#modalReject">
+                  <i class="fas fa-times-circle mr-2"></i> TOLAK PERIZINAN
+                </button>
               </div>
             @else
               @php $canFinalize = in_array($perizinan->status, [\App\Enums\PerizinanStatus::DISETUJUI->value, \App\Enums\PerizinanStatus::SIAP_DIAMBIL->value, \App\Enums\PerizinanStatus::SELESAI->value]); @endphp
@@ -463,6 +457,68 @@
           <div class="modal-footer bg-light px-4">
             <button type="button" class="btn btn-light font-weight-bold px-4" data-dismiss="modal">BATAL</button>
             <button type="submit" class="btn btn-warning font-weight-bold px-4 text-dark shadow-sm">KIRIM CATATAN</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalApprove" tabindex="-1" role="dialog" aria-labelledby="modalApproveLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content shadow-lg border-0" style="border-radius: 15px;">
+        <div class="modal-header bg-success text-white py-3">
+          <h5 class="modal-title font-weight-bold" id="modalApproveLabel"><i class="fas fa-check-circle mr-2"></i> Setujui
+            Pengajuan</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{{ route('super_admin.perizinan.approve', $perizinan) }}" method="POST">
+          @csrf
+          <div class="modal-body p-4">
+            <div class="form-group mb-0">
+              <label class="font-weight-bold text-muted small text-uppercase">Catatan Persetujuan (Opsional)</label>
+              <textarea name="catatan" class="form-control" rows="4"
+                placeholder="Contoh: Dokumen lengkap, sedang proses penomoran surat.">Disetujui oleh Dinas</textarea>
+              <small class="text-muted"><i class="fas fa-info-circle mr-1"></i> Catatan ini akan tampil di fitur tracking
+                untuk Lembaga.</small>
+            </div>
+          </div>
+          <div class="modal-footer bg-light border-0 py-3">
+            <button type="button" class="btn btn-link text-muted font-weight-bold" data-dismiss="modal">BATAL</button>
+            <button type="submit" class="btn btn-success px-4 font-weight-bold shadow-sm">SETUJUI SEKARANG</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalReject" tabindex="-1" role="dialog" aria-labelledby="modalRejectLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content shadow-lg border-0" style="border-radius: 15px;">
+        <div class="modal-header bg-danger text-white py-3">
+          <h5 class="modal-title font-weight-bold" id="modalRejectLabel"><i class="fas fa-times-circle mr-2"></i> Tolak
+            Pengajuan</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="{{ route('super_admin.perizinan.reject', $perizinan) }}" method="POST">
+          @csrf
+          <div class="modal-body p-4">
+            <div class="form-group mb-0">
+              <label class="font-weight-bold text-muted small text-uppercase">Alasan Penolakan</label>
+              <textarea name="catatan" class="form-control" rows="4" required
+                placeholder="Jelaskan alasan pengajuan ditolak..."></textarea>
+              <small class="text-muted"><i class="fas fa-info-circle mr-1"></i> Alasan ini akan tampil di fitur tracking
+                untuk Lembaga.</small>
+            </div>
+          </div>
+          <div class="modal-footer bg-light border-0 py-3">
+            <button type="button" class="btn btn-link text-muted font-weight-bold" data-dismiss="modal">BATAL</button>
+            <button type="submit" class="btn btn-danger px-4 font-weight-bold shadow-sm">TOLAK SEKARANG</button>
           </div>
         </form>
       </div>
@@ -537,6 +593,13 @@
         var chatBox = document.getElementById('chat-container');
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
       });
+
+      function insertQuickText(text) {
+        const textarea = document.querySelector('textarea[name="catatan"]');
+        if (textarea) {
+          textarea.value = text;
+        }
+      }
     </script>
   @endpush
 @endsection

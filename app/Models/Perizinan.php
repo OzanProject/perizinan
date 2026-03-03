@@ -77,6 +77,14 @@ class Perizinan extends Model
   {
     return $this->belongsTo(JenisPerizinan::class);
   }
+  public function discussions()
+  {
+    return $this->hasMany(PerizinanDiscussion::class);
+  }
+  public function dokumens()
+  {
+    return $this->hasMany(Dokumen::class);
+  }
 
   /**
    * Engine Utama Pengganti Variabel

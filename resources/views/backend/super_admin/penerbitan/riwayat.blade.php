@@ -73,6 +73,7 @@
                 <th>No. Sertifikat</th>
                 <th>Lembaga</th>
                 <th>Jenis Perizinan</th>
+                <th>Keterangan</th>
                 <th class="text-center">Tanggal Terbit</th>
                 <th class="text-center">Status</th>
                 <th class="text-right px-4">Aksi</th>
@@ -87,14 +88,20 @@
                     <div class="d-flex align-items-center">
                       <div class="bg-light rounded-circle text-center font-weight-bold text-primary mr-2 shadow-sm"
                         style="width: 32px; height: 32px; line-height: 32px; font-size: 11px;">
-                        {{ strtoupper(substr($perizinan->lembaga->nama, 0, 2)) }}
+                        {{ strtoupper(substr($perizinan->lembaga->nama_lembaga, 0, 2)) }}
                       </div>
-                      <span class="font-weight-bold">{{ $perizinan->lembaga->nama }}</span>
+                      <span class="font-weight-bold">{{ $perizinan->lembaga->nama_lembaga }}</span>
                     </div>
                   </td>
                   <td><span class="text-muted small font-weight-bold">{{ $perizinan->jenisPerizinan->nama }}</span></td>
+                  <td style="max-width: 200px;">
+                    <div class="small font-italic text-muted text-truncate" title="{{ $perizinan->catatan_verifikator }}">
+                      {{ $perizinan->catatan_verifikator ?: 'Tidak ada catatan' }}
+                    </div>
+                  </td>
                   <td class="text-center">
-                    {{ $perizinan->tanggal_terbit ? $perizinan->tanggal_terbit->format('d M Y') : '-' }}</td>
+                    {{ $perizinan->tanggal_terbit ? $perizinan->tanggal_terbit->format('d M Y') : '-' }}
+                  </td>
                   <td class="text-center">
                     @php $status = \App\Enums\PerizinanStatus::from($perizinan->status); @endphp
                     <span class="badge badge-{{ $status->color() }} px-3 py-1 rounded-pill">

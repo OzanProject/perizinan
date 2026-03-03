@@ -32,6 +32,7 @@ class PerizinanWorkflowService
 
     return DB::transaction(function () use ($perizinan, $fromStatus, $toStatus, $catatan) {
       $perizinan->status = $toStatus->value;
+      $perizinan->catatan_verifikator = $catatan;
 
       // Logika spesifik per status
       if ($toStatus === PerizinanStatus::DISETUJUI) {

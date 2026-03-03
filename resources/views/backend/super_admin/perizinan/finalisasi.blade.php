@@ -186,6 +186,17 @@
                     </div>
                 </div>
 
+                @if($perizinan->catatan_verifikator)
+                    <div class="card card-sm mb-4 shadow-sm border border-warning">
+                        <div class="card-header bg-warning py-2 px-3">
+                            <h3 class="card-title text-uppercase font-weight-bold small mb-0 text-dark">Catatan Verifikasi</h3>
+                        </div>
+                        <div class="card-body p-3 bg-light">
+                            <p class="small mb-0 font-italic text-dark">"{{ $perizinan->catatan_verifikator }}"</p>
+                        </div>
+                    </div>
+                @endif
+
                 @if($perizinan->jenisPerizinan->form_config && count($perizinan->jenisPerizinan->form_config) > 0)
                     <div class="card card-sm mb-4 shadow-sm border border-info">
                         <div class="card-header bg-info text-white py-2 px-3 d-flex justify-content-between align-items-center">

@@ -37,4 +37,17 @@ enum PerizinanStatus: string
       self::DITOLAK => 'danger',
     };
   }
+
+  public function description(): string
+  {
+    return match ($this) {
+      self::DRAFT => 'Pengajuan masih dalam draf dan belum dikirim.',
+      self::DIAJUKAN => 'Sedang dalam proses tinjauan administratif oleh petugas.',
+      self::PERBAIKAN => 'Perlu perbaikan dokumen. Silakan cek catatan perbaikan di dashboard.',
+      self::DISETUJUI => 'Pengajuan telah disetujui. Sedang dalam proses penomoran dan pencetakan sertifikat.',
+      self::SIAP_DIAMBIL => 'Sertifikat/Izin sudah selesai dan siap diambil di kantor dinas.',
+      self::SELESAI => 'Proses perizinan telah selesai sepenuhnya.',
+      self::DITOLAK => 'Mohon maaf, pengajuan Anda ditolak. Silakan cek alasan penolakan di dashboard.',
+    };
+  }
 }

@@ -112,6 +112,12 @@
                     </a>
                   </li>
                   <li class="nav-item">
+                    <a href="{{ route('super_admin.penerbitan.riwayat') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.riwayat') ? 'active' : '' }}">
+                      <i class="fas fa-history nav-icon" style="font-size: 12px;"></i>
+                      <p>Riwayat Penerbitan</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
                     <a href="{{ route('super_admin.penerbitan.preset.index') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.preset.*') ? 'active' : '' }}">
                       <i class="fas fa-sliders-h nav-icon" style="font-size: 12px;"></i>
                       <p>Preset & Layout</p>
@@ -134,6 +140,12 @@
             <a href="{{ route('super_admin.users.index') }}" class="nav-link {{ request()->routeIs('super_admin.users.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-users"></i>
               <p>Manajemen Pengguna</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('super_admin.landing_page.index') }}" class="nav-link {{ request()->routeIs('super_admin.landing_page.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-desktop"></i>
+              <p>Landing Page</p>
             </a>
           </li>
           <li class="nav-item">

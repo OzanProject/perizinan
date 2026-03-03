@@ -61,4 +61,9 @@ class Dinas extends Model
   {
     return $this->hasMany(JenisPerizinan::class);
   }
+
+  public function landingPageSetting()
+  {
+    return $this->hasOne(LandingPageSetting::class);
+  }
 }

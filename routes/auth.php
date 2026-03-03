@@ -26,6 +26,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::put('password', [\App\Http\Controllers\Auth\PasswordController::class, 'update'])->name('password.update');
+    Route::get('logout', [LoginController::class, 'logout']); // Permited for manual navigation
     Route::post('logout', [LoginController::class, 'logout'])
         ->name('logout');
 });
