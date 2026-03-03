@@ -207,7 +207,7 @@
 
       @include('public.partials.header')
 
-      <main class="flex flex-col flex-1 pt-20 md:pt-24">
+      <main class="flex flex-col flex-1 pt-24 md:pt-28 lg:pt-32 overflow-x-hidden">
         @yield('content')
       </main>
 

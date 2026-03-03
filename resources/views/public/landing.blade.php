@@ -7,18 +7,18 @@
 @section('content')
     <!-- Hero Section -->
     <section
-        class="px-6 md:px-20 py-12 md:py-24 bg-gradient-to-b from-white to-background-light dark:from-slate-900 dark:to-background-dark">
-        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 items-center">
-            <div class="flex flex-col gap-8 flex-1">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider w-fit"
+        class="px-6 md:px-20 py-8 md:py-16 lg:py-24 bg-gradient-to-b from-white to-background-light dark:from-slate-900 dark:to-background-dark relative overflow-hidden">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-10 lg:gap-16 items-center">
+            <div class="flex flex-col gap-6 md:gap-8 flex-1 w-full">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] md:text-xs font-bold uppercase tracking-wider w-fit"
                     data-aos="fade-down" data-aos-delay="100">
                     <span class="material-symbols-outlined text-sm">verified</span> Verified Educational Services
                 </div>
-                <h1 class="text-slate-900 dark:text-slate-100 text-4xl md:text-6xl font-black leading-tight tracking-tighter"
+                <h1 class="text-slate-900 dark:text-slate-100 text-3xl md:text-5xl lg:text-7xl font-black leading-[1.1] tracking-tighter"
                     data-aos="fade-up" data-aos-delay="200">
                     {!! $setting->hero_title !!}
                 </h1>
-                <p class="text-slate-600 dark:text-slate-400 text-lg md:text-xl leading-relaxed max-w-2xl"
+                <p class="text-slate-600 dark:text-slate-400 text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl"
                     data-aos="fade-up" data-aos-delay="300">
                     {{ $setting->hero_subtitle }}
                 </p>
@@ -382,40 +382,40 @@
                                 let discussionHtml = '';
                                 if (item.latest_discussion) {
                                     discussionHtml = `
-                                                                    <div class="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                                                                        <p class="text-[10px] text-primary uppercase font-black mb-1">Catatan Terbaru</p>
-                                                                        <p class="text-sm text-slate-700 dark:text-slate-300 font-medium mb-1">"${item.latest_discussion.message}"</p>
-                                                                        <p class="text-[10px] text-slate-400 font-bold">${item.latest_discussion.user} • ${item.latest_discussion.date}</p>
-                                                                    </div>
-                                                                `;
+                                                                        <div class="mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                                                                            <p class="text-[10px] text-primary uppercase font-black mb-1">Catatan Terbaru</p>
+                                                                            <p class="text-sm text-slate-700 dark:text-slate-300 font-medium mb-1">"${item.latest_discussion.message}"</p>
+                                                                            <p class="text-[10px] text-slate-400 font-bold">${item.latest_discussion.user} • ${item.latest_discussion.date}</p>
+                                                                        </div>
+                                                                    `;
                                 }
 
                                 const card = `
-                                                                <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-l-4 border-primary animate-in fade-in slide-in-from-top-4 duration-500">
-                                                                    <div class="flex justify-between items-start mb-4">
-                                                                        <div>
-                                                                            <h5 class="text-xs font-black uppercase tracking-widest text-primary mb-1">Status Pengajuan</h5>
-                                                                            <h4 class="text-lg font-bold text-slate-900 dark:text-white">${item.lembaga}</h4>
+                                                                    <div class="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-l-4 border-primary animate-in fade-in slide-in-from-top-4 duration-500">
+                                                                        <div class="flex justify-between items-start mb-4">
+                                                                            <div>
+                                                                                <h5 class="text-xs font-black uppercase tracking-widest text-primary mb-1">Status Pengajuan</h5>
+                                                                                <h4 class="text-lg font-bold text-slate-900 dark:text-white">${item.lembaga}</h4>
+                                                                            </div>
+                                                                            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-${item.status_color}/10 text-${item.status_color}">${item.status}</span>
                                                                         </div>
-                                                                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-${item.status_color}/10 text-${item.status_color}">${item.status}</span>
-                                                                    </div>
-                                                                    <div class="grid grid-cols-2 gap-4 mb-4">
-                                                                        <div>
-                                                                            <p class="text-[10px] text-slate-400 uppercase font-bold">Jenis Izin</p>
-                                                                            <p class="text-sm font-semibold dark:text-slate-200">${item.jenis}</p>
+                                                                        <div class="grid grid-cols-2 gap-4 mb-4">
+                                                                            <div>
+                                                                                <p class="text-[10px] text-slate-400 uppercase font-bold">Jenis Izin</p>
+                                                                                <p class="text-sm font-semibold dark:text-slate-200">${item.jenis}</p>
+                                                                            </div>
+                                                                            <div>
+                                                                                <p class="text-[10px] text-slate-400 uppercase font-bold">Tanggal</p>
+                                                                                <p class="text-sm font-semibold dark:text-slate-200">${item.tanggal}</p>
+                                                                            </div>
                                                                         </div>
-                                                                        <div>
-                                                                            <p class="text-[10px] text-slate-400 uppercase font-bold">Tanggal</p>
-                                                                            <p class="text-sm font-semibold dark:text-slate-200">${item.tanggal}</p>
+                                                                        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 line-clamp-2">
+                                                                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Keterangan</p>
+                                                                            <p class="text-sm text-slate-600 dark:text-slate-400 italic">"${item.keterangan}"</p>
                                                                         </div>
+                                                                        ${discussionHtml}
                                                                     </div>
-                                                                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 line-clamp-2">
-                                                                        <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Keterangan</p>
-                                                                        <p class="text-sm text-slate-600 dark:text-slate-400 italic">"${item.keterangan}"</p>
-                                                                    </div>
-                                                                    ${discussionHtml}
-                                                                </div>
-                                                            `;
+                                                                `;
                                 $('#tracking-result-container').append(card);
                             });
                         } else {
