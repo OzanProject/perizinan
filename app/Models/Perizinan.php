@@ -87,6 +87,15 @@ class Perizinan extends Model
   }
 
   /**
+   * Accessor: mengembalikan template yang sudah diisi variabel dinamis.
+   * Dipanggil saat view menggunakan $perizinan->rendered_template
+   */
+  public function getRenderedTemplateAttribute(): string
+  {
+    return $this->replaceVariables();
+  }
+
+  /**
    * Engine Utama Pengganti Variabel
    */
   public function replaceVariables()
@@ -197,28 +206,9 @@ class Perizinan extends Model
     // 3. Bersihkan sisa placeholder [DATA:xxx] yang tidak terpetakan
     $template = preg_replace('/\[DATA:[^\]]+\]/i', '................', $template);
 
-    // 4. Watermark tengah + Bingkai/Border
+    // 4. Hanya Bingkai/Border (Watermark tengah sudah ditangani oleh DocumentRenderService)
     if ($dinas->watermark_enabled ?? true) {
-      $wmOpacity = $dinas->watermark_opacity ?? 0.08;
-      $wmSize = $dinas->watermark_size ?? 400;
-      $halfSize = $wmSize / 2;
-
-      // Layer 1: Watermark logo di tengah
-      $wmImg = $dinas->watermark_img ?: $dinas->logo;
-      if ($wmImg) {
-        $wmBase64 = $toBase64($wmImg);
-        if ($wmBase64) {
-          $template .= '
-          <div style="position: fixed; top: 50%; left: 50%;
-                      width: ' . $wmSize . 'px; height: ' . $wmSize . 'px;
-                      margin-top: -' . $halfSize . 'px; margin-left: -' . $halfSize . 'px;
-                      opacity: ' . $wmOpacity . '; z-index: -1;">
-            <img src="' . $wmBase64 . '" width="' . $wmSize . '" height="' . $wmSize . '" style="object-fit:contain;" />
-          </div>';
-        }
-      }
-
-      // Layer 2: Bingkai/frame full-page
+      // Layer: Bingkai/frame full-page
       $useBorder = $this->jenisPerizinan->use_border ?? false;
       if ($useBorder) {
         $namaIzin = strtolower($this->jenisPerizinan->nama ?? '');
@@ -227,7 +217,7 @@ class Perizinan extends Model
 
         if ($borderType === 'paud') {
           $borderPath = $dinas->watermark_border_paud_img ?: 'images/bingkai-paud.jpg';
-        } elseif ($borderType === 'pkbm') {
+        } elseif ($borderType === 'lkp' || $borderType === 'pkbm') {
           $borderPath = 'images/bingkai-pkbm.jpg';
         } elseif ($borderType === 'default') {
           $borderPath = $dinas->watermark_border_img ?: 'images/default-border.png';

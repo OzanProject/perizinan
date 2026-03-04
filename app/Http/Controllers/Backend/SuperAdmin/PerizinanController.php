@@ -63,7 +63,6 @@ class PerizinanController extends Controller
   {
     $this->authorize('view', $perizinan);
     $perizinan->load(['lembaga', 'jenisPerizinan', 'discussions.user', 'dinas', 'dokumens']);
-    $perizinan->replaceVariables();
 
     return view('backend.super_admin.perizinan.show', compact('perizinan'));
   }

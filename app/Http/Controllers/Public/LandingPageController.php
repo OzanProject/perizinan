@@ -25,7 +25,20 @@ class LandingPageController extends Controller
     if (is_string($data))
       return $data;
 
-    return view('public.jenis_perizinan', $data);
+    $dinas = $data['dinas'];
+
+    // Load jenis perizinan aktif beserta syarat-syaratnya dari DB
+    $jenisPerizinanList = \App\Models\JenisPerizinan::where('dinas_id', $dinas->id)
+      ->where('is_active', true)
+      ->with([
+        'syarats' => function ($q) {
+          $q->orderBy('is_required', 'desc')->orderBy('id');
+        }
+      ])
+      ->orderBy('id')
+      ->get();
+
+    return view('public.jenis_perizinan', array_merge($data, compact('jenisPerizinanList')));
   }
 
   public function faq()
