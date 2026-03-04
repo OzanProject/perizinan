@@ -346,47 +346,97 @@ class CertificateTemplateService
     private static function getPkbmHerregistrasiPortrait(): string
     {
         return self::kopSuratPkbm() . '
-        <p style="text-align: center; margin: 0 0 10px 0;">
-            <span style="font-size: 12pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN DAFTAR ULANG ( HER-REGISTRASI )</span>
+        <p style="text-align: center; margin: 4px 0 4px 0;">
+            <span style="font-size: 11pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN DAFTAR ULANG ( HER-REGISTRASI )</span>
         </p>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 3px;">
             <tbody>
                 <tr>
-                    <td style="width: 35%; padding: 1px 0; text-align: left;">Nomor : [NOMOR_SURAT]</td>
-                    <td style="width: 65%; padding: 1px 0; text-align: left;">- Didik</td>
+                    <td style="width: 45%; padding: 1px 0; font-size: 10pt;">Nomor : [NOMOR_SURAT]</td>
+                    <td style="width: 55%; padding: 1px 0; font-size: 10pt;">- Didik</td>
                 </tr>
             </tbody>
         </table>
-        <p style="margin: 0 0 5px 0;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</p>
-        <table style="width: 92%; border-collapse: collapse; margin-left: 30px; margin-bottom: 5px;">
+        <p style="margin: 2px 0 4px 0; font-size: 10pt;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</p>
+
+        <table style="width: 95%; border-collapse: collapse; margin-left: 20px; margin-bottom: 4px; font-size: 10pt;">
             <tbody>
-                <tr><td style="width: 32%; padding: 1px 0;">Nama Lembaga</td><td style="width: 3%; padding: 1px 0;">:</td><td style="width: 65%; font-weight: bold; padding: 1px 0;">[NAMA_LEMBAGA]</td></tr>
-                <tr><td style="padding: 1px 0;">Alamat Lembaga</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[ALAMAT_LEMBAGA]</td></tr>
-                <tr><td style="padding: 1px 0;">Kecamatan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:KECAMATAN]</td></tr>
-                <tr><td style="padding: 1px 0;">Kabupaten</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[KOTA_DINAS]</td></tr>
+                <tr>
+                    <td style="width: 30%; padding: 1px 0; vertical-align: top;">Nama Lembaga</td>
+                    <td style="width: 3%;  padding: 1px 0; vertical-align: top;">:</td>
+                    <td style="width: 67%; padding: 1px 0; font-weight: bold;">[NAMA_LEMBAGA]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0; vertical-align: top;">Alamat Lembaga</td>
+                    <td style="padding: 1px 0; vertical-align: top;">:</td>
+                    <td style="padding: 1px 0;">[ALAMAT_LEMBAGA]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">Kecamatan</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[DATA:KECAMATAN]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">Kabupaten</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[KOTA_DINAS]</td>
+                </tr>
             </tbody>
         </table>
-        <p style="margin: 0 0 4px 0; font-size: 10pt;">Telah mempunyai Izin Pendirian Kepala Dinas Pendidikan kabupaten [KOTA_DINAS] :</p>
-        <table style="width: 92%; border-collapse: collapse; margin-left: 30px; margin-bottom: 10px;">
+
+        <p style="margin: 2px 0 3px 0; font-size: 10pt;">Telah mempunyai Izin Pendirian Kepala Dinas Pendidikan kabupaten [KOTA_DINAS] :</p>
+
+        <table style="width: 95%; border-collapse: collapse; margin-left: 20px; margin-bottom: 8px; font-size: 10pt;">
             <tbody>
-                <tr><td style="width: 32%; padding: 1px 0;">Nomor Izin</td><td style="width: 3%; padding: 1px 0;">:</td><td style="width: 65%; padding: 1px 0;">[DATA:NOMOR_IZIN_PENDIRIAN]</td></tr>
-                <tr><td style="padding: 1px 0;">Tanggal</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:TANGGAL_IZIN_PENDIRIAN]</td></tr>
-                <tr><td style="padding: 1px 0;">NPSN</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[NPSN]</td></tr>
-                <tr><td style="padding: 1px 0;">Nama Pimpinan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:NAMA_PIMPINAN]</td></tr>
-                <tr><td style="padding: 1px 0;">Pemilik/ Penyelenggara</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:NAMA_PENYELENGGARA]</td></tr>
-                <tr><td style="padding: 1px 0;">Akreditasi</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:AKREDITASI]</td></tr>
-                <tr><td style="padding: 1px 0;">TMT</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:TMT]</td></tr>
+                <tr>
+                    <td style="width: 30%; padding: 1px 0;">Nomor Izin</td>
+                    <td style="width: 3%;  padding: 1px 0;">:</td>
+                    <td style="width: 67%; padding: 1px 0;">[DATA:NOMOR_IZIN_PENDIRIAN]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">Tanggal</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[DATA:TANGGAL_IZIN_PENDIRIAN]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">NPSN</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[NPSN]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">Nama Pimpinan</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[DATA:NAMA_PIMPINAN]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">Pemilik/ Penyelenggara</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[DATA:NAMA_PENYELENGGARA]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">Akreditasi</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[DATA:AKREDITASI]</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1px 0;">TMT</td>
+                    <td style="padding: 1px 0;">:</td>
+                    <td style="padding: 1px 0;">[DATA:TMT]</td>
+                </tr>
             </tbody>
         </table>
-        <p style="text-align: justify; margin: 0 0 5px 0; line-height: 1.4;">
-            PKBM tersebut telah melakukan daftar ulang (her-registrasi) pada Bidang PAUD dan Dikmas Dinas Pendidikan Kabupaten [KOTA_DINAS]. Surat keterangan ini berlaku selama <strong>[MASA_BERLAKU]</strong> terhitung tanggal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sampai dengan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <p style="text-align: justify; margin: 0 0 6px 0; font-size: 10pt; line-height: 1.4;">
+            PKBM tersebut telah melakukan daftar ulang (her-registrasi) pada Bidang PAUD dan Dikmas Dinas Pendidikan Kabupaten [KOTA_DINAS].
+            Surat Keterangan ini berlaku selama <strong>[MASA_BERLAKU]</strong> terhitung tanggal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [TANGGAL_TERBIT] sampai dengan &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </p>
-        <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid; margin-top: 8px;">
+
+        <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid; margin-top: 5px;">
             <tbody>
                 <tr>
                     <td style="width: 55%;"></td>
-                    <td style="width: 45%; text-align: center;">
-                        [KOTA_DINAS], [TANGGAL_TERBIT]<br>
+                    <td style="width: 45%; text-align: center; font-size: 10pt;">
+                        [KOTA_DINAS], &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [TANGGAL_TERBIT]<br>
                         <strong>KEPALA</strong><br><br><br><br>
                         <strong><u>[PIMPINAN_NAMA]</u></strong><br>
                         [PIMPINAN_PANGKAT]<br>
