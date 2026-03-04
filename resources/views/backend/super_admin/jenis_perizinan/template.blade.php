@@ -92,13 +92,13 @@
               @endphp
 
               <div id="frame-overlay" style="
-                                                                  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                                                                  pointer-events: none; z-index: 2;
-                                                                  background-image: url('{{ $overlayUrl }}');
-                                                                  background-size: 100% 100%; background-repeat: no-repeat;
-                                                                  opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
-                                                                  display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
-                                                              "></div>
+                                                                    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                                                                    pointer-events: none; z-index: 2;
+                                                                    background-image: url('{{ $overlayUrl }}');
+                                                                    background-size: 100% 100%; background-repeat: no-repeat;
+                                                                    opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
+                                                                    display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
+                                                                "></div>
 
               <div id="editor-canvas" class="document-editor__editable paper-a4-portrait" contenteditable="true">
                 {!! $jenisPerizinan->template_html ?? '<div style="text-align:center; padding-top:50px; color:#ccc;"><h2>Kanvas Kosong</h2><p>Klik tombol kuning "Pilih Layout" di atas untuk memulai desain secara otomatis.</p></div>' !!}
@@ -369,9 +369,14 @@
 
           toolbar: [
             'undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | removeformat',
-            'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table | charmap code preview'
+            'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table | charmap code preview',
+            'tableprops tablecellprops | addcolbefore addcolafter deleterow deletecol | tableinsertrowbefore tableinsertrowafter'
           ],
 
+          table_column_resizing: 'resizetable',
+          table_resize_bars: true,
+          table_default_attributes: { border: '0', style: 'width:100%; border-collapse:collapse;' },
+          table_default_styles: { 'width': '100%', 'border-collapse': 'collapse' },
           font_family_formats: 'Times New Roman=times new roman,times,serif; Arial=arial,helvetica,sans-serif; Courier New=courier new,courier,monospace; Tahoma=tahoma,arial,helvetica,sans-serif;',
           font_size_formats: '8pt 10pt 11pt 12pt 14pt 18pt 24pt 36pt 48pt',
           menubar: false,

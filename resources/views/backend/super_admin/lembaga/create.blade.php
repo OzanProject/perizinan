@@ -31,7 +31,8 @@
                     <label for="nama_lembaga">Nama Lembaga <span class="text-danger">*</span></label>
                     <input type="text" name="nama_lembaga" id="nama_lembaga" value="{{ old('nama_lembaga') }}"
                       class="form-control @error('nama_lembaga') is-invalid @enderror"
-                      placeholder="Contoh: Sekolah Harapan" required>
+                      placeholder="Contoh: PKBM HARAPAN BANGSA" style="text-transform: uppercase;"
+                      oninput="this.value = this.value.toUpperCase();" required>
                     @error('nama_lembaga')
                       <span class="error invalid-feedback">{{ $message }}</span>
                     @enderror
