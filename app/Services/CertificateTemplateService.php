@@ -8,43 +8,78 @@ class CertificateTemplateService
     {
         return [
             // ==========================================
-            // KELOMPOK 1: TEMPLATE PKBM
+            // KELOMPOK 1: TEMPLATE LKP
             // ==========================================
             'pkbm_izin_memimpin' => [
-                'name' => '1. [PKBM] Izin Memimpin',
-                'description' => 'Format Surat Keterangan Izin Memimpin PKBM. A4/F4 Portrait.',
+                'name' => '1. [LKP] Izin Memimpin',
+                'description' => 'Format Surat Keterangan Izin Memimpin LKP. A4/F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
                 'html' => self::getIzinMemimpinPKBM()
             ],
             'pkbm_perubahan_ketua' => [
-                'name' => '2. [PKBM] Perubahan Ketua',
-                'description' => 'Format Surat Keterangan Perubahan Ketua PKBM. A4/F4 Portrait.',
+                'name' => '2. [LKP] Perubahan Ketua',
+                'description' => 'Format Surat Keterangan Perubahan Ketua LKP. A4/F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
                 'html' => self::getPerubahanKetuaPKBM()
             ],
             'pkbm_perubahan_alamat' => [
-                'name' => '3. [PKBM] Perubahan Alamat',
-                'description' => 'Format Surat Keterangan Perubahan Alamat PKBM. A4/F4 Portrait.',
+                'name' => '3. [LKP] Perubahan Alamat',
+                'description' => 'Format Surat Keterangan Perubahan Alamat LKP. A4/F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
                 'html' => self::getPerubahanAlamatPKBM()
             ],
             'pkbm_heregister' => [
-                'name' => '4. [PKBM] HER-REGISTRASI',
-                'description' => 'Sertifikat Daftar Ulang PKBM. Landscape F4, pakai Bingkai.',
+                'name' => '4. [LKP] HER-REGISTRASI',
+                'description' => 'Sertifikat Daftar Ulang LKP. Landscape F4, pakai Bingkai.',
                 'paper_size' => 'F4',
                 'orientation' => 'landscape',
                 'use_border' => true,
                 'html' => self::getHerregistrasiPKBM()
             ],
+            // ==========================================
+            // KELOMPOK 2: TEMPLATE PKBM
+            // ==========================================
+            'pkbm_izin_memimpin_baru' => [
+                'name' => '5. [PKBM] Izin Memimpin',
+                'description' => 'Format Surat Keterangan Izin Memimpin PKBM. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => self::getPkbmIzinMemimpin()
+            ],
+            'pkbm_perubahan_ketua_baru' => [
+                'name' => '6. [PKBM] Perubahan Ketua',
+                'description' => 'Format Surat Keterangan Perubahan Ketua PKBM. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => self::getPkbmPerubahanKetua()
+            ],
+            'pkbm_perubahan_alamat_baru' => [
+                'name' => '7. [PKBM] Perubahan Alamat',
+                'description' => 'Format Surat Keterangan Perubahan Alamat PKBM. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => self::getPkbmPerubahanAlamat()
+            ],
+            'pkbm_heregister_portrait' => [
+                'name' => '8. [PKBM] HER-REGISTRASI (Portrait)',
+                'description' => 'Surat Keterangan Daftar Ulang PKBM. Portrait F4, pakai Bingkai.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => true,
+                'html' => self::getPkbmHerregistrasiPortrait()
+            ],
 
             // ==========================================
-            // KELOMPOK 2: TEMPLATE PAUD (BARU)
+            // KELOMPOK 3: TEMPLATE PAUD
             // ==========================================
             'paud_izin_memimpin' => [
                 'name' => '5. [PAUD] Izin Memimpin (Foto 4x6)',
@@ -130,10 +165,242 @@ class CertificateTemplateService
         ';
     }
 
+    // =========================================================================
+    // KOP SURAT PKBM - Logo di tengah atas (sesuai format gambar referensi)
+    // =========================================================================
+    private static function kopSuratPkbm(): string
+    {
+        return '
+        <div style="text-align: center; margin-bottom: 5px;">
+            [LOGO_DINAS]<br>
+            <span style="font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">PEMERINTAH KABUPATEN [KOTA_DINAS]</span><br>
+            <span style="font-size: 18pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">DINAS PENDIDIKAN</span><br>
+            <span style="font-size: 10pt;">[ALAMAT_DINAS]</span>
+        </div>
+        <hr style="border: none; border-top: 3px solid black; border-bottom: 1px solid black; height: 4px; background: transparent; margin: 0 0 10px 0;">
+        ';
+    }
 
     /*
     |--------------------------------------------------------------------------
-    | BAGIAN 1: TEMPLATE PKBM
+    | BAGIAN 1: TEMPLATE PKBM (BARU)
+    |--------------------------------------------------------------------------
+    */
+    private static function getPkbmIzinMemimpin(): string
+    {
+        return self::kopSuratPkbm() . '
+        <p style="text-align: center; margin: 0 0 15px 0;">
+            <span style="font-size: 12pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN IZIN MEMIMPIN</span><br>
+            <span style="font-size: 11pt;">Nomor: [NOMOR_SURAT]</span>
+        </p>
+        <p style="margin: 0 0 5px 0;">Dasar:</p>
+        <ol style="padding-left: 20px; text-align: justify; margin: 0 0 10px 0;">
+            <li>Surat Permohonan dari Yayasan/ Lembaga PKBM nomor [DATA:NOMOR_SURAT_YAYASAN] tanggal: [DATA:TGL_SURAT_YAYASAN], Perihal: Permohonan Izin Memimpin PKBM.</li>
+            <li>Keputusan Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS] Nomor: [DATA:NOMOR_SK_PENDIRIAN], Tanggal [DATA:TGL_SK_PENDIRIAN], tentang Izin Pendirian PKBM.</li>
+            <li>Surat Keputusan Ketua Yayasan [DATA:NAMA_YAYASAN], Nomor: [DATA:NOMOR_SK_KETUA], tanggal: [DATA:TGL_SK_KETUA], Perihal: Pengangkatan Ketua Penyelenggara.</li>
+        </ol>
+        <p style="text-align: justify; margin: 0 0 10px 0;">Berdasarkan hal tersebut diatas, maka dengan ini Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS] menerangkan bahwa :</p>
+        <table style="width: 100%; border-collapse: collapse; margin-left: 20px; margin-bottom: 10px;">
+            <tbody>
+                <tr><td style="width: 30%; padding: 2px 0;">Nama</td><td style="width: 2%; padding: 2px 0;">:</td><td style="width: 68%; padding: 2px 0;"><strong>[DATA:NAMA_PIMPINAN]</strong></td></tr>
+                <tr><td style="padding: 2px 0;">Tempat, Tanggal Lahir</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:TTL]</td></tr>
+                <tr><td style="padding: 2px 0;">Pendidikan Terakhir</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:PENDIDIKAN]</td></tr>
+                <tr><td style="padding: 2px 0;">Jabatan</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:JABATAN]</td></tr>
+                <tr><td style="padding: 2px 0;">Unit Kerja</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[NAMA_LEMBAGA]</td></tr>
+                <tr><td style="padding: 2px 0;">NPSN</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[NPSN]</td></tr>
+                <tr><td style="vertical-align: top; padding: 2px 0;">Alamat</td><td style="vertical-align: top; padding: 2px 0;">:</td><td style="padding: 2px 0;">[ALAMAT_LEMBAGA]</td></tr>
+            </tbody>
+        </table>
+        <p style="text-align: justify; margin: 0 0 10px 0;">Adalah benar sebagai Ketua Penyelenggara di [NAMA_LEMBAGA] Kecamatan [DATA:KECAMATAN] yang diangkat oleh Yayasan [DATA:NAMA_YAYASAN].</p>
+        <p style="text-align: justify; margin: 0 0 10px 0;">Keterangan ini berlaku selama <strong>[MASA_BERLAKU]</strong> dengan ketentuan tidak ada perubahan terhadap penugasan Ketua Penyelenggara yang ditunjuk oleh yayasan.</p>
+        <p style="text-align: justify; margin: 0 0 15px 0;">Demikian surat keterangan memimpin ini dibuat untuk dipergunakan sebagaimana mestinya.</p>
+        <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid;">
+            <tbody>
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td style="width: 45%; text-align: left;">
+                        Dikeluarkan di : [KOTA_DINAS]<br>
+                        Pada Tanggal : [TANGGAL_TERBIT]<br><br>
+                        <strong style="text-transform: uppercase;">[PIMPINAN_JABATAN]</strong><br><br><br>
+                        <strong><u>[PIMPINAN_NAMA]</u></strong><br>
+                        [PIMPINAN_PANGKAT]<br>
+                        NIP. [PIMPINAN_NIP]
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ';
+    }
+
+    private static function getPkbmPerubahanKetua(): string
+    {
+        return self::kopSuratPkbm() . '
+        <p style="text-align: center; margin: 0 0 15px 0;">
+            <span style="font-size: 12pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN PERUBAHAN KETUA</span><br>
+            <span style="font-size: 11pt;">Nomor: [NOMOR_SURAT]</span>
+        </p>
+        <p style="margin: 0 0 5px 0;">Dasar:</p>
+        <ol style="padding-left: 20px; text-align: justify; margin: 0 0 10px 0;">
+            <li>Berdasarkan Permohonan dari Yayasan Nomor: [DATA:NOMOR_PERMOHONAN], Tanggal: [DATA:TANGGAL_PERMOHONAN].</li>
+            <li>Berdasarkan Berita Acara Perubahan Ketua, Nomor: [DATA:NOMOR_BA], Tanggal: [DATA:TANGGAL_BA].</li>
+            <li>Berdasarkan SK Pengangkatan Ketua dari Yayasan Nomor: [DATA:NOMOR_SK_YAYASAN].</li>
+            <li>Berdasarkan Izin Operasional dari Dinas Pendidikan Kabupaten [KOTA_DINAS] Nomor: [DATA:NOMOR_IZIN_OP].</li>
+        </ol>
+        <p style="margin: 0 0 10px 0;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS] Menerangkan :</p>
+        <table style="width: 100%; border-collapse: collapse; margin-left: 20px; margin-bottom: 10px;">
+            <tbody>
+                <tr><td style="width: 30%; padding: 2px 0;">Nama Lembaga</td><td style="width: 2%; padding: 2px 0;">:</td><td style="width: 68%; padding: 2px 0;"><strong>[NAMA_LEMBAGA]</strong></td></tr>
+                <tr><td style="padding: 2px 0;">NPSN</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[NPSN]</td></tr>
+                <tr><td style="padding: 2px 0;">Nama Penyelenggara</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:NAMA_PENYELENGGARA]</td></tr>
+                <tr><td style="vertical-align: top; padding: 2px 0;">Alamat Lembaga</td><td style="vertical-align: top; padding: 2px 0;">:</td><td style="padding: 2px 0;">[ALAMAT_LEMBAGA]</td></tr>
+            </tbody>
+        </table>
+        <p style="margin: 0 0 5px 0;">Bahwa Lembaga tersebut diatas mengalami Pergantian Ketua :</p>
+        <div style="margin-left: 20px;">
+            <strong>1. Ketua Lama</strong>
+            <table style="width: 100%; border-collapse: collapse; margin-left: 15px; margin-bottom: 5px;">
+                <tbody>
+                    <tr><td style="width: 25%; padding: 1px 0;">a. Nama Ketua</td><td style="width: 2%; padding: 1px 0;">:</td><td style="width: 73%; padding: 1px 0;">[DATA:KETUA_LAMA_NAMA]</td></tr>
+                    <tr><td style="padding: 1px 0;">b. TTL</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:KETUA_LAMA_TTL]</td></tr>
+                </tbody>
+            </table>
+            <strong>2. Ketua Baru</strong>
+            <table style="width: 100%; border-collapse: collapse; margin-left: 15px; margin-bottom: 10px;">
+                <tbody>
+                    <tr><td style="width: 25%; padding: 1px 0;">a. Nama Ketua</td><td style="width: 2%; padding: 1px 0;">:</td><td style="width: 73%; padding: 1px 0;">[DATA:NAMA_PIMPINAN]</td></tr>
+                    <tr><td style="padding: 1px 0;">b. TTL</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:TTL]</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="text-align: justify; margin: 0 0 15px 0;">Demikian Surat Keterangan ini kami buat agar yang berkepentingan menjadi maklum.</p>
+        <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid;">
+            <tbody>
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td style="width: 45%; text-align: left;">
+                        Dikeluarkan di : [KOTA_DINAS]<br>
+                        Pada Tanggal : [TANGGAL_TERBIT]<br><br>
+                        <strong style="text-transform: uppercase;">[PIMPINAN_JABATAN]</strong><br><br><br>
+                        <strong><u>[PIMPINAN_NAMA]</u></strong><br>
+                        [PIMPINAN_PANGKAT]<br>
+                        NIP. [PIMPINAN_NIP]
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ';
+    }
+
+    private static function getPkbmPerubahanAlamat(): string
+    {
+        return self::kopSuratPkbm() . '
+        <p style="text-align: center; margin: 0 0 15px 0;">
+            <span style="font-size: 12pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN PERUBAHAN ALAMAT</span><br>
+            <span style="font-size: 11pt;">Nomor: [NOMOR_SURAT]</span>
+        </p>
+        <p style="margin: 0 0 5px 0;">Dasar:</p>
+        <ol style="padding-left: 20px; text-align: justify; margin: 0 0 10px 0;">
+            <li>Berdasarkan Permohonan dari Yayasan Nomor: [DATA:NOMOR_PERMOHONAN], Tanggal: [DATA:TANGGAL_PERMOHONAN].</li>
+            <li>Surat Keterangan Domisili dari Desa: [DATA:NOMOR_DOMISILI].</li>
+            <li>Berdasarkan Izin Operasional dari Dinas Pendidikan Kabupaten [KOTA_DINAS] Nomor: [DATA:NOMOR_IZIN_OP].</li>
+        </ol>
+        <p style="margin: 0 0 10px 0;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS] Menerangkan :</p>
+        <table style="width: 100%; border-collapse: collapse; margin-left: 20px; margin-bottom: 10px;">
+            <tbody>
+                <tr><td style="width: 30%; padding: 2px 0;">Nama Lembaga</td><td style="width: 2%; padding: 2px 0;">:</td><td style="width: 68%; padding: 2px 0;"><strong>[NAMA_LEMBAGA]</strong></td></tr>
+                <tr><td style="padding: 2px 0;">Nama Ketua</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:NAMA_PIMPINAN]</td></tr>
+                <tr><td style="padding: 2px 0;">NPSN</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[NPSN]</td></tr>
+                <tr><td style="padding: 2px 0;">Nama Penyelenggara</td><td style="padding: 2px 0;">:</td><td style="padding: 2px 0;">[DATA:NAMA_PENYELENGGARA]</td></tr>
+            </tbody>
+        </table>
+        <p style="margin: 0 0 5px 0;">Bahwa Lembaga tersebut diatas mengalami Perpindahan Alamat :</p>
+        <div style="margin-left: 20px;">
+            <strong>1. Alamat Lama</strong>
+            <table style="width: 100%; border-collapse: collapse; margin-left: 15px; margin-bottom: 5px;">
+                <tbody><tr><td style="width: 5%; padding: 1px 0;">a.</td><td style="width: 15%; padding: 1px 0;">Alamat</td><td style="width: 2%; padding: 1px 0;">:</td><td style="width: 78%; padding: 1px 0;">[DATA:ALAMAT_LAMA]</td></tr></tbody>
+            </table>
+            <strong>2. Alamat Baru</strong>
+            <table style="width: 100%; border-collapse: collapse; margin-left: 15px; margin-bottom: 10px;">
+                <tbody><tr><td style="width: 5%; padding: 1px 0;">a.</td><td style="width: 15%; padding: 1px 0;">Alamat</td><td style="width: 2%; padding: 1px 0;">:</td><td style="width: 78%; padding: 1px 0;">[ALAMAT_LEMBAGA]</td></tr></tbody>
+            </table>
+        </div>
+        <p style="text-align: justify; margin: 0 0 15px 0;">Demikian Surat Keterangan ini kami buat agar yang berkepentingan menjadi maklum.</p>
+        <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid;">
+            <tbody>
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td style="width: 45%; text-align: left;">
+                        Dikeluarkan di : [KOTA_DINAS]<br>
+                        Pada Tanggal : [TANGGAL_TERBIT]<br><br>
+                        <strong style="text-transform: uppercase;">[PIMPINAN_JABATAN]</strong><br><br><br>
+                        <strong><u>[PIMPINAN_NAMA]</u></strong><br>
+                        [PIMPINAN_PANGKAT]<br>
+                        NIP. [PIMPINAN_NIP]
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ';
+    }
+
+    private static function getPkbmHerregistrasiPortrait(): string
+    {
+        return self::kopSuratPkbm() . '
+        <p style="text-align: center; margin: 0 0 10px 0;">
+            <span style="font-size: 12pt; font-weight: bold; text-decoration: underline; text-transform: uppercase;">SURAT KETERANGAN DAFTAR ULANG ( HER-REGISTRASI )</span>
+        </p>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+            <tbody>
+                <tr>
+                    <td style="width: 35%; padding: 1px 0; text-align: left;">Nomor : [NOMOR_SURAT]</td>
+                    <td style="width: 65%; padding: 1px 0; text-align: left;">- Didik</td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin: 0 0 5px 0;">Kepala Dinas Pendidikan Kabupaten [KOTA_DINAS], dengan ini menerangkan :</p>
+        <table style="width: 92%; border-collapse: collapse; margin-left: 30px; margin-bottom: 5px;">
+            <tbody>
+                <tr><td style="width: 32%; padding: 1px 0;">Nama Lembaga</td><td style="width: 3%; padding: 1px 0;">:</td><td style="width: 65%; font-weight: bold; padding: 1px 0;">[NAMA_LEMBAGA]</td></tr>
+                <tr><td style="padding: 1px 0;">Alamat Lembaga</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[ALAMAT_LEMBAGA]</td></tr>
+                <tr><td style="padding: 1px 0;">Kecamatan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:KECAMATAN]</td></tr>
+                <tr><td style="padding: 1px 0;">Kabupaten</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[KOTA_DINAS]</td></tr>
+            </tbody>
+        </table>
+        <p style="margin: 0 0 4px 0; font-size: 10pt;">Telah mempunyai Izin Pendirian Kepala Dinas Pendidikan kabupaten [KOTA_DINAS] :</p>
+        <table style="width: 92%; border-collapse: collapse; margin-left: 30px; margin-bottom: 10px;">
+            <tbody>
+                <tr><td style="width: 32%; padding: 1px 0;">Nomor Izin</td><td style="width: 3%; padding: 1px 0;">:</td><td style="width: 65%; padding: 1px 0;">[DATA:NOMOR_IZIN_PENDIRIAN]</td></tr>
+                <tr><td style="padding: 1px 0;">Tanggal</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:TANGGAL_IZIN_PENDIRIAN]</td></tr>
+                <tr><td style="padding: 1px 0;">NPSN</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[NPSN]</td></tr>
+                <tr><td style="padding: 1px 0;">Nama Pimpinan</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:NAMA_PIMPINAN]</td></tr>
+                <tr><td style="padding: 1px 0;">Pemilik/ Penyelenggara</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:NAMA_PENYELENGGARA]</td></tr>
+                <tr><td style="padding: 1px 0;">Akreditasi</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:AKREDITASI]</td></tr>
+                <tr><td style="padding: 1px 0;">TMT</td><td style="padding: 1px 0;">:</td><td style="padding: 1px 0;">[DATA:TMT]</td></tr>
+            </tbody>
+        </table>
+        <p style="text-align: justify; margin: 0 0 5px 0; line-height: 1.4;">
+            PKBM tersebut telah melakukan daftar ulang (her-registrasi) pada Bidang PAUD dan Dikmas Dinas Pendidikan Kabupaten [KOTA_DINAS]. Surat keterangan ini berlaku selama <strong>[MASA_BERLAKU]</strong> terhitung tanggal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sampai dengan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </p>
+        <table style="width: 100%; border-collapse: collapse; page-break-inside: avoid; margin-top: 8px;">
+            <tbody>
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td style="width: 45%; text-align: center;">
+                        [KOTA_DINAS], [TANGGAL_TERBIT]<br>
+                        <strong>KEPALA</strong><br><br><br><br>
+                        <strong><u>[PIMPINAN_NAMA]</u></strong><br>
+                        [PIMPINAN_PANGKAT]<br>
+                        NIP. [PIMPINAN_NIP]
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        ';
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BAGIAN 2: TEMPLATE LKP (sebelumnya PKBM)
     |--------------------------------------------------------------------------
     */
     private static function getIzinMemimpinPKBM(): string

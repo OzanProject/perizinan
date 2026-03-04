@@ -34,8 +34,8 @@
               id="btn-frame-default">Utama</button>
             <button type="button" class="btn btn-outline-primary font-weight-bold" onclick="changeFrame('paud')"
               id="btn-frame-paud">PAUD</button>
-            <button type="button" class="btn btn-outline-info font-weight-bold" onclick="changeFrame('pkbm')"
-              id="btn-frame-pkbm">PKBM</button>
+            <button type="button" class="btn btn-outline-info font-weight-bold" onclick="changeFrame('lkp')"
+              id="btn-frame-lkp">LKP</button>
           </div>
 
           <select class="form-control form-control-sm font-weight-bold text-dark mr-2" id="paper-size-selector"
@@ -86,19 +86,19 @@
 
                 if (strpos($namaIzin, 'paud') !== false || strpos($namaIzin, 'tk') !== false) {
                   $overlayUrl = $dinas->watermark_border_paud_img ? asset('storage/' . $dinas->watermark_border_paud_img) : asset('images/bingkai-paud.jpg');
-                } elseif (strpos($namaIzin, 'pkbm') !== false) {
+                } elseif (strpos($namaIzin, 'lkp') !== false) {
                   $overlayUrl = asset('images/bingkai-pkbm.jpg');
                 }
               @endphp
 
               <div id="frame-overlay" style="
-                                                                position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                                                                pointer-events: none; z-index: 2;
-                                                                background-image: url('{{ $overlayUrl }}');
-                                                                background-size: 100% 100%; background-repeat: no-repeat;
-                                                                opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
-                                                                display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
-                                                            "></div>
+                                                                  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                                                                  pointer-events: none; z-index: 2;
+                                                                  background-image: url('{{ $overlayUrl }}');
+                                                                  background-size: 100% 100%; background-repeat: no-repeat;
+                                                                  opacity: {{ $dinas->watermark_border_opacity ?? 0.9 }};
+                                                                  display: {{ ($jenisPerizinan->use_border ?? false) ? 'block' : 'none' }};
+                                                              "></div>
 
               <div id="editor-canvas" class="document-editor__editable paper-a4-portrait" contenteditable="true">
                 {!! $jenisPerizinan->template_html ?? '<div style="text-align:center; padding-top:50px; color:#ccc;"><h2>Kanvas Kosong</h2><p>Klik tombol kuning "Pilih Layout" di atas untuk memulai desain secara otomatis.</p></div>' !!}
@@ -423,7 +423,7 @@
       const framePaths = {
         'default': '{{ $frameUrl ?? asset('images/default-border.png') }}',
         'paud': '{{ $dinas->watermark_border_paud_img ? asset('storage/' . $dinas->watermark_border_paud_img) : asset('images/bingkai-paud.jpg') }}',
-        'pkbm': '{{ asset('images/bingkai-pkbm.jpg') }}'
+        'lkp': '{{ asset('images/bingkai-pkbm.jpg') }}'
       };
 
       function changeFrame(type) {
@@ -434,19 +434,19 @@
           overlay.style.backgroundImage = `url('${framePaths[type]}')`;
           if (borderTypeInput) borderTypeInput.value = type;
 
-          ['default', 'paud', 'pkbm'].forEach(t => {
+          ['default', 'paud', 'lkp'].forEach(t => {
             const btn = document.getElementById(`btn-frame-${t}`);
             if (btn) {
               if (t === type) {
                 btn.classList.add('active');
                 if (t === 'default') btn.className = 'btn btn-secondary font-weight-bold active';
                 if (t === 'paud') btn.className = 'btn btn-primary font-weight-bold active';
-                if (t === 'pkbm') btn.className = 'btn btn-info font-weight-bold active';
+                if (t === 'lkp') btn.className = 'btn btn-info font-weight-bold active';
               } else {
                 btn.classList.remove('active');
                 if (t === 'default') btn.className = 'btn btn-outline-secondary font-weight-bold';
                 if (t === 'paud') btn.className = 'btn btn-outline-primary font-weight-bold';
-                if (t === 'pkbm') btn.className = 'btn btn-outline-info font-weight-bold';
+                if (t === 'lkp') btn.className = 'btn btn-outline-info font-weight-bold';
               }
             }
           });
@@ -461,8 +461,8 @@
           const namaIzin = '{{ strtolower($jenisPerizinan->nama ?? '') }}';
           if (namaIzin.includes('paud') || namaIzin.includes('tk')) {
             changeFrame('paud');
-          } else if (namaIzin.includes('pkbm')) {
-            changeFrame('pkbm');
+          } else if (namaIzin.includes('lkp')) {
+            changeFrame('lkp');
           } else {
             changeFrame('default');
           }
