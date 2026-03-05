@@ -29,12 +29,13 @@ class DocumentRenderService
         $watermarkHtml = '';
         $watermarkCss = '';
         $watermarkEnabled = $dinas->watermark_enabled ?? true;
+        $wmSize = (int) ($dinas->watermark_size ?? 200);  // Ambil dari setting admin
         if ($watermarkEnabled && $dinas && $dinas->watermark_img) {
             $wmPath = Storage::disk('public')->path($dinas->watermark_img);
             $wmOpacity = $dinas->watermark_opacity ?? 0.08;
         } elseif ($watermarkEnabled && $dinas && $dinas->logo) {
             $wmPath = Storage::disk('public')->path($dinas->logo);
-            $wmOpacity = 0.08;
+            $wmOpacity = $dinas->watermark_opacity ?? 0.08;
         } else {
             $wmPath = null;
             $wmOpacity = 0;
@@ -51,13 +52,13 @@ class DocumentRenderService
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    width: 200px;
-                    height: 200px;
+                    width: ' . $wmSize . 'px;
+                    height: ' . $wmSize . 'px;
                     opacity: ' . $wmOpacity . ';
                     z-index: -1;
                 }
             ';
-            $watermarkHtml = '<div class="watermark-overlay"><img src="' . $wmSrc . '" style="width:200px; height:200px; object-fit:contain;"></div>';
+            $watermarkHtml = '<div class="watermark-overlay"><img src="' . $wmSrc . '" style="width:' . $wmSize . 'px; height:' . $wmSize . 'px; object-fit:contain;"></div>';
         }
 
         return '<!DOCTYPE html>
