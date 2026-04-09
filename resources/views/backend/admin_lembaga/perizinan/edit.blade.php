@@ -571,6 +571,12 @@
                         this.step = 2;
                         this.updateProgress();
                     } else if (n === 3) {
+                        const requiredCount = {{ $syarats->where('is_required', true)->count() }};
+                        const uploadedCount = {{ $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count() }};
+                        if (uploadedCount < requiredCount) {
+                            alert('Perhatian: Masih ada berkas wajib yang belum diunggah. Silakan lengkapi terlebih dahulu.');
+                            return;
+                        }
                         this.step = 3;
                         this.updateProgress();
                     }
@@ -590,6 +596,12 @@
                     });
                 },
                 validateStep2() {
+                    const requiredCount = {{ $syarats->where('is_required', true)->count() }};
+                    const uploadedCount = {{ $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count() }};
+                    if (uploadedCount < requiredCount) {
+                        alert('Perhatian: Masih ada berkas wajib yang belum diunggah. Silakan lengkapi terlebih dahulu.');
+                        return;
+                    }
                     this.step = 3;
                     this.updateProgress();
                     const url = new URL(window.location);
@@ -667,6 +679,12 @@
                         this.step = 2;
                         this.updateProgress();
                     } else if (n === 3) {
+                        const requiredCount = {{ $syarats->where('is_required', true)->count() }};
+                        const uploadedCount = {{ $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count() }};
+                        if (uploadedCount < requiredCount) {
+                            alert('Perhatian: Masih ada berkas wajib yang belum diunggah. Silakan lengkapi terlebih dahulu.');
+                            return;
+                        }
                         this.step = 3;
                         this.updateProgress();
                     }
@@ -688,6 +706,12 @@
                     });
                 },
                 validateStep2() {
+                    const requiredCount = {{ $syarats->where('is_required', true)->count() }};
+                    const uploadedCount = {{ $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count() }};
+                    if (uploadedCount < requiredCount) {
+                        alert('Perhatian: Masih ada berkas wajib yang belum diunggah. Silakan lengkapi terlebih dahulu.');
+                        return;
+                    }
                     // Navigate to step 3
                     this.step = 3;
                     this.updateProgress();
