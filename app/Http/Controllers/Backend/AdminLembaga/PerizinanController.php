@@ -133,6 +133,33 @@ class PerizinanController extends Controller
     $syarats = $perizinan->jenisPerizinan->syarats;
     $uploadedDokumens = $perizinan->dokumens->keyBy('syarat_perizinan_id');
 
+    // Server-side validation to prevent bypassing step 1
+    if ($initialStep >= 2) {
+      if ($perizinan->jenisPerizinan->form_config) {
+        $missing = [];
+        foreach ($perizinan->jenisPerizinan->form_config as $field) {
+          if (($field['required'] ?? false) && (!isset($perizinan->perizinan_data[$field['name']]) || empty($perizinan->perizinan_data[$field['name']]))) {
+            $missing[] = $field['label'];
+          }
+        }
+        if (count($missing) > 0) {
+          return redirect()->route('admin_lembaga.perizinan.edit', ['perizinan' => $perizinan->id, 'step' => 1])
+                           ->with('error', 'Akses ditolak. Mohon lengkapi informasi detail pengajuan terlebih dahulu.');
+        }
+      }
+    }
+
+    // Server-side validation to prevent bypassing step 2
+    if ($initialStep == 3) {
+      $requiredCount = $syarats->where('is_required', true)->count();
+      $uploadedCount = $uploadedDokumens->whereIn('syarat_perizinan_id', $syarats->where('is_required', true)->pluck('id'))->count();
+      
+      if ($uploadedCount < $requiredCount) {
+        return redirect()->route('admin_lembaga.perizinan.edit', ['perizinan' => $perizinan->id, 'step' => 2])
+                         ->with('error', 'Akses ditolak. Anda harus melengkapi semua dokumen wajib terlebih dahulu.');
+      }
+    }
+
     return view('backend.admin_lembaga.perizinan.edit', compact('perizinan', 'syarats', 'uploadedDokumens', 'initialStep'));
   }
 
