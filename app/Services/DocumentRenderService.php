@@ -111,7 +111,12 @@ class DocumentRenderService
         $html = $this->renderHtml($p, $preset, $paperSize, $orientation);
 
         if (strtoupper($paperSize) === 'F4') {
-            $paperSizeArray = [0, 0, 595.28, 935.43];
+            if (strtolower($orientation) === 'landscape') {
+                $paperSizeArray = [0, 0, 935.43, 595.28]; // width, height
+                $orientation = 'portrait'; // because we already swapped the dimensions
+            } else {
+                $paperSizeArray = [0, 0, 595.28, 935.43];
+            }
         } else {
             $paperSizeArray = strtolower($paperSize);
         }
@@ -172,7 +177,11 @@ class DocumentRenderService
         $orientation = strtolower($orientationOverride ?: ($preset->orientation ?? 'portrait'));
 
         if ($paperSize === 'F4') {
-            $size = "210mm 330mm {$orientation}";
+            if ($orientation === 'landscape') {
+                $size = "330mm 210mm";
+            } else {
+                $size = "210mm 330mm";
+            }
         } else {
             $size = "{$paperSize} {$orientation}";
         }
