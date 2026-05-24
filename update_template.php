@@ -1,18 +1,10 @@
 <?php
+require __DIR__.'/vendor/autoload.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-use App\Models\JenisPerizinan;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        $html = <<<HTML
+$html = <<<HTML
 <table style="width: 100%; border-collapse: collapse; margin-bottom: 2px;">
     <tbody>
         <tr>
@@ -79,19 +71,10 @@ return new class extends Migration
 HTML;
 
         foreach([1, 2, 3, 4] as $id) {
-            $perizinan = JenisPerizinan::find($id);
+            $perizinan = App\Models\JenisPerizinan::find($id);
             if($perizinan) {
                 $perizinan->template_html = $html;
                 $perizinan->save();
             }
         }
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        // 
-    }
-};
+        echo "Template updated!\n";
