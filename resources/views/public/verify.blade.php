@@ -243,6 +243,10 @@
             <span class="value">{{ $perizinan->lembaga->nama }}</span>
           </div>
           <div class="info-item">
+            <span class="label">NPSN</span>
+            <span class="value">{{ $perizinan->lembaga->npsn ?? '-' }}</span>
+          </div>
+          <div class="info-item">
             <span class="label">Tanggal Terbit</span>
             <span class="value">{{ $perizinan->tanggal_terbit->translatedFormat('d F Y') }}</span>
           </div>

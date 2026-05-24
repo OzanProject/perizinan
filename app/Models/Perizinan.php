@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Enums\PerizinanStatus;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class Perizinan extends Model
 {
@@ -17,6 +18,12 @@ class Perizinan extends Model
   protected static function boot()
   {
     parent::boot();
+
+    static::creating(function ($perizinan) {
+      if (empty($perizinan->qr_token)) {
+        $perizinan->qr_token = Str::uuid()->toString();
+      }
+    });
 
     static::updating(function ($perizinan) {
       if ($perizinan->allowImmutableUpdate)
@@ -156,6 +163,18 @@ class Perizinan extends Model
       '[STEMPEL_DINAS]' => '<img src="' . $toBase64($this->stempel_img ?? $dinas->stempel_img) . '" width="80" height="80" style="display:inline-block; max-width:100%;">',
     ];
 
+    // Generate QR Code
+    if ($this->qr_token) {
+      $qrUrl = route('perizinan.verify', $this->qr_token);
+      $qrCodeSvg = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(100)->margin(0)->generate($qrUrl);
+      $qrCodeBase64 = base64_encode($qrCodeSvg);
+      $qrImage = '<img src="data:image/svg+xml;base64,' . $qrCodeBase64 . '" width="80" height="80" style="display:inline-block; max-width:100%;">';
+      $globalVars['[QR_CODE]'] = $qrImage;
+    } else {
+      $qrImage = '';
+      $globalVars['[QR_CODE]'] = '';
+    }
+
     // TTL dinamis jika ada
     $tempatLahir = $data['tempat_lahir'] ?? null;
     $tglLahir = $data['tanggal_lahir'] ?? null;
@@ -257,6 +276,15 @@ class Perizinan extends Model
           }
         }
       }
+    }
+
+    // Auto-append QR Code di kiri bawah jika belum ada di template
+    if ($qrImage && !str_contains($template, '[QR_CODE]') && !str_contains($template, $qrCodeBase64)) {
+      $floatingQr = '<div style="position: absolute; bottom: 50px; left: 50px; z-index: 10; text-align: center;">' . 
+                    $qrImage . 
+                    '<br><span style="font-size: 8px; color: #555; margin-top: 5px; display: block;">Scan untuk<br>Verifikasi Asli</span>' .
+                    '</div>';
+      $template .= $floatingQr;
     }
 
     return $template;

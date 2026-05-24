@@ -21,8 +21,8 @@ class VerificationController extends Controller
    */
   public function verify($hash)
   {
-    // Try to find by hash (Phase 5 requirement)
-    $perizinan = Perizinan::where('document_hash', $hash)->first();
+    // Try to find by hash (Phase 5 requirement) or qr_token (Barcode)
+    $perizinan = Perizinan::where('document_hash', $hash)->orWhere('qr_token', $hash)->first();
 
     if (!$perizinan) {
       return view('public.verify', [
@@ -32,7 +32,7 @@ class VerificationController extends Controller
     }
 
     // Recalculate hash on-the-fly to check for database tampering
-    $currentHash = $this->renderService->calculateHash($perizinan->snapshot_html);
+    $currentHash = hash('sha256', $perizinan->snapshot_html ?? '');
     $isValid = ($currentHash === $perizinan->document_hash);
 
     // Load relations for display
