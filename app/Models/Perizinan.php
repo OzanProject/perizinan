@@ -127,10 +127,9 @@ class Perizinan extends Model
     if ($this->qr_token) {
       $qrUrl        = route('perizinan.verify', $this->qr_token);
       $qrCodeSvg    = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(82)->margin(0)->generate($qrUrl);
-      $qrCodeBase64 = base64_encode($qrCodeSvg);
-      $qrImage      = '<img src="data:image/svg+xml;base64,' . $qrCodeBase64 . '"'
-                    . ' width="58" height="58"'
-                    . ' style="display:inline-block;width:58px;height:58px;">';
+      $qrCodeSvg    = preg_replace('/<\?xml.*\?>/', '', $qrCodeSvg);
+      $qrCodeBase64 = base64_encode($qrCodeSvg); // Masih disimpan untuk kondisi str_contains
+      $qrImage      = '<div style="display:inline-block;width:58px;height:58px;">' . $qrCodeSvg . '</div>';
     }
 
     // ── Variabel global ──────────────────────────────────────────────────────
