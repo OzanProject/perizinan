@@ -90,7 +90,7 @@ class Perizinan extends Model
   // ENGINE UTAMA
   // =========================================================================
 
-  public function replaceVariables(): string
+  public function replaceVariables(bool $wrap = true): string
   {
     $template   = $this->jenisPerizinan->template_html;
     $formConfig = $this->jenisPerizinan->form_config;
@@ -256,7 +256,11 @@ class Perizinan extends Model
         </div>';
     }
 
-    return $this->wrapPrintableTemplate($template);
+    if ($wrap) {
+      return $this->wrapPrintableTemplate($template);
+    }
+    
+    return $template;
   }
 
   // =========================================================================

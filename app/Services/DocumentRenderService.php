@@ -12,7 +12,10 @@ class DocumentRenderService
     {
         $p->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-        $body = $p->replaceVariables();
+        $body = $p->snapshot_html;
+        if (empty($body)) {
+            $body = $p->replaceVariables(false);
+        }
 
         // Pembersih Spasi Gaib
         $body = preg_replace('/(<p>(&nbsp;|\s|<br\s*\/?>)*<\/p>\s*)+$/i', '', $body);
