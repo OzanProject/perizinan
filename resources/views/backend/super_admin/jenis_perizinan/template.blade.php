@@ -365,7 +365,7 @@
           fixed_toolbar_container: '#toolbar-container',
           toolbar_persist: true, // Toolbar selalu tampil, tidak perlu klik editor dulu
 
-          plugins: 'advlist autolink lists link charmap preview searchreplace visualblocks code fullscreen table help wordcount directionality nonbreaking',
+          plugins: 'advlist autolink lists link charmap preview searchreplace visualblocks code fullscreen table help wordcount directionality nonbreaking paste',
 
           toolbar: [
             'undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | removeformat',
@@ -382,6 +382,11 @@
           menubar: false,
 
           content_style: "body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.15; } .var-badge { display: inline-block; padding: 1px 4px; font-weight: bold; color: #004085; background: #cce5ff; border: 1px solid #b8daff; border-radius: 3px; font-family: monospace; }",
+
+          paste_as_text: false,
+          paste_data_images: false,
+          paste_webkit_styles: "none",
+          paste_merge_formats: true,
 
           // Pastikan TinyMCE tidak menghapus atribut data-logo pada img tag
           extended_valid_elements: 'img[src|alt|style|width|height|contenteditable|data-logo|data-mce-src]',

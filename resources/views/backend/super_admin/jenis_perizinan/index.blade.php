@@ -128,7 +128,7 @@
       @if($jenisPerizinans->hasPages())
         <div class="card-footer bg-white border-top py-3">
           <div class="d-flex justify-content-center">
-            {{ $jenisPerizinans->links('pagination::bootstrap-4') }}
+            {{ $jenisPerizinans->withQueryString()->links('pagination::bootstrap-4') }}
           </div>
         </div>
       @endif
@@ -181,7 +181,7 @@
         </div>
         <form id="formJenisPerizinan" method="POST">
           @csrf
-          <div id="methodContainer"></div>
+          <input type="hidden" id="formMethod" name="_method" value="POST">
           <div class="modal-body">
             <div class="row">
               <div class="col-md-8">
@@ -250,12 +250,17 @@
       function openModal(mode, data = null) {
         const form = document.getElementById('formJenisPerizinan');
         const title = document.getElementById('modalTitle');
-        const methodContainer = document.getElementById('methodContainer');
+        const methodInput = document.getElementById('formMethod');
 
         if (mode === 'edit') {
           title.innerText = 'Edit Jenis Perizinan';
-          form.action = `/super-admin/jenis-perizinan/${data.id}`;
-          methodContainer.innerHTML = '@method("PUT")';
+          
+          // Best practice routing (dinamis)
+          let baseUrl = "{{ route('super_admin.jenis_perizinan.update', 'ID_PLACEHOLDER') }}";
+          form.action = baseUrl.replace('ID_PLACEHOLDER', data.id);
+          
+          // Ubah value method input, bukan inject HTML
+          methodInput.value = "PUT";
 
           // Fill data
           document.getElementById('nama').value = data.nama;
@@ -267,7 +272,7 @@
         } else {
           title.innerText = 'Tambah Jenis Perizinan';
           form.action = "{{ route('super_admin.jenis_perizinan.store') }}";
-          methodContainer.innerHTML = '';
+          methodInput.value = "POST";
           form.reset();
           document.getElementById('is_active').checked = true;
         }
