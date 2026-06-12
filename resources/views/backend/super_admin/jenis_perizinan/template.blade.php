@@ -347,7 +347,7 @@
 
   {{-- TinyMCE Integration --}}
   @push('scripts')
-    <script src="https://cdn.tiny.cloud/1/nuww14eec90ohvwjq67sjn9fcqkn5mmyywap0caie6rk7xhs/tinymce/7/tinymce.min.js"
+    <script src="https://cdn.tiny.cloud/1/{{ $dinas->tinymce_api_key ?: env('TINYMCE_API_KEY', 'no-api-key') }}/tinymce/7/tinymce.min.js"
       referrerpolicy="origin"></script>
 
     <script>

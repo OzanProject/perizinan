@@ -31,6 +31,7 @@ class Dinas extends Model
     'watermark_border_opacity',
     'watermark_size',
     'watermark_border_paud_img',
+    'tinymce_api_key',
     'mail_host',
     'mail_port',
     'mail_username',

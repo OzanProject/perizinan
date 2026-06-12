@@ -257,6 +257,11 @@
                         <textarea name="footer_text" rows="2"
                           class="form-control">{{ old('footer_text', $dinas->footer_text) }}</textarea>
                       </div>
+                      <div class="form-group">
+                        <label class="small font-weight-bold text-muted text-uppercase">API Key TinyMCE (Editor Surat)</label>
+                        <input type="text" name="tinymce_api_key" value="{{ old('tinymce_api_key', $dinas->tinymce_api_key) }}"
+                          class="form-control" placeholder="Kosongkan untuk pakai key default (.env)">
+                      </div>
 
                       <hr class="my-4">
                       <h6 class="font-weight-bold mb-3"><i class="fas fa-certificate text-primary mr-2"></i> Watermark &

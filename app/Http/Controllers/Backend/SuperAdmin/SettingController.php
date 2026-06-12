@@ -68,6 +68,7 @@ class SettingController extends Controller
       'watermark_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
       'watermark_border_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048',
       'watermark_border_paud_img' => 'nullable|image|mimes:png,jpeg,jpg,webp|max:2048', // Validasi Bingkai PAUD
+      'tinymce_api_key' => 'nullable|string',
       'watermark_enabled' => 'nullable|string', // Checkbox
       'watermark_opacity' => 'required|numeric|min:0.01|max:1',
       'watermark_border_opacity' => 'required|numeric|min:0.01|max:1',
@@ -84,6 +85,7 @@ class SettingController extends Controller
     $dinas->pimpinan_pangkat = $request->pimpinan_pangkat;
     $dinas->pimpinan_nip = $request->pimpinan_nip;
     $dinas->footer_text = $request->footer_text;
+    $dinas->tinymce_api_key = $request->tinymce_api_key;
     $dinas->watermark_enabled = $request->has('watermark_enabled');
     $dinas->watermark_opacity = $request->watermark_opacity;
     $dinas->watermark_border_opacity = $request->watermark_border_opacity;
