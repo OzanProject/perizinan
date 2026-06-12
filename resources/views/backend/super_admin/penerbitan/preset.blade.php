@@ -236,7 +236,8 @@
           document.getElementById('input-margin-right').value = '2.0';
         } else {
           title.innerText = 'Edit Preset Layout';
-          form.action = `/super-admin/penerbitan/preset/${data.id}`;
+          let baseUrl = "{{ route('super_admin.penerbitan.preset.update', 'ID_PLACEHOLDER') }}";
+          form.action = baseUrl.replace('ID_PLACEHOLDER', data.id);
           methodInput.value = "PUT";
 
           document.getElementById('input-nama').value = data.nama;

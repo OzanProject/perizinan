@@ -30,6 +30,28 @@
     <form action="{{ route('admin_lembaga.profile.update') }}" method="POST" enctype="multipart/form-data"
       id="profile-form">
       @csrf
+      <!-- Banner / Sampul Lembaga -->
+      <div class="card card-outline card-primary shadow-sm mb-4">
+        <div class="card-body p-0 position-relative box-sampul">
+          <div class="sampul-container bg-light rounded-top" style="height: 200px; cursor: pointer; overflow: hidden; position: relative;" onclick="document.getElementById('sampul-input').click()">
+            @if($lembaga->sampul)
+              <img src="{{ Storage::url($lembaga->sampul) }}" id="sampul-preview" class="w-100 h-100" style="object-fit: cover;">
+            @else
+              <img src="" id="sampul-preview" class="w-100 h-100 d-none" style="object-fit: cover;">
+              <div id="sampul-fallback" class="d-flex h-100 flex-column align-items-center justify-content-center text-muted">
+                <i class="fas fa-image fa-3x mb-2 opacity-50"></i>
+                <span class="small font-weight-bold">Klik untuk unggah Banner/Sampul Lembaga</span>
+                <span class="x-small">Rekomendasi ukuran: 1200x400 px (Max 5MB)</span>
+              </div>
+            @endif
+            <div class="position-absolute bg-primary text-white p-2 rounded-circle shadow" style="bottom: 15px; right: 15px;">
+              <i class="fas fa-camera"></i>
+            </div>
+          </div>
+          <input type="file" name="sampul" id="sampul-input" class="d-none" onchange="previewImage(this, 'sampul-preview', 'sampul-fallback')">
+        </div>
+      </div>
+
       <div class="row">
         <!-- Left Column: Branding & Contacts -->
         <div class="col-md-4">
@@ -39,21 +61,22 @@
               <p class="text-center font-weight-bold text-muted text-uppercase small mb-3">Logo Institusi Resmi</p>
               <div class="text-center mb-4">
                 <div
-                  class="profile-user-img img-fluid img-circle shadow-sm overflow-hidden border-2 d-flex align-items-center justify-content-center bg-light"
-                  style="width: 150px; height: 150px; padding: 10px; margin: 0 auto; cursor: pointer;"
+                  class="profile-user-img img-fluid img-circle shadow-sm overflow-hidden border-2 d-flex align-items-center justify-content-center bg-light position-relative"
+                  style="width: 150px; height: 150px; padding: 10px; margin: 0 auto; cursor: pointer; top: -50px; margin-bottom: -40px; background-color: white !important;"
                   onclick="document.getElementById('logo-input').click()">
                   @if($lembaga->logo)
                     <img src="{{ Storage::url($lembaga->logo) }}" id="logo-preview" class="mw-100 mh-100 object-contain">
                   @else
-                    <i class="fas fa-school fa-3x text-muted opacity-50"></i>
+                    <img src="" id="logo-preview" class="mw-100 mh-100 object-contain d-none">
+                    <i id="logo-fallback" class="fas fa-school fa-3x text-muted opacity-50"></i>
                   @endif
                   <div class="position-absolute bg-primary text-white p-2 rounded-circle shadow"
-                    style="bottom: 0; right: 25px;">
+                    style="bottom: 5px; right: 5px;">
                     <i class="fas fa-camera"></i>
                   </div>
                 </div>
                 <input type="file" name="logo" id="logo-input" class="d-none"
-                  onchange="previewImage(this, 'logo-preview')">
+                  onchange="previewImage(this, 'logo-preview', 'logo-fallback')">
               </div>
               <p class="text-center text-muted x-small font-italic">Klik gambar untuk mengubah logo. Rekomendasi format
                 PNG/JPG dengan latar belakang transparan.</p>
@@ -218,17 +241,19 @@
 
 @push('scripts')
   <script>
-    function previewImage(input, previewId) {
+    function previewImage(input, previewId, fallbackId) {
       if (input.files && input.files[0]) {
         var reader = new FileReader();
         reader.onload = function (e) {
           const preview = document.getElementById(previewId);
+          const fallback = document.getElementById(fallbackId);
+          
           if (preview) {
             preview.src = e.target.result;
-          } else {
-            // Handle initial display if icon was present
-            const container = input.closest('.box-profile').querySelector('.profile-user-img');
-            container.innerHTML = `<img src="${e.target.result}" id="${previewId}" class="mw-100 mh-100 object-contain">`;
+            preview.classList.remove('d-none');
+          }
+          if (fallback) {
+            fallback.classList.add('d-none');
           }
         }
         reader.readAsDataURL(input.files[0]);

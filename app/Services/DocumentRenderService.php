@@ -10,6 +10,10 @@ class DocumentRenderService
 {
     public function renderHtml(Perizinan $p, $preset = null, $paperSize = null, $orientation = null): string
     {
+        // [REFAC 1] Injeksi Limit Memori dan Waktu Eksekusi
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', '120');
+
         $p->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
         $body = $p->snapshot_html;
@@ -32,22 +36,26 @@ class DocumentRenderService
         $watermarkHtml = '';
         $watermarkCss = '';
         $watermarkEnabled = $dinas->watermark_enabled ?? true;
-        $wmSize = (int) ($dinas->watermark_size ?? 200);  // Ambil dari setting admin
-        if ($watermarkEnabled && $dinas && $dinas->watermark_img) {
-            $wmPath = Storage::disk('public')->path($dinas->watermark_img);
-            $wmOpacity = $dinas->watermark_opacity ?? 0.08;
-        } elseif ($watermarkEnabled && $dinas && $dinas->logo) {
-            $wmPath = Storage::disk('public')->path($dinas->logo);
-            $wmOpacity = $dinas->watermark_opacity ?? 0.08;
-        } else {
-            $wmPath = null;
-            $wmOpacity = 0;
+        $wmSize = (int) ($dinas->watermark_size ?? 200);
+
+        // [REFAC 2] Cloud-ready Storage Fetching (Menggunakan get() dan exists())
+        $wmContent = null;
+        $wmExtension = 'png';
+        $wmOpacity = $dinas->watermark_opacity ?? 0.08;
+
+        if ($watermarkEnabled && $dinas) {
+            if (!empty($dinas->watermark_img) && Storage::disk('public')->exists($dinas->watermark_img)) {
+                $wmContent = Storage::disk('public')->get($dinas->watermark_img);
+                $wmExtension = strtolower(pathinfo($dinas->watermark_img, PATHINFO_EXTENSION)) ?: 'png';
+            } elseif (!empty($dinas->logo) && Storage::disk('public')->exists($dinas->logo)) {
+                $wmContent = Storage::disk('public')->get($dinas->logo);
+                $wmExtension = strtolower(pathinfo($dinas->logo, PATHINFO_EXTENSION)) ?: 'png';
+            }
         }
 
-        if ($wmPath && file_exists($wmPath)) {
-            $wmType = strtolower(pathinfo($wmPath, PATHINFO_EXTENSION)) ?: 'png';
-            $wmBase64 = base64_encode(file_get_contents($wmPath));
-            $wmSrc = "data:image/{$wmType};base64,{$wmBase64}";
+        if ($wmContent) {
+            $wmBase64 = base64_encode($wmContent);
+            $wmSrc = "data:image/{$wmExtension};base64,{$wmBase64}";
 
             $watermarkCss = '
                 .watermark-overlay {
@@ -79,6 +87,7 @@ class DocumentRenderService
                     color: #000;
                     margin: 0;
                     padding: ' . $padding . ';
+                    background-image-resize: 6;
                 }
 
                 figure { margin: 0; padding: 0; }
@@ -88,7 +97,13 @@ class DocumentRenderService
                 p { clear: both; margin-top: 0; margin-bottom: 4px; }
                 p:last-child { margin-bottom: 0 !important; }
 
-                table { border-collapse: collapse; width: 100%; page-break-inside: avoid; margin-bottom: 5px; }
+                .container {
+                    width: 100%;
+                    margin: 0 auto;
+                    box-sizing: border-box; 
+                }
+
+                table { border-collapse: collapse; width: 100% !important; max-width: 100% !important; page-break-inside: avoid; margin-bottom: 5px; }
                 tr { page-break-inside: avoid; page-break-after: auto; }
                 td { vertical-align: top; padding: 1px 3px; border: none; }
 
@@ -115,8 +130,8 @@ class DocumentRenderService
 
         if (strtoupper($paperSize) === 'F4') {
             if (strtolower($orientation) === 'landscape') {
-                $paperSizeArray = [0, 0, 935.43, 595.28]; // width, height
-                $orientation = 'portrait'; // because we already swapped the dimensions
+                $paperSizeArray = [0, 0, 935.43, 595.28];
+                $orientation = 'portrait'; 
             } else {
                 $paperSizeArray = [0, 0, 595.28, 935.43];
             }
@@ -154,12 +169,36 @@ class DocumentRenderService
 
     public function storePermanentPdf(Perizinan $perizinan): string
     {
-        $html = $this->renderHtml($perizinan);
+        // [REFAC 3] Dinamisasi Parameter Kertas untuk Penyimpanan Permanen
+        $preset = \App\Models\CetakPreset::where('dinas_id', $perizinan->dinas_id)
+            ->where('is_active', true)
+            ->first();
 
-        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'portrait')->setOptions([
-            'isRemoteEnabled' => true,
-            'isHtml5ParserEnabled' => true,
-        ]);
+        $paperSize = $preset->paper_size ?? 'A4';
+        $orientation = $preset->orientation ?? 'portrait';
+
+        $html = $this->renderHtml($perizinan, $preset, $paperSize, $orientation);
+
+        // Kalkulasi ulang kertas (khusus penanganan F4)
+        if (strtoupper($paperSize) === 'F4') {
+            if (strtolower($orientation) === 'landscape') {
+                $paperSizeArray = [0, 0, 935.43, 595.28];
+                $orientation = 'portrait';
+            } else {
+                $paperSizeArray = [0, 0, 595.28, 935.43];
+            }
+        } else {
+            $paperSizeArray = strtolower($paperSize);
+        }
+
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper($paperSizeArray, $orientation)
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'defaultFont' => 'Times New Roman',
+                'dpi' => 96,
+            ]);
 
         $folder = 'issued_pdfs/' . date('Y/m');
         if (!Storage::disk('local')->exists($folder)) {
@@ -202,14 +241,8 @@ class DocumentRenderService
             $mb = $preset->margin_bottom ?? ($orientation === 'landscape' ? 0.5 : 1.5);
             $ml = $preset->margin_left ?? ($orientation === 'landscape' ? 2.5 : 3.0);
 
-            // FORCE OVERRIDE: Jika di database setting margin atas/bawahnya terlalu besar untuk landscape, KITA PAKSA TIPIS!
-            if ($orientation === 'landscape') {
-                if ($mt > 1.2)
-                    $mt = 1.0;
-                if ($mb > 1.0)
-                    $mb = 0.5; // Batas bawah maksimal hanya 0.5cm
-            }
-
+            // [REFAC 4] Penghapusan "Force Override" kaku. 
+            // Kita mempercayakan sepenuhnya pada nilai dari database ($preset).
             return "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
 

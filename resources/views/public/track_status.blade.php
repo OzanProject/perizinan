@@ -128,7 +128,7 @@
                   case 'disetujui': step = 3; break;
                   case 'siap_diambil':
                   case 'selesai': step = 4; break;
-                  case 'ditolaknya': step = 3; break; // Show at step 3 but failed
+                  case 'ditolak': step = 3; break; // Show at step 3 but failed
                 }
 
                 const isRejected = item.status_code === 'ditolak';

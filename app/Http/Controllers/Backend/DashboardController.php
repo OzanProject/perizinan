@@ -32,8 +32,11 @@ class DashboardController extends Controller
         ->where('status', PerizinanStatus::DIAJUKAN->value)
         ->count(),
       'disetujui' => Perizinan::where('dinas_id', $user->dinas_id)
-        ->where('status', PerizinanStatus::DISETUJUI->value)
-        ->count(),
+        ->whereIn('status', [
+          PerizinanStatus::DISETUJUI->value,
+          PerizinanStatus::SIAP_DIAMBIL->value,
+          PerizinanStatus::SELESAI->value
+        ])->count(),
       'perbaikan' => Perizinan::where('dinas_id', $user->dinas_id)
         ->where('status', PerizinanStatus::PERBAIKAN->value)
         ->count(),
