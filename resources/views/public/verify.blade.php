@@ -269,8 +269,8 @@
           </div>
         @endif
 
-        @if($isValid && $perizinan->pdf_path)
-          <a href="{{ route('super_admin.penerbitan.export_pdf', $perizinan->id) }}" class="btn">
+        @if($isValid)
+          <a href="{{ route('perizinan.verify.download', $perizinan->qr_token) }}" class="btn">
             <i class="ion-android-download"></i> Unduh Salinan Resmi
           </a>
         @endif

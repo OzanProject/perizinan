@@ -46,4 +46,20 @@ class VerificationController extends Controller
       'storedHash' => $perizinan->document_hash
     ]);
   }
+
+  public function download($hash)
+  {
+    $perizinan = Perizinan::where('document_hash', $hash)->orWhere('qr_token', $hash)->first();
+
+    if (!$perizinan) {
+      abort(404, 'Dokumen tidak ditemukan.');
+    }
+
+    if ($perizinan->pdf_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($perizinan->pdf_path)) {
+      return response()->download(storage_path('app/' . $perizinan->pdf_path));
+    }
+
+    // Jika belum ada file fisik, generate on the fly
+    return $this->renderService->generatePdf($perizinan);
+  }
 }

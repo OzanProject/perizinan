@@ -11,6 +11,7 @@ Route::get('/track', [\App\Http\Controllers\Public\TrackingController::class, 't
 
 // Public Verification Route (Anti-Tamper & Immutable)
 Route::get('/verify/{hash}', [\App\Http\Controllers\Public\VerificationController::class, 'verify'])->name('perizinan.verify');
+Route::get('/verify/{hash}/download', [\App\Http\Controllers\Public\VerificationController::class, 'download'])->name('perizinan.verify.download');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {

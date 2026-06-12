@@ -126,10 +126,19 @@ class Perizinan extends Model
     $qrCodeBase64 = '';
     if ($this->qr_token) {
       $qrUrl        = route('perizinan.verify', $this->qr_token);
-      $qrCodeSvg    = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(82)->margin(0)->generate($qrUrl);
-      $qrCodeSvg    = preg_replace('/<\?xml.*\?>/', '', $qrCodeSvg);
-      $qrCodeBase64 = base64_encode($qrCodeSvg); // Masih disimpan untuk kondisi str_contains
-      $qrImage      = '<div style="display:inline-block;width:58px;height:58px;">' . $qrCodeSvg . '</div>';
+      try {
+        $qrCodePng    = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(82)->margin(0)->generate($qrUrl);
+        $qrCodeBase64 = base64_encode($qrCodePng);
+        $qrImage      = '<img src="data:image/png;base64,' . $qrCodeBase64 . '" style="width:58px;height:58px;display:inline-block;" alt="QR Code">';
+      } catch (\Exception $e) {
+        // Fallback to SVG if PNG fails (e.g., ext-imagick missing)
+        $qrCodeSvg    = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')->size(82)->margin(0)->generate($qrUrl);
+        if (!str_contains($qrCodeSvg, '<?xml')) {
+            $qrCodeSvg = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . $qrCodeSvg;
+        }
+        $qrCodeBase64 = base64_encode($qrCodeSvg);
+        $qrImage      = '<img src="data:image/svg+xml;base64,' . $qrCodeBase64 . '" style="width:58px;height:58px;display:inline-block;" alt="QR Code">';
+      }
     }
 
     // ── Variabel global ──────────────────────────────────────────────────────
