@@ -21,6 +21,11 @@ class LoginController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            if (!Auth::user()->is_active) {
+                Auth::logout();
+                return back()->with('error', 'Akun Anda belum aktif. Silahkan tunggu persetujuan Super Admin.')->onlyInput('email');
+            }
+
             $request->session()->regenerate();
 
             return redirect()->intended('/dashboard');

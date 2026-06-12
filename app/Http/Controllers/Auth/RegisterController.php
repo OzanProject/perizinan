@@ -69,14 +69,13 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
             'lembaga_id' => $lembaga->id,
             'dinas_id' => $lembaga->dinas_id,
+            'is_active' => false,
         ]);
 
         // Pastikan role 'admin_lembaga' ada, jika tidak buat
         $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin_lembaga']);
         $user->assignRole($role);
 
-        Auth::login($user);
-
-        return redirect('/dashboard')->with('success', 'Selamat datang! Akun lembaga Anda berhasil didaftarkan.');
+        return redirect('/login')->with('success', 'Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan Super Admin.');
     }
 }

@@ -66,15 +66,13 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'lembaga_id' => $lembagaId,
             'dinas_id' => $dinas->id, // Assign dinas_id to user
-            'is_active' => true,
+            'is_active' => false,
         ]);
 
         $user->assignRole('admin_lembaga');
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('login', absolute: false))->with('success', 'Pendaftaran berhasil! Akun Anda sedang menunggu persetujuan Super Admin.');
     }
 }
