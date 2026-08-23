@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Perizinan;
-use App\Services\DocumentRenderService;
+use App\Actions\Perizinan\GeneratePdfAction;
 use Illuminate\Http\Request;
 
 class VerificationController extends Controller
 {
-  protected $renderService;
+  protected $generatePdfAction;
 
-  public function __construct(DocumentRenderService $renderService)
+  public function __construct(GeneratePdfAction $generatePdfAction)
   {
-    $this->renderService = $renderService;
+    $this->generatePdfAction = $generatePdfAction;
   }
 
   /**
@@ -60,6 +60,7 @@ class VerificationController extends Controller
     }
 
     // Jika belum ada file fisik, generate on the fly
-    return $this->renderService->generatePdf($perizinan);
+    return $this->generatePdfAction->handle($perizinan);
   }
 }
+

@@ -11,22 +11,26 @@ use App\Services\PerizinanWorkflowService;
 use App\Services\NomorSuratService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenerbitanController extends Controller
 {
   protected $workflowService;
   protected $nomorSuratService;
-  protected $renderService;
+  protected $renderHtmlAction;
+  protected $generatePdfAction;
 
   public function __construct(
     PerizinanWorkflowService $workflowService,
     NomorSuratService $nomorSuratService,
-    DocumentRenderService $renderService
+    \App\Actions\Perizinan\RenderHtmlAction $renderHtmlAction,
+    \App\Actions\Perizinan\GeneratePdfAction $generatePdfAction
   ) {
     $this->workflowService = $workflowService;
     $this->nomorSuratService = $nomorSuratService;
-    $this->renderService = $renderService;
+    $this->renderHtmlAction = $renderHtmlAction;
+    $this->generatePdfAction = $generatePdfAction;
   }
 
   public function antrian()
@@ -94,12 +98,21 @@ class PenerbitanController extends Controller
     return view('backend.super_admin.penerbitan.pusat_cetak', compact('perizinans', 'totalCount', 'activePreset'));
   }
 
-  public function preview(Perizinan $perizinan)
+  public function preview(Request $request, Perizinan $perizinan)
   {
     $this->authorize('view', $perizinan);
+    
+    // Gunakan preset aktif
+    $preset = \App\Models\CetakPreset::where('dinas_id', $perizinan->dinas_id)
+        ->where('is_active', true)
+        ->first();
 
-    // Use the service for consistent preview
-    $html = $this->renderService->renderHtml($perizinan);
+    // Terima parameter dari URL jika ada (seperti di Pusat Cetak), kalau tidak ada gunakan rule hierarki
+    $paperSize = $request->query('paper_size') ?: ($perizinan->jenisPerizinan->paper_size ?: ($preset->paper_size ?? 'A4'));
+    $orientation = $request->query('orientation') ?: ($perizinan->jenisPerizinan->orientation ?: ($preset->orientation ?? 'portrait'));
+
+    // Render HTML dengan CSS size: ... agar iframe bisa mengambil ukuran yang benar
+    $html = $this->renderHtmlAction->handle($perizinan, $paperSize, $orientation, false);
 
     return response()->json([
       'success' => true,
@@ -107,75 +120,200 @@ class PenerbitanController extends Controller
     ]);
   }
 
+  public function printHtml(Request $request, Perizinan $perizinan)
+  {
+    $this->authorize('view', $perizinan);
+
+    $preset = \App\Models\CetakPreset::where('dinas_id', $perizinan->dinas_id)
+        ->where('is_active', true)
+        ->first();
+
+    $paperSize   = strtoupper($request->query('paper_size') ?: ($perizinan->jenisPerizinan->paper_size ?: ($preset->paper_size ?? 'A4')));
+    $orientation = strtolower($request->query('orientation') ?: ($perizinan->jenisPerizinan->orientation ?: ($preset->orientation ?? 'portrait')));
+
+    // Dimensi kertas dalam mm
+    $paperDims = ['A4' => ['w' => 210, 'h' => 297], 'F4' => ['w' => 215, 'h' => 330], 'A3' => ['w' => 297, 'h' => 420]];
+    $dims      = $paperDims[$paperSize] ?? $paperDims['A4'];
+
+    // Landscape: tukar lebar & tinggi
+    if ($orientation === 'landscape') {
+        $bodyW = $dims['h'] . 'mm';
+        $bodyH = $dims['w'] . 'mm';
+    } else {
+        $bodyW = $dims['w'] . 'mm';
+        $bodyH = $dims['h'] . 'mm';
+    }
+
+    // @page size keyword (F4 pakai mm karena tidak ada di CSS standard)
+    $pageSize = ($paperSize === 'F4')
+        ? ($orientation === 'landscape' ? '330mm 215mm' : '215mm 330mm')
+        : strtolower($paperSize) . ' ' . $orientation;
+
+    // Render HTML
+    $html = $this->renderHtmlAction->handle($perizinan, $paperSize, $orientation, false);
+
+    // Inject CSS & JS untuk force landscape di Chrome SEBELUM </head>
+    $inject = '
+<style id="force-print-css">
+@page { size: ' . $pageSize . '; margin: 0; }
+@media print {
+    @page { size: ' . $pageSize . '; margin: 0; }
+    html, body { width: ' . $bodyW . ' !important; height: ' . $bodyH . ' !important; overflow: hidden !important; }
+}
+html, body { width: ' . $bodyW . '; min-height: ' . $bodyH . '; }
+</style>
+<script>
+// Chrome: inject ulang @page tepat sebelum print agar tidak di-override dialog
+window.addEventListener("beforeprint", function() {
+    var old = document.getElementById("dyn-page");
+    if (old) old.remove();
+    var s = document.createElement("style");
+    s.id = "dyn-page";
+    s.textContent = "@page { size: ' . $pageSize . '; margin: 0; }";
+    document.head.appendChild(s);
+});
+window.addEventListener("load", function() {
+    setTimeout(function() { window.print(); }, 800);
+});
+window.addEventListener("afterprint", function() { window.close(); });
+</script>';
+
+    // Inject banner panduan di bagian atas halaman (tidak muncul saat print)
+    $banner = $this->buildPrintGuidanceBanner($orientation, $paperSize);
+    $html = str_replace('<body>', '<body>' . $banner, $html);
+
+    $html = str_replace('</head>', $inject . '</head>', $html);
+
+    return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+  }
+
+  // Helper untuk menampilkan halaman cetak dengan panduan orientasi
+  private function buildPrintGuidanceBanner(string $orientation, string $paperSize): string
+  {
+    if ($orientation !== 'landscape') return '';
+    return '
+<div id="print-guidance" style="
+    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    color: #fff; padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: Arial, sans-serif; font-size: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:22px;">🖨️</span>
+        <div>
+            <strong style="font-size:15px;">Dokumen ini harus dicetak LANDSCAPE (' . $paperSize . ')</strong><br>
+            <span style="opacity:0.85; font-size:13px;">Di dialog Print Chrome: klik <strong>"More settings"</strong> → ubah <strong>"Layout"</strong> ke <strong>"Landscape"</strong></span>
+        </div>
+    </div>
+    <button onclick="document.getElementById(\'print-guidance\').style.display=\'none\'" style="
+        background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+        color: #fff; border-radius: 6px; padding: 6px 14px; cursor: pointer; font-size: 13px;
+    ">✕ Tutup</button>
+</div>
+<div style="height: 60px;" id="print-guidance-spacer"></div>
+<style>
+@media print {
+    #print-guidance, #print-guidance-spacer { display: none !important; }
+}
+</style>';
+  }
+
   public function exportPdf(Request $request, Perizinan $perizinan)
   {
     $this->authorize('view', $perizinan);
 
-    // Accept overrides for paper size and orientation
-    $paperSize = $request->query('paper_size');
-    $orientation = $request->query('orientation');
-
-    // This service now handles active presets and overrides
-    return $this->renderService->generatePdf($perizinan, $paperSize, $orientation);
+    // Tidak perlu query param — generatePdf membaca otomatis dari jenisPerizinan → preset global → default A4 portrait
+    return $this->generatePdfAction->handle($perizinan);
   }
 
   public function exportWord(Request $request, Perizinan $perizinan)
   {
     $this->authorize('view', $perizinan);
-
     $perizinan->load(['lembaga', 'jenisPerizinan', 'dinas']);
 
-    $activePreset = CetakPreset::where('dinas_id', $perizinan->dinas_id)
-      ->where('is_active', true)
-      ->first();
+    $lembaga = $perizinan->lembaga->nama_lembaga ?? 'Lembaga';
+    $jenis   = $perizinan->jenisPerizinan->nama  ?? 'Perizinan';
+    $tanggal = date('d-m-Y');
 
-    // Mapping Paper Sizes for Word
-    $paperSize = 'A4';
-    $orientation = 'portrait';
-    $margins = '1cm';
+    // 1. Cek apakah ada template DOCX asli yang diunggah
+    if ($perizinan->jenisPerizinan && $perizinan->jenisPerizinan->template_word_path) {
+        $templatePath = storage_path('app/public/' . $perizinan->jenisPerizinan->template_word_path);
+        if (file_exists($templatePath)) {
+            $template = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+            
+            // Standard Variables
+            $template->setValue('NOMOR_SURAT', $perizinan->nomor_surat ?? '-');
+            $template->setValue('NAMA_LEMBAGA', $perizinan->lembaga->nama_lembaga ?? '-');
+            $template->setValue('NPSN', $perizinan->lembaga->npsn ?? '-');
+            $template->setValue('ALAMAT_LEMBAGA', $perizinan->lembaga->alamat ?? '-');
+            $template->setValue('TANGGAL_TERBIT', $perizinan->tanggal_terbit ? $perizinan->tanggal_terbit->translatedFormat('d F Y') : '-');
+            $template->setValue('MASA_BERLAKU', $perizinan->masa_berlaku ? $perizinan->masa_berlaku->translatedFormat('d F Y') : '-');
+            
+            // Dinas Variables
+            $dinas = $perizinan->dinas;
+            if ($dinas) {
+                $template->setValue('KOTA_DINAS', $dinas->kota ?? '');
+                $template->setValue('ALAMAT_DINAS', $dinas->alamat ?? '');
+                $template->setValue('PIMPINAN_NAMA', $dinas->nama_pimpinan ?? '');
+                $template->setValue('PIMPINAN_NIP', $dinas->nip_pimpinan ?? '');
+                $template->setValue('PIMPINAN_JABATAN', $dinas->jabatan_pimpinan ?? '');
+                $template->setValue('PIMPINAN_PANGKAT', $dinas->pangkat_pimpinan ?? '');
+            }
 
-    if ($activePreset) {
-      $paperSize = $request->query('paper_size') ?: strtoupper($activePreset->paper_size);
-      $orientation = $request->query('orientation') ?: strtolower($activePreset->orientation);
+            // Data Pemohon (JSON)
+            if (is_array($perizinan->data)) {
+                foreach ($perizinan->data as $key => $value) {
+                    $valStr = is_string($value) ? $value : (is_array($value) ? implode(', ', $value) : json_encode($value));
+                    $template->setValue('DATA:' . strtoupper($key), $valStr);
+                }
+            }
+            
+            // QR Code
+            if ($perizinan->qr_file && file_exists(storage_path('app/public/qr_codes/' . $perizinan->qr_file))) {
+                try {
+                    $template->setImageValue('QR_CODE', [
+                        'path' => storage_path('app/public/qr_codes/' . $perizinan->qr_file),
+                        'width' => 80,
+                        'height' => 80,
+                        'ratio' => false
+                    ]);
+                } catch (\Exception $e) {}
+            }
 
-      // Map "F4" to dimensions for Word CSS
-      if (strtoupper($paperSize) === 'F4') {
-        $paperSize = '21.5cm 33.0cm';
-      }
-
-      $mt = $activePreset->margin_top ?? 1.0;
-      $mr = $activePreset->margin_right ?? 1.0;
-      $mb = $activePreset->margin_bottom ?? 1.0;
-      $ml = $activePreset->margin_left ?? 1.0;
-      $margins = "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
-    } else {
-      // Fallback for overrides without preset
-      $paperSize = $request->query('paper_size') ?: $paperSize;
-      $orientation = $request->query('orientation') ?: $orientation;
-      if (strtoupper($paperSize) === 'F4') {
-        $paperSize = '21.5cm 33.0cm';
-      }
+            $filename = "{$lembaga}_{$jenis}_{$tanggal}.docx";
+            $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $filename);
+            $tempPath = storage_path('app/public/temp/' . $filename);
+            
+            if (!file_exists(storage_path('app/public/temp'))) {
+                mkdir(storage_path('app/public/temp'), 0755, true);
+            }
+            
+            $template->saveAs($tempPath);
+            return response()->download($tempPath)->deleteFileAfterSend(true);
+        }
     }
 
-    // Use the user-designed template from template editor
-    $finalHtml = $perizinan->replaceVariables();
+    // 2. Fallback: Gunakan raw HTML wrapper (Hindari RenderHtmlAction karena CSS strict-nya merusak MS Word)
+    $finalHtml = $perizinan->replaceVariables(false);
 
-    // Inject Page CSS for Word
-    $htmlWithLayout = '
-    <div class="word-page" style="page: word-page;">
-        ' . $finalHtml . '
-    </div>';
+    // Pastikan semua gambar lokal (logo, watermark, QR yang sudah ada di body) ikut ter-embed
+    // sebagai base64, bukan URL. MS Word tidak mengirim cookie/session saat membuka file .doc
+    // secara langsung, jadi <img src="/storage/..."> akan gagal dimuat / gambar hilang.
+    $finalHtml = $this->embedLocalImagesAsBase64($finalHtml);
 
-    $filename = $this->renderService->generateStandardFilename($perizinan) . '.doc';
+    // Sisipkan QR code resmi sebagai gambar ter-embed, diletakkan dalam <table> (bukan
+    // position:absolute) supaya posisinya konsisten saat dibuka di MS Word.
+    $qrBlock = $this->buildWordQrBlock($perizinan);
 
-    // Wrap in Word-compatible HTML
-    $wordHtml = '
-    <html xmlns:o="urn:schemas-microsoft-com:office:office"
-          xmlns:w="urn:schemas-microsoft-com:office:word"
-          xmlns="http://www.w3.org/TR/REC-html40">
+    $orientation = $request->query('orientation') ?: null;
+    $safeOrientation = $orientation ?: ($perizinan->jenisPerizinan->orientation ?? 'portrait');
+    $orientationStr = (strtolower($safeOrientation) === 'landscape') ? 'landscape' : 'portrait';
+    
+    $wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
     <head>
-      <meta charset="UTF-8">
-      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta charset="utf-8">
       <!--[if gte mso 9]>
       <xml>
         <w:WordDocument>
@@ -186,23 +324,129 @@ class PenerbitanController extends Controller
       </xml>
       <![endif]-->
       <style>
-        @page { 
-          size: ' . $paperSize . ($orientation === 'landscape' ? ' landscape' : '') . '; 
-          margin: ' . $margins . '; 
-          mso-page-orientation: ' . $orientation . ';
+        @page {
+            mso-page-orientation: ' . $orientationStr . ';
+            margin: 1.5cm;
         }
-        body { font-family: \'Times New Roman\', serif; font-size: 11pt; line-height: 1.2; }
+        body { font-family: "Times New Roman", serif; font-size: 11pt; line-height: 1.15; }
         table { border-collapse: collapse; width: 100%; }
-        .signature-block { page-break-inside: avoid; }
+        td { vertical-align: top; }
+        .print-qr-floating { margin-top: 20px; }
       </style>
     </head>
-    <body>' . $htmlWithLayout . '</body>
+    <body>
+        ' . $finalHtml . '
+        ' . $qrBlock . '
+    </body>
     </html>';
+
+    $filename = "{$lembaga}_{$jenis}_{$tanggal}.doc";
+    $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $filename);
 
     return response($wordHtml)
       ->header('Content-Type', 'application/msword')
       ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
       ->header('Cache-Control', 'max-age=0');
+  }
+
+  /**
+   * Ubah semua <img src="..."> yang menunjuk ke file lokal (storage/public, asset(), atau path
+   * relatif "/storage/...") menjadi data URI base64, supaya gambar tetap tampil saat file .doc
+   * dibuka langsung oleh MS Word (yang tidak mengirim cookie/session untuk fetch gambar via HTTP).
+   * Gambar yang sudah berupa data URI (base64) atau URL eksternal (http/https ke domain lain)
+   * dibiarkan apa adanya.
+   */
+  private function embedLocalImagesAsBase64(string $html): string
+  {
+    // Ukuran default (px) untuk gambar yang TIDAK punya atribut width/height HTML eksplisit.
+    // MS Word mengabaikan CSS (class Tailwind, width:100%, dst) sepenuhnya saat merender HTML
+    // sebagai .doc, jadi tanpa atribut ini gambar akan tampil di resolusi asli filenya (bisa
+    // sangat besar). Sesuaikan angka ini kalau ternyata masih kurang pas untuk logo kop surat.
+    $defaultMaxSize = 90;
+
+    return preg_replace_callback(
+      '/<img([^>]*)>/i',
+      function ($m) use ($defaultMaxSize) {
+        $fullTag   = $m[0];
+        $attrsPart = $m[1];
+
+        if (!preg_match('/src=["\']([^"\']+)["\']/i', $attrsPart, $sm)) {
+          return $fullTag; // img tanpa src, biarkan
+        }
+        $src = $sm[1];
+
+        $dataUri = $src;
+
+        if (!str_starts_with($src, 'data:')) {
+          // Ambil path relatif dari URL storage publik (mis. ".../storage/xxx.png" -> "xxx.png")
+          $relativePath = null;
+          if (preg_match('#/storage/(.+)$#', $src, $pm)) {
+            $relativePath = $pm[1];
+          } elseif (!str_starts_with($src, 'http')) {
+            $relativePath = ltrim($src, '/');
+          }
+
+          if (!$relativePath || !Storage::disk('public')->exists($relativePath)) {
+            // Tidak ditemukan di disk lokal (kemungkinan memang gambar eksternal) -> biarkan src, lanjut cek ukuran
+          } else {
+            $ext     = pathinfo($relativePath, PATHINFO_EXTENSION) ?: 'png';
+            $data    = Storage::disk('public')->get($relativePath);
+            $dataUri = 'data:image/' . $ext . ';base64,' . base64_encode($data);
+          }
+        }
+
+        // Ganti src (kalau berubah jadi base64)
+        $attrsPart = preg_replace('/src=["\'][^"\']+["\']/i', 'src="' . $dataUri . '"', $attrsPart);
+
+        // Kalau belum ada atribut width DAN height eksplisit, paksa ukuran default supaya
+        // tidak tampil raksasa di Word. Hapus dulu style width/height persen yang mungkin
+        // ada (tidak akan dipatuhi Word, tapi rapikan saja).
+        $hasWidthAttr  = preg_match('/\bwidth=["\']?\d/i', $attrsPart);
+        $hasHeightAttr = preg_match('/\bheight=["\']?\d/i', $attrsPart);
+
+        if (!$hasWidthAttr || !$hasHeightAttr) {
+          $attrsPart .= ' width="' . $defaultMaxSize . '" height="' . $defaultMaxSize . '" style="width:' . $defaultMaxSize . 'px; height:' . $defaultMaxSize . 'px;"';
+        }
+
+        return '<img' . $attrsPart . '>';
+      },
+      $html
+    );
+  }
+
+  /**
+   * Bangun blok QR code untuk export Word, dengan tabel (bukan position:absolute) supaya
+   * posisinya konsisten, dan gambar di-embed sebagai base64 supaya selalu tampil.
+   */
+  private function buildWordQrBlock(Perizinan $perizinan): string
+  {
+    // Belum ada QR sama sekali di record ini (kemungkinan besar penyebab "QR tidak muncul" —
+    // bukan soal render, tapi memang belum di-generate). Tampilkan catatan kecil supaya
+    // kelihatan jelas alasannya alih-alih diam-diam kosong.
+    if (!$perizinan->qr_file) {
+      return '<p style="font-size:8pt; color:#888; margin-top:10px;">[QR code belum tersedia untuk dokumen ini]</p>';
+    }
+
+    $path = storage_path('app/public/qr_codes/' . $perizinan->qr_file);
+    if (!file_exists($path)) {
+      return '<p style="font-size:8pt; color:#888; margin-top:10px;">[QR code tidak ditemukan di: qr_codes/' . e($perizinan->qr_file) . ']</p>';
+    }
+
+    $ext     = pathinfo($path, PATHINFO_EXTENSION) ?: 'png';
+    $dataUri = 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($path));
+
+    // Tabel 1 baris 1 kolom, rata kanan, lebar tetap — cara paling aman untuk MS Word
+    // menempatkan gambar di posisi yang konsisten tanpa position:absolute/float.
+    return '
+        <table style="width:100%; border:none; margin-top:10px;">
+            <tr>
+                <td style="width:70%; border:none;">&nbsp;</td>
+                <td style="width:30%; border:none; text-align:center;">
+                    <img src="' . $dataUri . '" width="80" height="80" style="width:80px; height:80px;" alt="QR Code">
+                    <div style="font-size:8pt; margin-top:2px;">Kode Verifikasi</div>
+                </td>
+            </tr>
+        </table>';
   }
 
   public function exportExcel(Perizinan $perizinan)
@@ -211,51 +455,62 @@ class PenerbitanController extends Controller
 
     $perizinan->load(['lembaga', 'jenisPerizinan']);
 
-    $filename = $this->renderService->generateStandardFilename($perizinan) . '.csv';
+    $lembaga = $perizinan->lembaga->nama_lembaga ?? 'Lembaga';
+    $jenis   = $perizinan->jenisPerizinan->nama  ?? 'Perizinan';
+    $tanggal = date('d-m-Y');
+    $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', "{$lembaga}_{$jenis}_{$tanggal}.xls");
 
-    // Build data rows
-    $rows = [
-      ['INFORMASI PERIZINAN', ''],
-      ['', ''],
-      ['ID Perizinan', '#' . $perizinan->id],
-      ['Nomor Surat', $perizinan->nomor_surat ?? '-'],
-      ['Jenis Izin', $perizinan->jenisPerizinan->nama ?? '-'],
-      ['Status', $perizinan->status],
-      ['', ''],
-      ['DATA LEMBAGA', ''],
-      ['Nama Lembaga', $perizinan->lembaga->nama_lembaga ?? '-'],
-      ['NPSN', $perizinan->lembaga->npsn ?? '-'],
-      ['Jenjang', $perizinan->lembaga->jenjang ?? '-'],
-      ['Alamat', $perizinan->lembaga->alamat ?? '-'],
-      ['', ''],
-      ['TANGGAL', ''],
-      ['Tanggal Disetujui', $perizinan->approved_at ? $perizinan->approved_at->format('d/m/Y') : '-'],
-      ['Tanggal Diterbitkan', $perizinan->tanggal_terbit ? $perizinan->tanggal_terbit->format('d/m/Y') : '-'],
-    ];
+    // Build HTML table for Excel
+    $html = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">
+<head>
+    <meta charset="utf-8">
+    <style>
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .section-header { background-color: #0d6efd; color: white; font-weight: bold; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <table>
+        <tr><td colspan="2" class="section-header">INFORMASI PERIZINAN</td></tr>
+        <tr><td style="width: 200px;">ID Perizinan</td><td>#' . $perizinan->id . '</td></tr>
+        <tr><td>Nomor Surat</td><td>' . ($perizinan->nomor_surat ?? '-') . '</td></tr>
+        <tr><td>Jenis Izin</td><td>' . ($perizinan->jenisPerizinan->nama ?? '-') . '</td></tr>
+        <tr><td>Status</td><td>' . $perizinan->status . '</td></tr>
+        <tr><td colspan="2"></td></tr>
+        
+        <tr><td colspan="2" class="section-header">DATA LEMBAGA</td></tr>
+        <tr><td>Nama Lembaga</td><td>' . ($perizinan->lembaga->nama_lembaga ?? '-') . '</td></tr>
+        <tr><td>NPSN</td><td>' . ($perizinan->lembaga->npsn ?? '-') . '</td></tr>
+        <tr><td>Jenjang</td><td>' . ($perizinan->lembaga->jenjang ?? '-') . '</td></tr>
+        <tr><td>Alamat</td><td>' . ($perizinan->lembaga->alamat ?? '-') . '</td></tr>
+        <tr><td colspan="2"></td></tr>
+        
+        <tr><td colspan="2" class="section-header">TANGGAL</td></tr>
+        <tr><td>Tanggal Disetujui</td><td>' . ($perizinan->approved_at ? $perizinan->approved_at->format('d/m/Y') : '-') . '</td></tr>
+        <tr><td>Tanggal Diterbitkan</td><td>' . ($perizinan->tanggal_terbit ? $perizinan->tanggal_terbit->format('d/m/Y') : '-') . '</td></tr>
+        <tr><td colspan="2"></td></tr>';
 
-    // Add perizinan_data if available
     $perizinanData = $perizinan->perizinan_data;
     if ($perizinanData && is_array($perizinanData)) {
-      $rows[] = ['', ''];
-      $rows[] = ['DATA ISIAN', ''];
-      foreach ($perizinanData as $key => $value) {
-        $rows[] = [ucwords(str_replace('_', ' ', $key)), is_array($value) ? json_encode($value) : ($value ?? '-')];
-      }
+        $html .= '<tr><td colspan="2" class="section-header">DATA ISIAN</td></tr>';
+        foreach ($perizinanData as $key => $value) {
+            $label = ucwords(str_replace('_', ' ', $key));
+            $val = is_array($value) ? json_encode($value) : ($value ?? '-');
+            $html .= '<tr><td>' . htmlspecialchars($label) . '</td><td>' . htmlspecialchars($val) . '</td></tr>';
+        }
     }
 
-    // Generate CSV with BOM for Excel UTF-8
-    $callback = function () use ($rows) {
-      $file = fopen('php://output', 'w');
-      fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
-      foreach ($rows as $row) {
-        fputcsv($file, $row);
-      }
-      fclose($file);
-    };
+    $html .= '
+    </table>
+</body>
+</html>';
 
-    return response()->streamDownload($callback, $filename, [
-      'Content-Type' => 'text/csv; charset=UTF-8',
-    ]);
+    return response($html)
+      ->header('Content-Type', 'application/vnd.ms-excel')
+      ->header('Content-Disposition', "attachment; filename=\"{$filename}\"")
+      ->header('Cache-Control', 'max-age=0');
   }
 
   /**
@@ -275,63 +530,5 @@ class PenerbitanController extends Controller
     ]);
   }
 
-  public function presetIndex()
-  {
-    $presets = CetakPreset::where('dinas_id', Auth::user()->dinas->id)->orderBy('is_active', 'desc')->get();
-    return view('backend.super_admin.penerbitan.preset', compact('presets'));
-  }
 
-  public function presetStore(Request $request)
-  {
-    $data = $request->validate([
-      'nama' => 'required',
-      'paper_size' => 'required',
-      'orientation' => 'required',
-      'margin_top' => 'required|numeric',
-      'margin_bottom' => 'required|numeric',
-      'margin_left' => 'required|numeric',
-      'margin_right' => 'required|numeric',
-    ]);
-
-    $data['dinas_id'] = Auth::user()->dinas->id;
-
-    CetakPreset::create($data);
-
-    return back()->with('success', 'Preset berhasil ditambahkan.');
-  }
-
-  public function presetUpdate(Request $request, CetakPreset $preset)
-  {
-    $data = $request->validate([
-      'nama' => 'required',
-      'paper_size' => 'required',
-      'orientation' => 'required',
-      'margin_top' => 'required|numeric',
-      'margin_bottom' => 'required|numeric',
-      'margin_left' => 'required|numeric',
-      'margin_right' => 'required|numeric',
-    ]);
-
-    $preset->update($data);
-
-    return back()->with('success', 'Preset berhasil diperbarui.');
-  }
-
-  public function presetDestroy(CetakPreset $preset)
-  {
-    if ($preset->is_active) {
-      return back()->with('error', 'Preset aktif tidak bisa dihapus.');
-    }
-
-    $preset->delete();
-    return back()->with('success', 'Preset berhasil dihapus.');
-  }
-
-  public function presetSetActive(CetakPreset $preset)
-  {
-    CetakPreset::where('dinas_id', $preset->dinas_id)->update(['is_active' => false]);
-    $preset->update(['is_active' => true]);
-
-    return back()->with('success', 'Preset aktif berhasil diubah.');
-  }
 }

@@ -3,106 +3,196 @@
 @section('title', 'Manajemen Jenis Perizinan')
 @section('breadcrumb', 'Jenis Perizinan')
 
+@push('styles')
+<style>
+  /* Premium UI Overrides */
+  .premium-card {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .premium-card .card-header {
+    background: #ffffff;
+    border-bottom: 1px solid #f1f3f5;
+    padding: 1.5rem 1.5rem;
+  }
+  .table-premium th {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #87929d;
+    border-top: none !important;
+    border-bottom: 2px solid #f8f9fa !important;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  .table-premium td {
+    vertical-align: middle;
+    padding: 1.25rem 0.75rem;
+    border-bottom: 1px solid #f8f9fa;
+    color: #495057;
+  }
+  .table-premium tbody tr {
+    transition: all 0.2s ease;
+  }
+  .table-premium tbody tr:hover {
+    background-color: #fcfcfc;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+    transform: translateY(-1px);
+    z-index: 1;
+    position: relative;
+  }
+  .badge-soft-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    font-weight: 600;
+  }
+  .badge-soft-secondary {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+  }
+  .btn-action {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  .icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #f8f9fa;
+  }
+  .icon-wrapper.primary { color: #0d6efd; background: #ebf3ff; }
+  .action-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+</style>
+@endpush
+
 @section('content')
-  <div class="container-fluid text-dark">
-    <!-- Page Header -->
-    <div class="row mb-4 align-items-center">
-      <div class="col-sm-6 text-center text-sm-left">
-        <h1 class="m-0 text-dark font-weight-bold"><i class="fas fa-folder-open mr-2 text-primary"></i> Manajemen Jenis
-          Perizinan</h1>
-        <p class="text-muted small mt-1">Kelola kategori dan pengaturan perizinan dinas Anda secara terpusat.</p>
+  <div class="container-fluid text-dark pb-4">
+
+    <!-- Header & Action -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+      <div>
+        <p class="text-muted mb-0">Kelola dan atur master kategori perizinan dinas secara terpusat.</p>
       </div>
-      <div class="col-sm-6 text-sm-right mt-2 mt-sm-0">
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb bg-transparent p-0 mb-0 justify-content-sm-end">
-            <li class="breadcrumb-item"><a href="{{ route('super_admin.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active text-muted" aria-current="page">Jenis Perizinan</li>
-          </ol>
-        </nav>
+      <div class="mt-3 mt-md-0 d-flex gap-2">
+        <button type="button" id="btnBulkDelete" onclick="submitBulkDelete()" class="btn btn-danger btn-action shadow-sm px-4 mr-2" style="display: none;">
+          <i class="fas fa-trash-alt mr-2"></i> Hapus Terpilih (<span id="selectedCount">0</span>)
+        </button>
+        <button type="button" onclick="openModal('add')" class="btn btn-primary btn-action shadow-sm px-4">
+          <i class="fas fa-plus mr-2"></i> Tambah Kategori
+        </button>
       </div>
     </div>
 
     <!-- Main Card -->
-    <div class="card card-outline card-primary shadow-sm border-0">
-      <div class="card-header bg-white py-3">
-        <h3 class="card-title font-weight-bold">
-          <i class="fas fa-layer-group mr-2 text-primary"></i> Master Data Kategori
-        </h3>
-        <div class="card-tools">
-          <button type="button" onclick="openModal('add')"
-            class="btn btn-primary btn-sm shadow-sm font-weight-bold rounded-pill px-3">
-            <i class="fas fa-plus-circle mr-1"></i> Tambah Kategori
-          </button>
+    <div class="card premium-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <div class="icon-wrapper primary mr-3">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 font-weight-bold text-dark">Data Kategori Perizinan</h5>
+            <small class="text-muted">Total {{ $jenisPerizinans->total() }} kategori terdaftar</small>
+          </div>
         </div>
       </div>
 
       <div class="card-body p-0">
+        <form id="bulkDeleteForm" action="{{ route('super_admin.jenis_perizinan.bulk_destroy') }}" method="POST" style="display: none;">
+          @csrf
+          @method('DELETE')
+        </form>
+        
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-muted uppercase small font-weight-bold">
+          <table class="table table-premium mb-0">
+            <thead>
               <tr>
-                <th class="text-center py-3" style="width: 50px;">No</th>
-                <th class="py-3">Informasi Perizinan</th>
-                <th class="py-3 text-center">Durasi Berlaku</th>
-                <th class="py-3 text-center">Status</th>
-                <th class="py-3 text-right pr-4">Opsi Pengaturan</th>
+                <th class="text-center" style="width: 50px; padding-left: 1.5rem;">
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="checkAll">
+                    <label class="custom-control-label" for="checkAll"></label>
+                  </div>
+                </th>
+                <th style="width: 50px;">No</th>
+                <th style="min-width: 250px;">Informasi Perizinan</th>
+                <th class="text-center" style="min-width: 140px;">Durasi Berlaku</th>
+                <th class="text-center" style="min-width: 120px;">Status</th>
+                <th class="text-right" style="min-width: 320px; padding-right: 1.5rem;">Opsi & Pengaturan</th>
               </tr>
             </thead>
             <tbody>
               @forelse($jenisPerizinans as $index => $item)
-                <tr class="hover-row">
-                  <td class="text-center text-muted">{{ $jenisPerizinans->firstItem() + $index }}</td>
+                <tr>
+                  <td class="text-center" style="padding-left: 1.5rem;">
+                    <div class="custom-control custom-checkbox">
+                      <input type="checkbox" class="custom-control-input check-item" id="check_{{ $item->id }}" value="{{ $item->id }}">
+                      <label class="custom-control-label" for="check_{{ $item->id }}"></label>
+                    </div>
+                  </td>
+                  <td class="text-muted font-weight-bold">{{ $jenisPerizinans->firstItem() + $index }}</td>
                   <td>
                     <div class="d-flex flex-column">
-                      <span class="font-weight-bold text-dark mb-0">{{ $item->nama }}</span>
-                      <small class="text-muted"><i class="fas fa-barcode mr-1 opacity-50"></i>ID: <span
-                          class="text-primary font-weight-bold">{{ $item->kode ?? '-' }}</span></small>
+                      <span class="font-weight-bold text-dark mb-1" style="font-size: 1rem;">{{ $item->nama }}</span>
+                      <small class="text-muted"><span class="badge badge-light border text-primary px-2 py-1">ID: {{ $item->kode ?? '-' }}</span></small>
                     </div>
                   </td>
                   <td class="text-center">
-                    <div class="badge badge-light border rounded-pill px-3 py-2 font-weight-bold text-dark shadow-sm">
-                      <i class="far fa-clock mr-1 text-info"></i> {{ $item->masa_berlaku_nilai }}
-                      {{ $item->masa_berlaku_unit }}
-                    </div>
+                    <span class="badge badge-light border px-3 py-2 text-dark font-weight-bold rounded" style="font-size: 0.85rem;">
+                      <i class="far fa-clock mr-1 text-info"></i> {{ $item->masa_berlaku_nilai }} {{ $item->masa_berlaku_unit }}
+                    </span>
                   </td>
                   <td class="text-center">
                     @if($item->is_active)
-                      <span class="badge badge-success px-3 py-2 rounded-pill shadow-sm" style="font-size: 11px;">
-                        <i class="fas fa-check-circle mr-1"></i> Aktif
+                      <span class="badge badge-soft-success px-3 py-2 rounded-pill">
+                        <i class="fas fa-circle mr-1" style="font-size: 0.5rem; vertical-align: middle;"></i> Aktif
                       </span>
                     @else
-                      <span class="badge badge-secondary px-3 py-2 rounded-pill shadow-sm" style="font-size: 11px;">
-                        <i class="fas fa-times-circle mr-1"></i> Nonaktif
+                      <span class="badge badge-soft-secondary px-3 py-2 rounded-pill">
+                        <i class="fas fa-circle mr-1" style="font-size: 0.5rem; vertical-align: middle;"></i> Nonaktif
                       </span>
                     @endif
                   </td>
-                  <td class="text-right pr-4">
-                    <div class="d-flex justify-content-end align-items-center">
-                      <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                        <a href="{{ route('super_admin.jenis_perizinan.template', $item) }}"
-                          class="btn btn-sm btn-outline-primary px-3" title="Desain Sertifikat">
-                          <i class="fas fa-certificate mr-1"></i> <span class="d-none d-lg-inline">Template</span>
-                        </a>
-                        <a href="{{ route('super_admin.jenis_perizinan.syarat.index', $item) }}"
-                          class="btn btn-sm btn-outline-info px-3" title="Kelola Persyaratan">
-                          <i class="fas fa-file-contract mr-1"></i> <span class="d-none d-lg-inline">Syarat</span>
-                        </a>
-                        <a href="{{ route('super_admin.jenis_perizinan.form', $item) }}"
-                          class="btn btn-sm btn-outline-dark px-3" title="Konfigurasi Form">
-                          <i class="fab fa-wpforms mr-1"></i> <span class="d-none d-lg-inline">Form</span>
-                        </a>
-                      </div>
-
-                      <div class="ml-2">
-                        <button onclick="openModal('edit', {{ json_encode($item) }})"
-                          class="btn btn-sm btn-light border rounded-circle shadow-sm mx-1" title="Edit Dasar">
-                          <i class="fas fa-pencil-alt text-warning"></i>
+                  <td class="text-right" style="padding-right: 1.5rem;">
+                    <div class="action-group justify-content-end">
+                      <a href="{{ route('super_admin.jenis_perizinan.template', $item) }}" class="btn btn-sm btn-outline-primary btn-action" title="Desain Template">
+                        <i class="fas fa-paint-brush mr-1"></i> Template
+                      </a>
+                      <a href="{{ route('super_admin.jenis_perizinan.syarat.index', $item) }}" class="btn btn-sm btn-outline-info btn-action" title="Kelola Persyaratan">
+                        <i class="fas fa-list-check mr-1"></i> Syarat
+                      </a>
+                      <a href="{{ route('super_admin.jenis_perizinan.form', $item) }}" class="btn btn-sm btn-outline-dark btn-action" title="Konfigurasi Form">
+                        <i class="fab fa-wpforms mr-1"></i> Form
+                      </a>
+                      
+                      <div class="border-left ml-2 pl-2 d-flex gap-1">
+                        <button onclick="openModal('edit', this)"
+                          data-id="{{ $item->id }}" data-nama="{{ $item->nama }}" data-kode="{{ $item->kode }}"
+                          data-masa-nilai="{{ $item->masa_berlaku_nilai }}" data-masa-unit="{{ $item->masa_berlaku_unit }}"
+                          data-deskripsi="{{ $item->deskripsi }}" data-is-active="{{ $item->is_active }}"
+                          class="btn btn-sm btn-light border btn-action text-warning" title="Edit">
+                          <i class="fas fa-pencil-alt"></i>
                         </button>
-                        <form action="{{ route('super_admin.jenis_perizinan.destroy', $item) }}" method="POST"
-                          class="d-inline" onsubmit="return confirm('Hapus jenis perizinan ini secara permanen?')">
+                        <form action="{{ route('super_admin.jenis_perizinan.destroy', $item) }}" method="POST" class="d-inline mb-0" onsubmit="return confirm('Hapus jenis perizinan ini secara permanen?')">
                           @csrf @method('DELETE')
-                          <button type="submit" class="btn btn-sm btn-light border rounded-circle shadow-sm" title="Hapus">
-                            <i class="fas fa-trash text-danger"></i>
+                          <button type="submit" class="btn btn-sm btn-light border btn-action text-danger" title="Hapus">
+                            <i class="fas fa-trash"></i>
                           </button>
                         </form>
                       </div>
@@ -111,12 +201,16 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="5" class="text-center py-5">
-                    <div class="d-flex flex-column align-items-center opacity-75">
-                      <i class="fas fa-layer-group fa-3x mb-3 text-muted"></i>
-                      <p class="text-muted font-italic">Belum ada kategori perizinan yang tersedia.</p>
-                      <button type="button" onclick="openModal('add')" class="btn btn-primary btn-sm rounded-pill">Tambah
-                        Sekarang</button>
+                  <td colspan="6" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center py-4">
+                      <div class="icon-wrapper mb-3" style="width: 64px; height: 64px; background: #f8f9fa;">
+                        <i class="fas fa-folder-open fa-2x text-muted"></i>
+                      </div>
+                      <h6 class="font-weight-bold text-dark">Belum ada kategori perizinan</h6>
+                      <p class="text-muted font-italic mb-3">Mulai dengan menambahkan kategori perizinan pertama Anda.</p>
+                      <button type="button" onclick="openModal('add')" class="btn btn-primary btn-action px-4">
+                        <i class="fas fa-plus mr-2"></i> Tambah Kategori
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -126,8 +220,8 @@
         </div>
       </div>
       @if($jenisPerizinans->hasPages())
-        <div class="card-footer bg-white border-top py-3">
-          <div class="d-flex justify-content-center">
+        <div class="card-footer bg-white border-top py-3 px-4">
+          <div class="d-flex justify-content-center m-0">
             {{ $jenisPerizinans->withQueryString()->links('pagination::bootstrap-4') }}
           </div>
         </div>
@@ -135,38 +229,7 @@
     </div>
   </div>
 
-  <style>
-    .table td {
-      vertical-align: middle;
-    }
 
-    .hover-row:hover {
-      background-color: rgba(0, 123, 255, 0.02);
-      transition: background 0.2s ease;
-    }
-
-    .btn-group .btn {
-      border-width: 1px !important;
-    }
-
-    .badge {
-      letter-spacing: 0.5px;
-    }
-
-    @media (max-width: 768px) {
-      .d-lg-inline {
-        display: none !important;
-      }
-
-      .btn-sm i {
-        margin-right: 0 !important;
-      }
-
-      .btn-group .btn {
-        padding: 0.25rem 0.6rem;
-      }
-    }
-  </style>
 
   <!-- Modal Popup for Add/Edit -->
   <div class="modal fade" id="modalJenisPerizinan" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
@@ -247,7 +310,7 @@
 
   @push('scripts')
     <script>
-      function openModal(mode, data = null) {
+      function openModal(mode, element = null) {
         const form = document.getElementById('formJenisPerizinan');
         const title = document.getElementById('modalTitle');
         const methodInput = document.getElementById('formMethod');
@@ -257,18 +320,18 @@
           
           // Best practice routing (dinamis)
           let baseUrl = "{{ route('super_admin.jenis_perizinan.update', 'ID_PLACEHOLDER') }}";
-          form.action = baseUrl.replace('ID_PLACEHOLDER', data.id);
+          form.action = baseUrl.replace('ID_PLACEHOLDER', element.dataset.id);
           
           // Ubah value method input, bukan inject HTML
           methodInput.value = "PUT";
 
           // Fill data
-          document.getElementById('nama').value = data.nama;
-          document.getElementById('kode').value = data.kode || '';
-          document.getElementById('masa_berlaku_nilai').value = data.masa_berlaku_nilai;
-          document.querySelector('select[name="masa_berlaku_unit"]').value = data.masa_berlaku_unit;
-          document.getElementById('deskripsi').value = data.deskripsi || '';
-          document.getElementById('is_active').checked = data.is_active == 1;
+          document.getElementById('nama').value = element.dataset.nama;
+          document.getElementById('kode').value = element.dataset.kode || '';
+          document.getElementById('masa_berlaku_nilai').value = element.dataset.masaNilai;
+          document.querySelector('select[name="masa_berlaku_unit"]').value = element.dataset.masaUnit;
+          document.getElementById('deskripsi').value = element.dataset.deskripsi || '';
+          document.getElementById('is_active').checked = element.dataset.isActive == '1';
         } else {
           title.innerText = 'Tambah Jenis Perizinan';
           form.action = "{{ route('super_admin.jenis_perizinan.store') }}";
@@ -278,6 +341,56 @@
         }
 
         $('#modalJenisPerizinan').modal('show');
+      }
+
+      // Bulk Delete Logic
+      const checkAll = document.getElementById('checkAll');
+      const checkItems = document.querySelectorAll('.check-item');
+      const btnBulkDelete = document.getElementById('btnBulkDelete');
+      const selectedCountSpan = document.getElementById('selectedCount');
+      const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+
+      function updateBulkDeleteButton() {
+        const checkedCount = document.querySelectorAll('.check-item:checked').length;
+        if (checkedCount > 0) {
+          btnBulkDelete.style.display = 'inline-block';
+          selectedCountSpan.innerText = checkedCount;
+        } else {
+          btnBulkDelete.style.display = 'none';
+        }
+        if(checkAll) {
+          checkAll.checked = checkedCount === checkItems.length && checkItems.length > 0;
+        }
+      }
+
+      if (checkAll) {
+        checkAll.addEventListener('change', function() {
+          checkItems.forEach(item => {
+            item.checked = this.checked;
+          });
+          updateBulkDeleteButton();
+        });
+      }
+
+      checkItems.forEach(item => {
+        item.addEventListener('change', updateBulkDeleteButton);
+      });
+
+      function submitBulkDelete() {
+        const checkedItems = document.querySelectorAll('.check-item:checked');
+        if (checkedItems.length === 0) return;
+
+        if (confirm(`Yakin ingin menghapus ${checkedItems.length} jenis perizinan terpilih secara permanen?`)) {
+          // Add hidden inputs to form
+          checkedItems.forEach(item => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = item.value;
+            bulkDeleteForm.appendChild(input);
+          });
+          bulkDeleteForm.submit();
+        }
       }
     </script>
   @endpush

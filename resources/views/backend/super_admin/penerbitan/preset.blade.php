@@ -6,15 +6,30 @@
 @section('content')
   <div class="container-fluid">
     <!-- Page Header & Actions -->
-    <div class="row mb-4 align-items-center">
+    <div class="row mb-3 align-items-center">
       <div class="col-md-8">
         <h1 class="h3 font-weight-bold text-dark mb-1">Manajemen Preset Cetak</h1>
-        <p class="text-muted mb-0">Kelola konfigurasi layout, ukuran kertas, dan margin untuk pencetakan sertifikat.</p>
+        <p class="text-muted mb-0">Kelola konfigurasi layout, ukuran kertas, dan margin untuk pencetakan dokumen.</p>
       </div>
       <div class="col-md-4 text-md-right mt-3 mt-md-0">
         <button type="button" onclick="openPresetModal('add')" class="btn btn-primary shadow-sm font-weight-bold">
           <i class="fas fa-plus-circle mr-2"></i> Buat Preset Baru
         </button>
+      </div>
+    </div>
+
+    <!-- Communication Banner -->
+    <div class="card border-0 mb-4" style="background: linear-gradient(135deg, #ebf3ff 0%, #f8f9fa 100%); border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.04);">
+      <div class="card-body p-4 d-flex align-items-center">
+        <div class="d-flex justify-content-center align-items-center mr-4 bg-white rounded-circle shadow-sm" style="width: 50px; height: 50px; flex-shrink: 0;">
+          <i class="fas fa-info-circle text-primary fa-lg"></i>
+        </div>
+        <div>
+          <h6 class="font-weight-bold text-dark mb-1">Fungsi Preset Global (Fallback)</h6>
+          <p class="mb-0 text-muted small" style="line-height: 1.5;">
+            Preset aktif di halaman ini berfungsi sebagai <strong>konfigurasi dasar (fallback)</strong>. Berkat fitur <em>komunikasi dua arah</em>, jika Anda telah mengatur Ukuran Kertas & Orientasi secara spesifik pada Template Editor di menu <strong>Jenis Perizinan</strong>, sistem akan secara otomatis memprioritaskan konfigurasi Jenis Perizinan tersebut.
+          </p>
+        </div>
       </div>
     </div>
 

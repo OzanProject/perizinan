@@ -3,8 +3,9 @@
 @section('title', 'Finalisasi Sertifikat')
 
 @php
-    $paperSize = strtoupper($activePreset->paper_size ?? 'A4');
-    $orientation = strtolower($activePreset->orientation ?? 'portrait');
+    // Prioritaskan jenis perizinan, jika kosong baru ambil dari preset
+    $paperSize = strtoupper($perizinan->jenisPerizinan->paper_size ?: ($activePreset->paper_size ?? 'A4'));
+    $orientation = strtolower($perizinan->jenisPerizinan->orientation ?: ($activePreset->orientation ?? 'portrait'));
     
     $width = '210mm';
     $height = '297mm';
@@ -72,64 +73,18 @@
             overflow: auto;
         }
 
-        #preview-paper {
+        #draft-preview-iframe {
             background: white;
             width: {{ $width }};
-            min-height: {{ $height }};
+            height: {{ $height }};
+            border: none;
             box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
             transform-origin: top center;
             transition: transform 0.3s ease;
             position: relative;
             margin: 0 auto;
+            display: block;
         }
-
-        /* =========================================================
-           CSS FIX UNTUK CANVAS AGAR 100% IDENTIK DENGAN PDF 
-           ========================================================= */
-        #certificate-canvas {
-            position: relative;
-            width: 100%;
-            min-height: {{ $height }};
-            background: transparent;
-            padding: {{ $padding }};
-            margin: 0;
-            box-sizing: border-box; 
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.15;
-            color: #000;
-        }
-
-        #certificate-canvas div[style*="position: fixed"] {
-            position: absolute !important;
-        }
-
-        #certificate-canvas p { clear: both; margin-top: 2px; margin-bottom: 2px; }
-        #certificate-canvas p:last-child { margin-bottom: 0 !important; }
-        
-        #certificate-canvas table { border-collapse: collapse; width: 100%; }
-        #certificate-canvas td { vertical-align: top; padding: 2px 4px; border: none; }
-
-        #certificate-canvas figure { margin: 0; padding: 0; }
-        #certificate-canvas figure.image {
-            display: block !important;
-            width: 100% !important;
-            text-align: center !important;
-            margin-bottom: 10px !important;
-            clear: both !important;
-        }
-        #certificate-canvas figure.image img {
-            display: inline-block !important;
-            margin: 0 auto !important;
-            max-width: 100%;
-            height: auto;
-        }
-        #certificate-canvas .image-style-align-left { text-align: left !important; }
-        #certificate-canvas .image-style-align-left img { float: left !important; margin-right: 15px !important; }
-        #certificate-canvas .image-style-align-center { text-align: center !important; }
-        #certificate-canvas .image-style-align-center img { margin-left: auto !important; margin-right: auto !important; }
-        #certificate-canvas .image-style-align-right { text-align: right !important; }
-        #certificate-canvas .image-style-align-right img { float: right !important; margin-left: 15px !important; }
 
         @media (max-width: 991.98px) {
             .finalisasi-wrapper {
@@ -328,11 +283,7 @@
                 </div>
 
                 <div class="preview-container">
-                    <div id="preview-paper" style="transform: scale(0.85);">
-                        <div id="certificate-canvas">
-                            {!! $perizinan->rendered_template !!}
-                        </div>
-                    </div>
+                    <iframe id="draft-preview-iframe" style="transform: scale(0.85);"></iframe>
                 </div>
             </div>
         </div>
@@ -343,10 +294,38 @@
     <script>
         let currentZoom = 0.85;
 
+        window.addEventListener('load', () => {
+            const iframe = document.getElementById('draft-preview-iframe');
+            iframe.style.transform = `scale(${currentZoom})`;
+
+            iframe.srcdoc = `
+                <div style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; color:#666;">
+                    <p>Memuat pratinjau dokumen...</p>
+                </div>
+            `;
+            
+            fetch("{{ route('super_admin.penerbitan.preview', $perizinan) }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        iframe.srcdoc = data.html;
+                    } else {
+                        iframe.srcdoc = `<p style="color:red; text-align:center; margin-top:20px;">Gagal memuat pratinjau.</p>`;
+                    }
+                })
+                .catch(err => {
+                    iframe.srcdoc = `<p style="color:red; text-align:center; margin-top:20px;">Error: ${err.message}</p>`;
+                });
+
+            if (window.innerWidth < 1024) {
+                 zoomPreview(-0.25);
+            }
+        });
+
         function zoomPreview(delta) {
             currentZoom = Math.min(Math.max(currentZoom + delta, 0.4), 1.5);
-            const paper = document.getElementById('preview-paper');
-            paper.style.transform = `scale(${currentZoom})`;
+            const iframe = document.getElementById('draft-preview-iframe');
+            iframe.style.transform = `scale(${currentZoom})`;
             document.getElementById('zoom-level').innerText = `${Math.round(currentZoom * 100)}%`;
         }
 
@@ -363,14 +342,5 @@
             // Maka live preview tidak berubah seketika di Javascript. 
             // Admin bisa melihat hasil fix-nya setelah menekan "Terbitkan" dan melihat file PDF-nya.
         }
-
-        window.addEventListener('load', () => {
-            const paper = document.getElementById('preview-paper');
-            paper.style.transform = `scale(${currentZoom})`;
-
-            if (window.innerWidth < 1024) {
-                 zoomPreview(-0.25);
-            }
-        });
     </script>
 @endpush

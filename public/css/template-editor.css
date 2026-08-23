@@ -1,0 +1,106 @@
+/* TUKAR KERTAS KANVAS TINYMCE */
+.tox-tinymce {
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+.document-editor__editable {
+    background: white;
+    border: 1px solid #d3d3d3;
+    padding: 1.5cm 1.5cm;
+    /* Adjust padding slightly for TinyMCE */
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    line-height: 1.15;
+    color: black;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+    min-height: auto !important;
+    /* TinyMCE uses its own height management */
+}
+
+.document-editor__editable:focus {
+    outline: none;
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+    border-color: #80bdff;
+}
+
+/* UKURAN KERTAS - Menggunakan min-height bukan height */
+.paper-a4-portrait {
+    width: 210mm;
+    min-height: 297mm;
+}
+
+.paper-a4-landscape {
+    width: 297mm;
+    min-height: 210mm;
+    padding: 1.5cm 2cm !important;
+}
+
+.paper-f4-portrait {
+    width: 215mm;
+    min-height: 330mm;
+}
+
+.paper-f4-landscape {
+    width: 330mm;
+    min-height: 215mm;
+    padding: 1.5cm 2cm !important;
+}
+
+/* Spasi Paragraf Rapat */
+.document-editor__editable p {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+    line-height: 1.15 !important;
+}
+
+.document-editor__editable h1,
+.document-editor__editable h2,
+.document-editor__editable h3,
+.document-editor__editable h4 {
+    margin-top: 5px !important;
+    margin-bottom: 5px !important;
+}
+
+.document-editor__editable table {
+    margin-bottom: 10px !important;
+}
+
+.document-editor__editable td,
+.document-editor__editable th {
+    padding: 2px 4px !important;
+    line-height: 1.15 !important;
+    border: 1px dashed #ccc;
+    /* Tampilkan border dashed tipis saat di editor agar mudah dilihat */
+}
+
+.document-editor__editable figure {
+    margin: 0 auto 10px auto !important;
+    text-align: center;
+}
+
+/* Variabel & Scrollbar */
+.var-badge {
+    display: inline-block;
+    padding: 1px 4px;
+    font-size: 10pt !important;
+    font-weight: bold;
+    color: #004085;
+    background: #cce5ff;
+    border: 1px solid #b8daff;
+    border-radius: 3px;
+    font-family: monospace;
+    cursor: not-allowed;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #adb5bd;
+    border-radius: 10px;
+}

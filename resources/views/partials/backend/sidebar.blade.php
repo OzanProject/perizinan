@@ -117,12 +117,6 @@
                       <p>Riwayat Penerbitan</p>
                     </a>
                   </li>
-                  <li class="nav-item">
-                    <a href="{{ route('super_admin.penerbitan.preset.index') }}" class="nav-link {{ request()->routeIs('super_admin.penerbitan.preset.*') ? 'active' : '' }}">
-                      <i class="fas fa-sliders-h nav-icon" style="font-size: 12px;"></i>
-                      <p>Preset & Layout</p>
-                    </a>
-                  </li>
                 </ul>
               </li>
             </ul>

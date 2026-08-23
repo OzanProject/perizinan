@@ -70,17 +70,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/perizinan/{perizinan}/discussion', [\App\Http\Controllers\Backend\PerizinanDiscussionController::class, 'store'])->name('perizinan.discussion.store');
 
         // Master Data: Jenis Perizinan
+        Route::delete('jenis-perizinan/bulk-destroy', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'bulkDestroy'])->name('jenis_perizinan.bulk_destroy');
         Route::resource('jenis-perizinan', \App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class)->names('jenis_perizinan');
-        Route::get('jenis-perizinan/{jenisPerizinan}/template', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'template'])->name('jenis_perizinan.template');
-        Route::post('jenis-perizinan/{jenisPerizinan}/template', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'updateTemplate'])->name('jenis_perizinan.template.update');
+        Route::get('jenis-perizinan/{jenisPerizinan}/template', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanTemplateController::class, 'edit'])->name('jenis_perizinan.template');
+        Route::post('jenis-perizinan/{jenisPerizinan}/template', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanTemplateController::class, 'update'])->name('jenis_perizinan.template.update');
         Route::get('jenis-perizinan/{jenisPerizinan}/syarat', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanSyaratController::class, 'index'])->name('jenis_perizinan.syarat.index');
         Route::post('jenis-perizinan/{jenisPerizinan}/syarat', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanSyaratController::class, 'store'])->name('jenis_perizinan.syarat.store');
         Route::put('jenis-perizinan/{jenisPerizinan}/syarat/{syarat}', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanSyaratController::class, 'update'])->name('jenis_perizinan.syarat.update');
         Route::delete('jenis-perizinan/{jenisPerizinan}/syarat/{syarat}', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanSyaratController::class, 'destroy'])->name('jenis_perizinan.syarat.destroy');
 
         // Form Builder
-        Route::get('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'formConfig'])->name('jenis_perizinan.form');
-        Route::post('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanController::class, 'updateFormConfig'])->name('jenis_perizinan.form.update');
+        Route::get('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanFormController::class, 'edit'])->name('jenis_perizinan.form');
+        Route::post('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanFormController::class, 'update'])->name('jenis_perizinan.form.update');
 
         // Pengguna
         Route::resource('users', \App\Http\Controllers\Backend\SuperAdmin\UserController::class);
@@ -97,17 +98,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/riwayat', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'riwayat'])->name('riwayat');
             Route::get('/pusat-cetak', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'pusatCetak'])->name('pusat_cetak');
             Route::get('/{perizinan}/preview', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'preview'])->name('preview');
+            Route::get('/{perizinan}/print-html', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'printHtml'])->name('print_html');
             Route::get('/{perizinan}/export-pdf', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportPdf'])->name('export_pdf');
             Route::get('/{perizinan}/export-word', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportWord'])->name('export_word');
             Route::get('/{perizinan}/export-excel', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'exportExcel'])->name('export_excel');
             Route::get('/{perizinan}/finalisasi', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'finalisasi'])->name('finalisasi');
 
             // Preset & Layout
-            Route::get('/preset', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetIndex'])->name('preset.index');
-            Route::post('/preset', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetStore'])->name('preset.store');
-            Route::put('/preset/{preset}', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetUpdate'])->name('preset.update');
-            Route::delete('/preset/{preset}', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetDestroy'])->name('preset.destroy');
-            Route::post('/preset/{preset}/set-active', [\App\Http\Controllers\Backend\SuperAdmin\PenerbitanController::class, 'presetSetActive'])->name('preset.set_active');
+
         });
 
         // Settings

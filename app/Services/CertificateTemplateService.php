@@ -7,119 +7,53 @@ class CertificateTemplateService
     public static function getPresets()
     {
         return [
-            // ==========================================
-            // KELOMPOK 1: TEMPLATE LKP
-            // ==========================================
-            'pkbm_izin_memimpin' => [
-                'name' => '1. [LKP] Izin Memimpin',
-                'description' => 'Format Surat Keterangan Izin Memimpin LKP. A4/F4 Portrait.',
-                'paper_size' => 'F4',
-                'orientation' => 'portrait',
-                'use_border' => false,
-                'html' => self::getIzinMemimpinPKBM()
-            ],
-            'pkbm_perubahan_ketua' => [
-                'name' => '2. [LKP] Perubahan Ketua',
-                'description' => 'Format Surat Keterangan Perubahan Ketua LKP. A4/F4 Portrait.',
-                'paper_size' => 'F4',
-                'orientation' => 'portrait',
-                'use_border' => false,
-                'html' => self::getPerubahanKetuaPKBM()
-            ],
-            'pkbm_perubahan_alamat' => [
-                'name' => '3. [LKP] Perubahan Alamat',
-                'description' => 'Format Surat Keterangan Perubahan Alamat LKP. A4/F4 Portrait.',
-                'paper_size' => 'F4',
-                'orientation' => 'portrait',
-                'use_border' => false,
-                'html' => self::getPerubahanAlamatPKBM()
-            ],
             'pkbm_heregister' => [
-                'name' => '4. [LKP] HER-REGISTRASI',
-                'description' => 'Sertifikat Daftar Ulang LKP. Landscape F4, pakai Bingkai.',
-                'paper_size' => 'F4',
-                'orientation' => 'landscape',
-                'use_border' => true,
-                'html' => self::getHerregistrasiPKBM()
-            ],
-            // ==========================================
-            // KELOMPOK 2: TEMPLATE PKBM
-            // ==========================================
-            'pkbm_izin_memimpin_baru' => [
-                'name' => '5. [PKBM] Izin Memimpin',
-                'description' => 'Format Surat Keterangan Izin Memimpin PKBM. F4 Portrait.',
+                'name' => '1. Surat Keterangan Daftar Ulang (PKBM)',
+                'description' => 'Sertifikat Daftar Ulang PKBM (Her-Registrasi). F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
-                'html' => self::getPkbmIzinMemimpin()
+                'html' => view('backend.super_admin.jenis_perizinan.presets.heregistrasi_pkbm')->render()
             ],
-            'pkbm_perubahan_ketua_baru' => [
-                'name' => '6. [PKBM] Perubahan Ketua',
-                'description' => 'Format Surat Keterangan Perubahan Ketua PKBM. F4 Portrait.',
+            'pkbm_izin_memimpin' => [
+                'name' => '2. Surat Keterangan Izin Memimpin (PKBM)',
+                'description' => 'Surat Keterangan Izin Memimpin PKBM. F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
-                'html' => self::getPkbmPerubahanKetua()
+                'html' => view('backend.super_admin.jenis_perizinan.presets.izin_memimpin_pkbm')->render()
             ],
-            'pkbm_perubahan_alamat_baru' => [
-                'name' => '7. [PKBM] Perubahan Alamat',
-                'description' => 'Format Surat Keterangan Perubahan Alamat PKBM. F4 Portrait.',
+            'pkbm_perpindahan_alamat' => [
+                'name' => '3. Surat Keterangan Perpindahan Alamat (PKBM)',
+                'description' => 'Surat Keterangan Perpindahan Alamat PKBM. F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
-                'html' => self::getPkbmPerubahanAlamat()
+                'html' => view('backend.super_admin.jenis_perizinan.presets.perpindahan_alamat_pkbm')->render()
             ],
-            'pkbm_heregister_portrait' => [
-                'name' => '8. [PKBM] HER-REGISTRASI (Portrait)',
-                'description' => 'Surat Keterangan Daftar Ulang PKBM. Portrait F4, pakai Bingkai.',
-                'paper_size' => 'F4',
-                'orientation' => 'portrait',
-                'use_border' => true,
-                'html' => self::getPkbmHerregistrasiPortrait()
-            ],
-
-            // ==========================================
-            // KELOMPOK 3: TEMPLATE PAUD
-            // ==========================================
-            'paud_izin_memimpin' => [
-                'name' => '5. [PAUD] Izin Memimpin (Foto 4x6)',
-                'description' => 'Suket Izin Memimpin PAUD dengan kotak foto 4x6 di kiri bawah. Portrait.',
+            'pkbm_pergantian_ketua' => [
+                'name' => '4. Surat Keterangan Pergantian Ketua (PKBM)',
+                'description' => 'Surat Keterangan Pergantian Ketua PKBM. F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
-                'html' => self::getIzinMemimpinPAUD()
+                'html' => view('backend.super_admin.jenis_perizinan.presets.pergantian_ketua_pkbm')->render()
             ],
-            'paud_perubahan_yayasan' => [
-                'name' => '6. [PAUD] Perubahan Pimpinan & Yayasan',
-                'description' => 'Suket Perubahan Pimpinan dan Yayasan Baru PAUD. Portrait.',
+            'pkbm_pergantian_yayasan' => [
+                'name' => '5. Surat Keterangan Pergantian Yayasan (PKBM)',
+                'description' => 'Surat Keterangan Pergantian Yayasan PKBM. F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
-                'html' => self::getPerubahanPimpinanYayasanPAUD()
+                'html' => view('backend.super_admin.jenis_perizinan.presets.pergantian_yayasan_pkbm')->render()
             ],
-            'paud_perubahan_alamat' => [
-                'name' => '7. [PAUD] Perubahan Alamat',
-                'description' => 'Suket Perubahan Alamat (Lama vs Baru) PAUD. Portrait.',
+            'lkp_daftar_ulang' => [
+                'name' => '6. Surat Keterangan Daftar Ulang (LKP)',
+                'description' => 'Surat Keterangan Daftar Ulang LKP. F4 Portrait.',
                 'paper_size' => 'F4',
                 'orientation' => 'portrait',
                 'use_border' => false,
-                'html' => self::getPerubahanAlamatPAUD()
-            ],
-            'paud_heregister' => [
-                'name' => '8. [PAUD] HER-REGISTRASI (Sertifikat)',
-                'description' => 'Blangko Her-Registrasi PAUD. Landscape F4, pakai Bingkai Emas-Biru.',
-                'paper_size' => 'F4',
-                'orientation' => 'landscape',
-                'use_border' => true,
-                'html' => self::getHerregistrasiPAUD()
-            ],
-            'paud_sk_jenjang' => [
-                'name' => '9. [PAUD] SK Perubahan Jenjang',
-                'description' => 'SK KEPUTUSAN KEPALA DINAS (Menimbang, Mengingat, Memutuskan). Portrait.',
-                'paper_size' => 'F4',
-                'orientation' => 'portrait',
-                'use_border' => false,
-                'html' => self::getSkPerubahanJenjangPAUD()
+                'html' => view('backend.super_admin.jenis_perizinan.presets.daftar_ulang_lkp')->render()
             ],
         ];
     }

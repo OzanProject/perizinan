@@ -211,49 +211,7 @@ class Perizinan extends Model
     // Bersihkan sisa placeholder [DATA:xxx]
     $template = preg_replace('/\[DATA:[^\]]+\]/i', '................', $template);
 
-    // ── Watermark tengah ─────────────────────────────────────────────────────
-    if ($dinas->watermark_enabled ?? true) {
-      $wmSrc = $toBase64($dinas->watermark_img ?: $dinas->logo);
-      if ($wmSrc) {
-        $wmOpacity = number_format(max(0, min(1, $dinas->watermark_opacity ?? 0.07)), 2);
-        $template .= '
-          <div style="position:fixed;top:50%;left:50%;
-                      transform:translate(-50%,-50%);
-                      width:180mm;height:180mm;
-                      opacity:' . $wmOpacity . ';z-index:-1;pointer-events:none;">
-            <img src="' . $wmSrc . '" style="width:100%;height:100%;object-fit:contain;" alt="">
-          </div>';
-      }
-    }
-
-    // ── Border/bingkai halaman ───────────────────────────────────────────────
-    if (($dinas->watermark_enabled ?? true) && ($this->jenisPerizinan->use_border ?? false)) {
-      $borderPath = $this->resolveBorderPath($dinas);
-      if ($borderPath) {
-        $isPublicAsset = !preg_match('#^(watermarks|logos|stempels)/#', $borderPath);
-        if ($isPublicAsset) {
-          $fp = public_path($borderPath);
-          if (file_exists($fp) && !is_dir($fp)) {
-            $ext       = strtolower(pathinfo($fp, PATHINFO_EXTENSION)) ?: 'jpg';
-            $borderSrc = 'data:image/' . $ext . ';base64,' . base64_encode(file_get_contents($fp));
-          } else {
-            $borderSrc = null;
-          }
-        } else {
-          $borderSrc = $toBase64($borderPath);
-        }
-
-        if ($borderSrc) {
-          $borderOpacity = number_format(max(0, min(1, $dinas->watermark_border_opacity ?? 0.2)), 2);
-          // Beri jarak 4mm dari tepi agar tidak menutup isi
-          $template .= '
-            <div style="position:fixed;top:4mm;left:4mm;right:4mm;bottom:4mm;
-                        opacity:' . $borderOpacity . ';z-index:-2;pointer-events:none;">
-              <img src="' . $borderSrc . '" style="width:100%;height:100%;" alt="">
-            </div>';
-        }
-      }
-    }
+    // (Watermark dan Border telah dipindahkan ke RenderHtmlAction agar dinamis dan tidak merusak layout HTML)
 
     // ── QR floating (pojok kiri bawah, hanya jika belum ada di template) ────
     if ($qrImage && !str_contains($template, '[QR_CODE]') && !str_contains($template, $qrCodeBase64)) {

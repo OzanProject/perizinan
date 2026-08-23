@@ -19,7 +19,10 @@ class JenisPerizinan extends Model
     'deskripsi',
     'template_html',
     'use_border',
+    'paper_size',
+    'orientation',
     'border_type',
+    'use_watermark',
     'form_config',
     'is_active',
   ];
