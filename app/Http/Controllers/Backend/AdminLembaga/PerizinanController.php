@@ -59,7 +59,25 @@ class PerizinanController extends Controller
 
   public function create()
   {
-    $jenisPerizinans = JenisPerizinan::where('is_active', true)->get();
+    $lembaga = Auth::user()->lembaga;
+    
+    $query = JenisPerizinan::where('is_active', true);
+    
+    if ($lembaga && $lembaga->jenjang) {
+        $paudJenjangs = ['KB', 'TK', 'PAUD', 'SPS', 'TPA'];
+        $dikmasJenjangs = ['PKBM', 'LKP'];
+        
+        if (in_array($lembaga->jenjang, $paudJenjangs)) {
+            $query->whereIn('kode', $paudJenjangs);
+        } elseif (in_array($lembaga->jenjang, $dikmasJenjangs)) {
+            $query->whereIn('kode', $dikmasJenjangs);
+        } else {
+            $query->where('kode', $lembaga->jenjang);
+        }
+    }
+    
+    $jenisPerizinans = $query->get();
+    
     return view('backend.admin_lembaga.perizinan.create', compact('jenisPerizinans'));
   }
 
