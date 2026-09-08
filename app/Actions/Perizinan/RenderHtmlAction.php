@@ -137,9 +137,10 @@ class RenderHtmlAction
         string $body,
         bool $forPdf
     ): string {
-        // DOMPDF memiliki bug di mana elemen absolute di dalam elemen yang terpotong halaman akan loncat.
-        // Solusinya: khusus PDF, kita gunakan 'fixed' (yang di DOMPDF berarti menempel absolut di kertas/kamera).
-        $qrPosition = $forPdf ? 'fixed' : 'absolute';
+        // QR selalu position: absolute — mengikuti .print-page yang sudah dibatasi overflow:hidden.
+        // position:fixed di DOMPDF justru menyebabkan QR terpaku di halaman 1 sementara
+        // konten/tanda-tangan bisa loncat ke halaman 2 — ini biang kerok kekacauan tampilan.
+        $qrPosition = 'absolute';
 
         return '<!DOCTYPE html>
 <html lang="id">
