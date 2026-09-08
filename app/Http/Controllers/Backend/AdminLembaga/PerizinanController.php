@@ -96,11 +96,18 @@ class PerizinanController extends Controller
       return back()->with('error', 'Anda masih memiliki pengajuan yang aktif.');
     }
 
+    // Cari izin sebelumnya yang sudah selesai untuk menyalin perizinan_data
+    $lastPerizinan = Perizinan::where('lembaga_id', Auth::user()->lembaga_id)
+      ->where('status', PerizinanStatus::SELESAI->value)
+      ->latest()
+      ->first();
+
     $perizinan = Perizinan::create([
       'dinas_id' => Auth::user()->dinas_id,
       'lembaga_id' => Auth::user()->lembaga_id,
       'jenis_perizinan_id' => $request->jenis_perizinan_id,
       'status' => PerizinanStatus::DRAFT->value,
+      'perizinan_data' => $lastPerizinan ? $lastPerizinan->perizinan_data : null,
     ]);
 
     return redirect()->route('admin_lembaga.perizinan.edit', $perizinan)->with('success', 'Draf pengajuan berhasil dibuat. Silakan lengkapi berkas.');
