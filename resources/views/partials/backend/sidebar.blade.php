@@ -47,7 +47,7 @@
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>Dashboard</p>
             </a>
-          @endrole
+          @endhasanyrole
         </li>
 
         @if(Auth::user()->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud']))
