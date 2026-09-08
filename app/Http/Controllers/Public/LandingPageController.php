@@ -65,10 +65,19 @@ class LandingPageController extends Controller
     if (is_string($data))
       return $data;
 
-    $downloads = \App\Models\Download::where('dinas_id', $data['dinas']->id)
-      ->where('is_active', true)
-      ->latest()
-      ->get();
+    $query = \App\Models\Download::where('dinas_id', $data['dinas']->id)
+      ->where('is_active', true);
+
+    if (request()->has('search')) {
+      $search = request('search');
+      $query->where(function ($q) use ($search) {
+        $q->where('judul', 'like', '%' . $search . '%')
+          ->orWhere('keterangan', 'like', '%' . $search . '%');
+      });
+    }
+
+    $limit = request('limit', 10);
+    $downloads = $query->latest()->paginate($limit)->withQueryString();
 
     return view('public.downloads', array_merge($data, compact('downloads')));
   }

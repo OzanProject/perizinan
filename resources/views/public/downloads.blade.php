@@ -17,7 +17,35 @@
   </section>
 
   <!-- Download List Section -->
-  <section class="max-w-6xl mx-auto px-6 py-24">
+  <section class="max-w-6xl mx-auto px-6 py-12 md:py-24">
+    
+    <!-- Filter Section -->
+    <div class="mb-8">
+      <form action="{{ route('landing.unduhan') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <label class="text-sm font-bold text-slate-600 dark:text-slate-400 whitespace-nowrap">Tampilkan:</label>
+          <select name="limit" onchange="this.form.submit()" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm rounded-xl focus:ring-primary focus:border-primary block w-24 p-2.5">
+            <option value="10" {{ request('limit') == 10 ? 'selected' : '' }}>10</option>
+            <option value="20" {{ request('limit') == 20 ? 'selected' : '' }}>20</option>
+            <option value="50" {{ request('limit') == 50 ? 'selected' : '' }}>50</option>
+          </select>
+          <span class="text-sm font-medium text-slate-500">Data</span>
+        </div>
+        
+        <div class="w-full md:w-96 relative">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <span class="material-symbols-outlined text-slate-400">search</span>
+          </div>
+          <input type="text" name="search" value="{{ request('search') }}" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm rounded-2xl focus:ring-primary focus:border-primary block w-full pl-12 p-3 transition-all" placeholder="Cari nama dokumen...">
+          @if(request('search'))
+            <a href="{{ route('landing.unduhan') }}" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-red-500 transition-colors">
+              <span class="material-symbols-outlined">close</span>
+            </a>
+          @endif
+        </div>
+      </form>
+    </div>
+
     <div class="bg-white dark:bg-slate-800 rounded-[2rem] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-none">
       
       @if($downloads->isEmpty())
@@ -91,6 +119,14 @@
         </div>
       @endif
     </div>
+
+    <!-- Pagination -->
+    @if($downloads->hasPages())
+      <div class="mt-8">
+        {{ $downloads->links() }}
+      </div>
+    @endif
+    
     
     <div class="text-center mt-12">
       <a href="{{ route('landing') }}" class="inline-flex items-center gap-2 text-slate-500 hover:text-primary font-bold transition-colors">
