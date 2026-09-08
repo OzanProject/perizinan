@@ -128,7 +128,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
                                 <label class="text-xs font-bold text-slate-600 dark:text-slate-400 ml-1">Nama
-                                    Lengkap</label>
+                                    Kepala/Ketua Lembaga</label>
                                 <input type="text" name="name" value="{{ old('name') }}" required
                                     placeholder="Nama asli sesuai KTP"
                                     class="block w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
@@ -170,39 +170,19 @@
                             </div>
 
                             <div class="space-y-2">
-                                <label class="text-xs font-bold text-slate-600 dark:text-slate-400 ml-1">Lembaga
-                                    Terdaftar</label>
-                                <select name="lembaga_id" id="lembaga-select" required
-                                    class="block w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
-                                    <option value="" disabled selected>Pilih Nama Lembaga</option>
-                                    @foreach($lembagas as $lembaga)
-                                        <option value="{{ $lembaga->id }}" data-jenjang="{{ $lembaga->jenjang }}" {{ old('lembaga_id') == $lembaga->id ? 'selected' : '' }}>
-                                            {{ $lembaga->nama_lembaga }}
-                                        </option>
-                                    @endforeach
-                                    <option value="new" {{ old('lembaga_id') == 'new' ? 'selected' : '' }}>+ Tambah
-                                        Lembaga Baru</option>
-                                </select>
+                                <label class="text-xs font-bold text-slate-600 dark:text-slate-400 ml-1">Nama Lembaga</label>
+                                <input type="text" name="nama_lembaga" value="{{ old('nama_lembaga') }}" required
+                                    placeholder="Contoh: PKBM Mandiri"
+                                    class="block w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
                             </div>
+
                         </div>
 
-                        <!-- New Institution Fields -->
-                        <div id="new-lembaga-fields"
-                            class="{{ old('lembaga_id') == 'new' ? 'block' : 'hidden' }} grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 animate-[fadeIn_0.3s_ease-out]">
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-blue-600 dark:text-blue-400 ml-1">Nama Lembaga
-                                    Baru</label>
-                                <input type="text" name="nama_lembaga_baru" value="{{ old('nama_lembaga_baru') }}"
-                                    placeholder="Contoh: PKBM Mandiri"
-                                    class="block w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-blue-600 dark:text-blue-400 ml-1">NPSN (8
-                                    Digit)</label>
-                                <input type="text" name="npsn" maxlength="8" value="{{ old('npsn') }}"
-                                    placeholder="12345678"
-                                    class="block w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
-                            </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-600 dark:text-slate-400 ml-1">NPSN (8 Digit)</label>
+                            <input type="text" name="npsn" maxlength="8" value="{{ old('npsn') }}" required
+                                placeholder="12345678"
+                                class="block w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
                         </div>
                     </div>
 
@@ -267,34 +247,6 @@
         </div>
     </div>
 
-    <script>
-        window.addEventListener('load', function () {
-            const jenjangSelect = document.getElementById('jenjang-select');
-            const lembagaSelect = document.getElementById('lembaga-select');
-            const newLembagaFields = document.getElementById('new-lembaga-fields');
-            const allLembagaOptions = Array.from(lembagaSelect.options);
-
-            function filterLembaga() {
-                const selectedJenjang = jenjangSelect.value;
-                lembagaSelect.innerHTML = '';
-                lembagaSelect.appendChild(allLembagaOptions[0]);
-
-                allLembagaOptions.slice(1).forEach(option => {
-                    if (option.value === 'new' || option.getAttribute('data-jenjang') === selectedJenjang) {
-                        lembagaSelect.appendChild(option);
-                    }
-                });
-            }
-
-            jenjangSelect.addEventListener('change', filterLembaga);
-            lembagaSelect.addEventListener('change', function () {
-                if (this.value === 'new') {
-                    newLembagaFields.classList.remove('hidden');
-                } else {
-                    newLembagaFields.classList.add('hidden');
-                }
-            });
-        });
     </script>
 
     @include('partials.sweetalert')
