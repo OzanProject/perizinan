@@ -28,7 +28,10 @@ class RenderHtmlAction
      * terlalu kecil untuk Chrome, itulah sumber print-html "tidak rapi"
      * walau PDF sudah pas.
      */
-    private const SAFETY_BUFFER_MM_PDF = 0.4;
+    // 3mm buffer — lebih aman dari 0.4 tanpa terlalu agresif.
+    // Lihat juga: .print-page sekarang overflow:visible & max-height:none
+    // agar DOMPDF tidak paksa page-break di tengah signature block.
+    private const SAFETY_BUFFER_MM_PDF  = 3.0;
     private const SAFETY_BUFFER_MM_HTML = 1.5;
 
     /* =====================================================================
@@ -151,13 +154,20 @@ class RenderHtmlAction
            keluar batas kertas ketika width eksplisit + padding dipakai bersamaan.
            Karena .print-page adalah elemen block di dalam elemen BODY yang sudah
            width:100%, ia otomatis mengambil lebar penuh halaman tanpa perlu
-           width eksplisit — sehingga bug tersebut tidak terpicu. */
+           width eksplisit — sehingga bug tersebut tidak terpicu.
+
+           KENAPA max-height:none & overflow:visible?
+           max-height + overflow:hidden memaksa DOMPDF memotong layout tepat di batas
+           tinggi kotak, lalu memindahkan overflow ke halaman baru. Hasilnya:
+           signature/QR yang hanya selisih beberapa mm loncat ke halaman 2.
+           Dengan overflow:visible, DOMPDF mengikuti page-break alami (batas fisik kertas),
+           bukan batas kotak — sehingga selama total konten muat 1 halaman, tetap 1 halaman. */
         .print-page {
             position: relative;
             min-height: ' . $contentHeight . ';
-            max-height: ' . $contentHeight . ';
+            max-height: none;
             padding: ' . $padding . ';
-            overflow: hidden;
+            overflow: visible;
             margin: 0 auto;
             page-break-after: avoid;
             page-break-inside: avoid;
@@ -195,7 +205,16 @@ class RenderHtmlAction
 
         .signature-block {
             margin-top: 5px;
+            /* Pastikan seluruh blok tanda tangan (nama, jabatan, NIP, dst)
+               TIDAK pernah terpotong ke halaman berikutnya. */
             page-break-inside: avoid !important;
+            break-inside:      avoid !important;
+            page-break-before: avoid !important;
+            break-before:      avoid !important;
+        }
+        .signature-block * {
+            page-break-inside: avoid !important;
+            break-inside:      avoid !important;
         }
 
         .print-qr-floating {
