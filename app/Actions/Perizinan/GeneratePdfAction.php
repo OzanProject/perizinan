@@ -228,6 +228,9 @@ class GeneratePdfAction
                 'isHtml5ParserEnabled' => true,
                 'defaultFont'          => 'Times-Roman',
                 'dpi'                  => 96,
+                // Override config('dompdf.font_height_ratio') yang mungkin ter-cache di hosting
+                // 0.85 memastikan tinggi baris di Linux tidak akan melebihi Windows.
+                'fontHeightRatio'      => 0.85,
             ]);
 
         $filename = $this->generateStandardFilename($perizinan);

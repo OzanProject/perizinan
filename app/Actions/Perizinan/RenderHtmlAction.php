@@ -99,7 +99,12 @@ class RenderHtmlAction
         ?CetakPreset $preset
     ): string {
         $body = !empty($snapshot) ? $snapshot : $perizinan->replaceVariables(false);
-        $body = preg_replace('/(<br\s*\/?>(\s)*)+$/i', '', $body);
+        
+        // BANYAK TERJADI: User menekan Enter beberapa kali di akhir editor TinyMCE,
+        // menghasilkan <p><br></p> atau <br> yang mendorong tanda tangan ke halaman 2.
+        // Kita WAJIB hapus semua elemen kosong di akhir konten!
+        $body = preg_replace('/(<br\s*\/?>|\s)+$/i', '', $body);
+        $body = preg_replace('/(<p>(&nbsp;|\s|<br\s*\/?>)*<\/p>\s*)+$/i', '', $body);
 
         $isLandscape = $orientation === 'landscape';
 
@@ -113,11 +118,21 @@ class RenderHtmlAction
         // dengan engine render (DOMPDF untuk PDF, Chrome untuk preview/print HTML).
         $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape, $padding, $forPdf);
 
-        $pageCss = $this->buildPageCss($paperSize, $orientation, $forPdf);
-        $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
+        $pageCss       = $this->buildPageCss($paperSize, $orientation, $forPdf);
+        
+        // PENGECILAN FONT & LINE-HEIGHT KHUSUS PDF:
+        // Di Linux, font fallback DOMPDF lebih tinggi/lebar dari Windows.
+        if ($forPdf) {
+            $fontSize   = $isLandscape ? '8.5pt' : '9.5pt';
+            $lineHeight = '1.05';
+        } else {
+            $fontSize   = $isLandscape ? '9.5pt' : '10.5pt';
+            $lineHeight = '1.15';
+        }
+        
         $watermarkHtml = $this->buildWatermarkHtml($perizinan);
 
-        return $this->buildDocument($pageCss, $fontSize, $contentHeight, $padding, $watermarkHtml, $body);
+        return $this->buildDocument($pageCss, $fontSize, $lineHeight, $contentHeight, $padding, $watermarkHtml, $body);
     }
 
     /* =====================================================================
@@ -127,6 +142,7 @@ class RenderHtmlAction
     private function buildDocument(
         string $pageCss,
         string $fontSize,
+        string $lineHeight,
         string $contentHeight,
         string $padding,
         string $watermarkHtml,
@@ -143,7 +159,7 @@ class RenderHtmlAction
             margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: "Times New Roman", Times, serif;
             font-size: ' . $fontSize . ' !important;
-            line-height: 1.15; color: #000; background: #fff;
+            line-height: ' . $lineHeight . '; color: #000; background: #fff;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -185,8 +201,8 @@ class RenderHtmlAction
         figure.image img { display: inline-block !important; margin: 0 auto !important; max-width: 100%; height: auto; }
 
         p {
-            clear: both; margin-top: 0; margin-bottom: 4px;
-            text-align: justify; line-height: 1.15 !important;
+            clear: both; margin-top: 0; margin-bottom: 3px;
+            text-align: justify; line-height: ' . $lineHeight . ' !important;
             orphans: 3; widows: 3;
         }
         p:last-child { margin-bottom: 0 !important; }
