@@ -29,6 +29,7 @@ class ProfileController extends Controller
     $request->validate([
       'nama_lembaga' => 'required|string|max:255',
       'npsn' => 'required|string|max:20|unique:lembagas,npsn,' . $lembaga->id,
+      'kecamatan' => 'required|string|max:100',
       'alamat' => 'required|string',
       'sk_pendirian' => 'nullable|string|max:255',
       'tanggal_sk_pendirian' => 'nullable|date',

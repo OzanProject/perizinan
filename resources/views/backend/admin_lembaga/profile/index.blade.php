@@ -106,7 +106,12 @@
                   placeholder="https://pkbm.sch.id">
               </div>
               <div class="form-group">
-                <label class="small font-weight-bold text-uppercase text-muted">Alamat Lengkap</label>
+                <label class="small font-weight-bold text-uppercase text-muted">Kecamatan <span class="text-danger">*</span></label>
+                <input type="text" name="kecamatan" value="{{ old('kecamatan', $lembaga->kecamatan) }}" class="form-control"
+                  placeholder="Contoh: GARUT KOTA" required>
+              </div>
+              <div class="form-group">
+                <label class="small font-weight-bold text-uppercase text-muted">Alamat Lengkap <span class="text-danger">*</span></label>
                 <textarea name="alamat" rows="4" class="form-control"
                   placeholder="Jl. Raya Garut - Tasikmalaya No. 123, Garut"
                   required>{{ old('alamat', $lembaga->alamat) }}</textarea>
