@@ -126,7 +126,6 @@
             </ul>
           </li>
 
-          @if(Auth::user()->hasRole('super_admin'))
           <li class="nav-item {{ request()->routeIs('super_admin.laporan.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('super_admin.laporan.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-chart-line text-info"></i>
@@ -151,6 +150,7 @@
             </ul>
           </li>
 
+          @if(Auth::user()->hasRole('super_admin'))
           <li class="nav-header">SYSTEM</li>
           <li class="nav-item">
             <a href="{{ route('super_admin.users.index') }}" class="nav-link {{ request()->routeIs('super_admin.users.*') ? 'active' : '' }}">

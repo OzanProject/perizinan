@@ -15,12 +15,20 @@ class RekapKecamatanController extends Controller
         $dinasId = Auth::user()->dinas_id;
 
         // Query to get recap per kecamatan
-        $rekapData = DB::table('lembagas')
+        $query = DB::table('lembagas')
             ->where('lembagas.dinas_id', $dinasId)
             ->whereNotNull('lembagas.kecamatan')
             ->where('lembagas.kecamatan', '!=', '')
-            ->leftJoin('perizinans', 'lembagas.id', '=', 'perizinans.lembaga_id')
-            ->select(
+            ->leftJoin('perizinans', 'lembagas.id', '=', 'perizinans.lembaga_id');
+
+        $user = Auth::user();
+        if ($user->hasRole('bidang_dikmas')) {
+            $query->whereIn('lembagas.jenjang', ['PKBM', 'LKP']);
+        } elseif ($user->hasRole('bidang_paud')) {
+            $query->whereIn('lembagas.jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+        }
+
+        $rekapData = $query->select(
                 'lembagas.kecamatan',
                 DB::raw('COUNT(DISTINCT lembagas.id) as total_lembaga'),
                 DB::raw('COUNT(perizinans.id) as total_perizinan'),

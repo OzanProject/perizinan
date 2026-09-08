@@ -12,6 +12,32 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+  private function applyRoleFilterPerizinan($query)
+  {
+    $user = Auth::user();
+    if ($user->hasRole('bidang_dikmas')) {
+      $query->whereHas('lembaga', function ($q) {
+        $q->whereIn('jenjang', ['PKBM', 'LKP']);
+      });
+    } elseif ($user->hasRole('bidang_paud')) {
+      $query->whereHas('lembaga', function ($q) {
+        $q->whereIn('jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+      });
+    }
+    return $query;
+  }
+
+  private function applyRoleFilterLembaga($query)
+  {
+    $user = Auth::user();
+    if ($user->hasRole('bidang_dikmas')) {
+      $query->whereIn('jenjang', ['PKBM', 'LKP']);
+    } elseif ($user->hasRole('bidang_paud')) {
+      $query->whereIn('jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+    }
+    return $query;
+  }
+
   public function index(Request $request)
   {
     $dinasId = Auth::user()->dinas_id;
@@ -22,6 +48,7 @@ class ReportController extends Controller
     // Base query for stats
     $baseQuery = Perizinan::where('dinas_id', $dinasId)
       ->where('status', '!=', PerizinanStatus::DRAFT);
+    $baseQuery = $this->applyRoleFilterPerizinan($baseQuery);
 
     if ($startDate) {
       $baseQuery->whereDate('created_at', '>=', $startDate);
@@ -48,16 +75,18 @@ class ReportController extends Controller
       ])->count(),
     ];
 
-    // Monthly Trend (Last 7 Months) - Trend usually covers recent time, independent of range filter for context
+    // Monthly Trend (Last 7 Months)
     $months = collect();
     for ($i = 6; $i >= 0; $i--) {
       $months->push(now()->subMonths($i)->format('Y-m'));
     }
 
-    $trendData = Perizinan::where('dinas_id', $dinasId)
+    $trendQuery = Perizinan::where('dinas_id', $dinasId)
       ->where('status', '!=', PerizinanStatus::DRAFT)
-      ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
-      ->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
+      ->where('created_at', '>=', now()->subMonths(6)->startOfMonth());
+    $trendQuery = $this->applyRoleFilterPerizinan($trendQuery);
+
+    $trendData = $trendQuery->select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
       ->groupBy('month')
       ->get()
       ->pluck('total', 'month');
@@ -68,6 +97,7 @@ class ReportController extends Controller
 
     // Institution Stats Query
     $lembagaQuery = Lembaga::where('dinas_id', $dinasId);
+    $lembagaQuery = $this->applyRoleFilterLembaga($lembagaQuery);
 
     if ($lembagaId) {
       $lembagaQuery->where('id', $lembagaId);
@@ -99,7 +129,9 @@ class ReportController extends Controller
       ->orderBy('total_pengajuan', 'desc')
       ->paginate(10);
 
-    $listLembaga = Lembaga::where('dinas_id', $dinasId)->orderBy('nama_lembaga')->get();
+    $listLembagaQuery = Lembaga::where('dinas_id', $dinasId)->orderBy('nama_lembaga');
+    $listLembagaQuery = $this->applyRoleFilterLembaga($listLembagaQuery);
+    $listLembaga = $listLembagaQuery->get();
 
     // Detailed perizinan list
     $perizinans = (clone $baseQuery)
@@ -133,6 +165,7 @@ class ReportController extends Controller
   private function getOverviewStats($dinasId, $filters = [])
   {
     $query = Perizinan::where('dinas_id', $dinasId)->where('status', '!=', PerizinanStatus::DRAFT);
+    $query = $this->applyRoleFilterPerizinan($query);
 
     if (!empty($filters['start_date'])) {
       $query->whereDate('created_at', '>=', $filters['start_date']);
@@ -162,6 +195,7 @@ class ReportController extends Controller
   private function getLembagaData($filters = [])
   {
     $query = Lembaga::where('dinas_id', Auth::user()->dinas_id);
+    $query = $this->applyRoleFilterLembaga($query);
 
     if (!empty($filters['lembaga_id'])) {
       $query->where('id', $filters['lembaga_id']);
