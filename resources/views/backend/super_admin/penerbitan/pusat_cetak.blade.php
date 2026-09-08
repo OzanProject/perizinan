@@ -264,6 +264,7 @@
 
                         {{-- Tombol PDF --}}
                         <a href="{{ route('super_admin.penerbitan.export_pdf', $perizinan) }}"
+                           target="_blank"
                            class="btn btn-sm btn-outline-danger btn-action"
                            title="Download PDF (ukuran: {{ $finalSize }} {{ $orientLabel }})">
                           <i class="fas fa-file-pdf mr-1"></i> PDF
@@ -271,6 +272,7 @@
 
                         {{-- Tombol Word --}}
                         <a href="{{ route('super_admin.penerbitan.export_word', $perizinan) }}"
+                           target="_blank"
                            class="btn btn-sm btn-outline-primary btn-action"
                            title="Download Word">
                           <i class="fas fa-file-word mr-1"></i> Word
@@ -278,6 +280,7 @@
 
                         {{-- Tombol Excel --}}
                         <a href="{{ route('super_admin.penerbitan.export_excel', $perizinan) }}"
+                           target="_blank"
                            class="btn btn-sm btn-outline-success btn-action"
                            title="Download Excel">
                           <i class="fas fa-file-excel mr-1"></i> Excel
