@@ -10,16 +10,26 @@ class RenderHtmlAction
 {
     /**
      * Ukuran kertas yang didukung (dalam milimeter).
-     * Catatan: konstanta ini didefinisikan untuk referensi/dokumentasi ukuran kertas,
-     * meski perhitungan tinggi aktual saat render tetap memakai nilai hardcode
-     * di buildPageCss() / patchSnapshotOrientation() (tidak diubah agar logika tetap sama).
+     * Nilai ini SEKARANG benar-benar dipakai untuk menghitung tinggi konten
+     * secara presisi (paperHeight - padding), bukan sekadar dokumentasi.
      */
     private const PAPER_SIZES = [
-        'A4'     => ['w_mm' => 210.0, 'h_mm' => 297.0],
-        'F4'     => ['w_mm' => 215.0, 'h_mm' => 330.0],
-        'A3'     => ['w_mm' => 297.0, 'h_mm' => 420.0],
+        'A4' => ['w_mm' => 210.0, 'h_mm' => 297.0],
+        'F4' => ['w_mm' => 215.0, 'h_mm' => 330.0],
+        'A3' => ['w_mm' => 297.0, 'h_mm' => 420.0],
         'LETTER' => ['w_mm' => 215.9, 'h_mm' => 279.4],
     ];
+
+    /**
+     * Buffer kecil (mm) untuk menghindari blank/overflow page ke-2 akibat
+     * pembulatan sub-pixel. Nilainya BERBEDA antara DOMPDF dan browser
+     * (Chrome) karena kedua engine merender font Times New Roman dengan
+     * metric yang sedikit berbeda — buffer presisi untuk DOMPDF ternyata
+     * terlalu kecil untuk Chrome, itulah sumber print-html "tidak rapi"
+     * walau PDF sudah pas.
+     */
+    private const SAFETY_BUFFER_MM_PDF = 0.4;
+    private const SAFETY_BUFFER_MM_HTML = 1.5;
 
     /* =====================================================================
      |  ENTRY POINT
@@ -40,71 +50,68 @@ class RenderHtmlAction
             ->where('is_active', true)
             ->first();
 
-        $paperSize   = strtoupper($paperSize ?: ($perizinan->jenisPerizinan->paper_size ?: ($preset->paper_size ?? 'A4')));
+        $paperSize = strtoupper($paperSize ?: ($perizinan->jenisPerizinan->paper_size ?: ($preset->paper_size ?? 'A4')));
         $orientation = strtolower($orientation ?: ($perizinan->jenisPerizinan->orientation ?: ($preset->orientation ?? 'portrait')));
+
+        if (!isset(self::PAPER_SIZES[$paperSize])) {
+            $paperSize = 'A4';
+        }
 
         $snapshot = $perizinan->snapshot_html;
 
         // Kasus 1: snapshot sudah berupa HTML utuh (dari sistem lama) → patch ukurannya saja
         if (!empty($snapshot) && stripos($snapshot, '<html') !== false) {
-            return $this->renderFromLegacySnapshot($perizinan, $snapshot, $paperSize, $orientation);
+            return $this->renderFromLegacySnapshot($perizinan, $snapshot, $paperSize, $orientation, $preset, $forPdf);
         }
 
         // Kasus 2: snapshot berupa raw body (sistem baru), atau belum ada snapshot sama sekali
-        return $this->renderFromBody($perizinan, $snapshot, $paperSize, $orientation, $forPdf);
+        return $this->renderFromBody($perizinan, $snapshot, $paperSize, $orientation, $forPdf, $preset);
     }
 
     /* =====================================================================
      |  RENDER PATHS
      |===================================================================== */
 
-    /**
-     * Render untuk snapshot HTML lama: patch orientasi/ukuran kertas,
-     * lalu injeksikan watermark ke dalam markup yang sudah ada.
-     */
     private function renderFromLegacySnapshot(
         Perizinan $perizinan,
         string $snapshot,
         string $paperSize,
-        string $orientation
+        string $orientation,
+        ?CetakPreset $preset,
+        bool $forPdf
     ): string {
-        $html = $this->patchSnapshotOrientation($snapshot, $paperSize, $orientation);
+        $html = $this->patchSnapshotOrientation($snapshot, $paperSize, $orientation, $preset, $forPdf);
 
         $watermarkHtml = $this->buildWatermarkHtml($perizinan);
 
         return preg_replace('/(<div class="print-content">)/i', $watermarkHtml . '$1', $html);
     }
 
-    /**
-     * Render dari body mentah (raw body) dengan membangun ulang dokumen HTML lengkap
-     * beserta CSS halaman, padding, watermark, dsb.
-     */
     private function renderFromBody(
         Perizinan $perizinan,
         ?string $snapshot,
         string $paperSize,
         string $orientation,
-        bool $forPdf
+        bool $forPdf,
+        ?CetakPreset $preset
     ): string {
         $body = !empty($snapshot) ? $snapshot : $perizinan->replaceVariables(false);
         $body = preg_replace('/(<br\s*\/?>(\s)*)+$/i', '', $body);
 
         $isLandscape = $orientation === 'landscape';
 
-        $preset = CetakPreset::where('dinas_id', $perizinan->dinas_id)
-            ->where('is_active', true)
-            ->first();
-
-        // Tinggi spesifik kertas (dikurangi 1-2mm agar tidak memicu blank page ke-2 di DOMPDF)
-        $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape);
-
-        // Padding: pakai preset jika ada, kalau tidak, ikuti nilai default dari template-editor.css
+        // Padding: pakai preset jika ada, kalau tidak, default proporsional per orientasi
         $padding = ($preset && ($preset->margin_top || $preset->margin_bottom || $preset->margin_left || $preset->margin_right))
             ? $this->getContentPadding($preset, $orientation)
             : ($isLandscape ? '1.5cm 2cm' : '1.5cm 1.5cm');
 
-        $pageCss       = $this->buildPageCss($paperSize, $orientation, $forPdf);
-        $fontSize      = $isLandscape ? '9.5pt' : '10.5pt';
+        // Tinggi konten dihitung PRESISI dari ukuran kertas asli dikurangi padding aktual,
+        // bukan angka hardcode yang mengasumsikan padding tertentu. Buffer disesuaikan
+        // dengan engine render (DOMPDF untuk PDF, Chrome untuk preview/print HTML).
+        $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape, $padding, $forPdf);
+
+        $pageCss = $this->buildPageCss($paperSize, $orientation, $forPdf);
+        $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
         $watermarkHtml = $this->buildWatermarkHtml($perizinan);
 
         return $this->buildDocument($pageCss, $fontSize, $contentHeight, $padding, $watermarkHtml, $body);
@@ -114,9 +121,6 @@ class RenderHtmlAction
      |  HTML BUILDERS
      |===================================================================== */
 
-    /**
-     * Susun dokumen HTML lengkap (head + body) untuk hasil render baru.
-     */
     private function buildDocument(
         string $pageCss,
         string $fontSize,
@@ -137,10 +141,17 @@ class RenderHtmlAction
             font-family: "Times New Roman", Times, serif;
             font-size: ' . $fontSize . ' !important;
             line-height: 1.15; color: #000; background: #fff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
-        /* PENTING: Jangan gunakan width: 100% pada .print-page bersamaan dengan padding.
-           DOMPDF memiliki bug box-sizing: border-box sehingga elemen akan meluber keluar kertas.
-           Gunakan width: auto (default dari block element) */
+
+        /* PENTING — jangan ubah pola ini:
+           Jangan gunakan width: 100% pada .print-page bersamaan dengan padding.
+           DOMPDF punya bug box-sizing: border-box yang membuat elemen meluber
+           keluar batas kertas ketika width eksplisit + padding dipakai bersamaan.
+           Karena .print-page adalah elemen block di dalam elemen BODY yang sudah
+           width:100%, ia otomatis mengambil lebar penuh halaman tanpa perlu
+           width eksplisit — sehingga bug tersebut tidak terpicu. */
         .print-page {
             position: relative;
             min-height: ' . $contentHeight . ';
@@ -148,20 +159,45 @@ class RenderHtmlAction
             padding: ' . $padding . ';
             overflow: hidden;
             margin: 0 auto;
+            page-break-after: avoid;
+            page-break-inside: avoid;
         }
         .print-content {
             position: relative; z-index: 2; height: 100%;
         }
+
+        /* Tipografi & spacing dirapikan supaya konsisten di semua template */
         figure { margin: 0; padding: 0; }
-        figure.image { display: block !important; width: 100% !important; text-align: center !important; margin-bottom: 5px !important; clear: both !important; }
+        figure.image {
+            display: block !important; width: 100% !important;
+            text-align: center !important; margin-bottom: 4px !important; clear: both !important;
+        }
         figure.image img { display: inline-block !important; margin: 0 auto !important; max-width: 100%; height: auto; }
-        p { clear: both; margin-top: 0; margin-bottom: 4px; text-align: justify; line-height: 1.15 !important; }
+
+        p {
+            clear: both; margin-top: 0; margin-bottom: 4px;
+            text-align: justify; line-height: 1.15 !important;
+            orphans: 3; widows: 3;
+        }
         p:last-child { margin-bottom: 0 !important; }
-        h1, h2, h3, h4 { margin-top: 5px !important; margin-bottom: 5px !important; }
-        table { border-collapse: collapse; width: 100% !important; max-width: 100% !important; margin-bottom: 5px; }
-        tr { page-break-inside: auto; page-break-after: auto; }
+
+        h1, h2, h3, h4 {
+            margin-top: 4px !important; margin-bottom: 4px !important;
+            letter-spacing: 0.2px;
+        }
+
+        table {
+            border-collapse: collapse; width: 100% !important; max-width: 100% !important;
+            margin-bottom: 4px; page-break-inside: avoid;
+        }
+        tr { page-break-inside: avoid !important; page-break-after: auto; }
         td { vertical-align: top; padding: 1px 3px; border: none; word-wrap: break-word; }
-        .signature-block { margin-top: 5px; }
+
+        .signature-block {
+            margin-top: 5px;
+            page-break-inside: avoid !important;
+        }
+
         .print-qr-floating {
             position: absolute;
             left: 5mm;
@@ -194,33 +230,26 @@ class RenderHtmlAction
 </html>';
     }
 
-    /**
-     * Patch CSS `@page` dan `.print-page` di dalam snapshot HTML lama
-     * agar mengikuti ukuran kertas & orientasi yang diminta.
-     */
-    private function patchSnapshotOrientation(string $html, string $paperSize, string $orientation): string
+    private function patchSnapshotOrientation(string $html, string $paperSize, string $orientation, ?CetakPreset $preset, bool $forPdf): string
     {
-        if (strtoupper($paperSize) === 'F4') {
+        if ($paperSize === 'F4') {
             $newSize = $orientation === 'landscape' ? '330mm 215mm' : '215mm 330mm';
         } else {
             $newSize = strtolower($paperSize) . ' ' . $orientation;
         }
 
         $isLandscape = $orientation === 'landscape';
-        $padding     = $isLandscape ? '10mm 25mm 5mm 25mm' : '25mm 30mm 15mm 30mm';
+        $padding = ($preset && ($preset->margin_top || $preset->margin_bottom || $preset->margin_left || $preset->margin_right))
+            ? $this->getContentPadding($preset, $orientation)
+            : ($isLandscape ? '1.0cm 2.5cm 0.5cm 2.5cm' : '2.5cm 3cm 1.5cm 3cm');
 
-        // Ganti nilai `size` di dalam blok @page, pertahankan properti lain apa adanya
         $patched = preg_replace_callback('/@page\s*[^{]*\{([^}]*)\}/i', function ($m) use ($newSize) {
             $inner = preg_replace('/size\s*:[^;]+;?/i', '', $m[1]);
             return '@page { size: ' . $newSize . '; ' . trim($inner) . ' }';
         }, $html);
 
-        $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape);
+        $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape, $padding, $forPdf);
 
-        // Hapus hardcoded max-height/min-height dari .print-page yang membuat konten jadi 2 halaman,
-        // lalu ganti dengan dimensi kertas spesifik agar tetap 1 lembar dan tidak tumpah.
-        // PENTING: Jangan gunakan width: 100% atau width spesifik bersamaan dengan padding — DOMPDF
-        // punya bug box-sizing: border-box yang membuatnya melebar ke luar kertas. Gunakan width: auto.
         $patched = preg_replace(
             '/\.print-page\s*\{[^}]*\}/i',
             '.print-page { position: relative; min-height: ' . $contentHeight . '; max-height: ' . $contentHeight . '; padding: ' . $padding . '; overflow: hidden; margin: 0 auto; page-break-after: avoid; page-break-inside: avoid; }',
@@ -240,7 +269,7 @@ class RenderHtmlAction
             return '@page { margin: 0; }';
         }
 
-        $size = strtoupper($paperSize) === 'F4'
+        $size = $paperSize === 'F4'
             ? ($orientation === 'landscape' ? '330mm 215mm' : '215mm 330mm')
             : (strtolower($paperSize) . ' ' . $orientation);
 
@@ -248,17 +277,74 @@ class RenderHtmlAction
     }
 
     /**
-     * Tinggi konten spesifik per ukuran kertas & orientasi.
-     * Nilai sengaja dikurangi 1-2mm dari ukuran kertas asli agar tidak memicu blank page ke-2 di DOMPDF.
+     * Tinggi konten dihitung PRESISI: tinggi kertas asli dikurangi padding
+     * atas & bawah yang SEBENARNYA dipakai, dikurangi buffer kecil untuk
+     * menghindari blank page ke-2 akibat pembulatan sub-pixel di DOMPDF.
+     *
+     * Ini menggantikan pendekatan lama yang mengurangi 1-2mm secara asal
+     * tanpa memperhitungkan padding aktual — itulah sumber ketidakpresisian
+     * saat preset margin custom dipakai.
      */
-    private function resolveContentHeight(string $paperSize, bool $isLandscape): string
+    private function resolveContentHeight(string $paperSize, bool $isLandscape, string $padding, bool $forPdf = true): string
     {
-        if (strtoupper($paperSize) === 'F4') {
-            return $isLandscape ? '213mm' : '328mm';
+        $size = self::PAPER_SIZES[$paperSize] ?? self::PAPER_SIZES['A4'];
+        $paperHeightMm = $isLandscape ? $size['w_mm'] : $size['h_mm'];
+
+        [$topMm, , $bottomMm,] = $this->parsePaddingToMm($padding);
+
+        $buffer = $forPdf ? self::SAFETY_BUFFER_MM_PDF : self::SAFETY_BUFFER_MM_HTML;
+        $height = $paperHeightMm - $topMm - $bottomMm - $buffer;
+
+        // Jaga-jaga: jangan sampai negatif/terlalu kecil kalau padding sangat besar
+        $height = max($height, 20.0);
+
+        return number_format($height, 2, '.', '') . 'mm';
+    }
+
+    /**
+     * Parser shorthand CSS padding ("2.5cm 3cm 1.5cm 3cm", "1cm 2cm", dst)
+     * menjadi array [top, right, bottom, left] dalam milimeter.
+     */
+    private function parsePaddingToMm(string $padding): array
+    {
+        $parts = preg_split('/\s+/', trim($padding));
+        $parts = array_filter($parts, fn($p) => $p !== '');
+        $parts = array_values($parts);
+
+        switch (count($parts)) {
+            case 1:
+                $parts = array_fill(0, 4, $parts[0]);
+                break;
+            case 2:
+                $parts = [$parts[0], $parts[1], $parts[0], $parts[1]];
+                break;
+            case 3:
+                $parts = [$parts[0], $parts[1], $parts[2], $parts[1]];
+                break;
+            case 4:
+                break;
+            default:
+                $parts = ['15mm', '15mm', '15mm', '15mm'];
         }
 
-        // A4
-        return $isLandscape ? '208mm' : '295mm';
+        return array_map(fn($v) => $this->cssLengthToMm($v), $parts);
+    }
+
+    private function cssLengthToMm(string $value): float
+    {
+        if (preg_match('/^([\d.]+)\s*(mm|cm|in|px)?$/i', trim($value), $m)) {
+            $num = (float) $m[1];
+            $unit = strtolower($m[2] ?? 'mm');
+
+            return match ($unit) {
+                'cm' => $num * 10,
+                'in' => $num * 25.4,
+                'px' => $num * 25.4 / 96,
+                default => $num, // mm
+            };
+        }
+
+        return 15.0; // fallback aman
     }
 
     private function getContentPadding($preset, string $orientation): string
@@ -266,10 +352,10 @@ class RenderHtmlAction
         $isLandscape = $orientation === 'landscape';
 
         if ($preset) {
-            $mt = $preset->margin_top    ?? ($isLandscape ? 1.0 : 2.5);
-            $mr = $preset->margin_right  ?? ($isLandscape ? 2.5 : 3.0);
+            $mt = $preset->margin_top ?? ($isLandscape ? 1.0 : 2.5);
+            $mr = $preset->margin_right ?? ($isLandscape ? 2.5 : 3.0);
             $mb = $preset->margin_bottom ?? ($isLandscape ? 0.5 : 1.5);
-            $ml = $preset->margin_left   ?? ($isLandscape ? 2.5 : 3.0);
+            $ml = $preset->margin_left ?? ($isLandscape ? 2.5 : 3.0);
 
             return "{$mt}cm {$mr}cm {$mb}cm {$ml}cm";
         }
@@ -311,7 +397,7 @@ class RenderHtmlAction
         $opacity = number_format(max(0, min(1, $dinas->watermark_border_opacity ?? 0.9)), 2);
 
         return '
-                <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:' . $opacity . ';z-index:0;pointer-events:none;">
+                <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:' . $opacity . ';z-index:0;pointer-events:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
                     <img src="' . $borderSrc . '" style="width:100%;height:100%;" alt="">
                 </div>';
     }
@@ -331,7 +417,7 @@ class RenderHtmlAction
         $opacity = number_format(max(0, min(1, $dinas->watermark_opacity ?? 0.07)), 2);
 
         return '
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180mm;height:180mm;opacity:' . $opacity . ';z-index:1;pointer-events:none;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180mm;height:180mm;opacity:' . $opacity . ';z-index:1;pointer-events:none;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
                     <img src="' . $wmSrc . '" style="width:100%;height:100%;object-fit:contain;" alt="">
                 </div>';
     }
@@ -346,7 +432,7 @@ class RenderHtmlAction
             return null;
         }
 
-        $ext  = pathinfo($path, PATHINFO_EXTENSION);
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
         $data = Storage::disk('public')->get($path);
 
         return 'data:image/' . $ext . ';base64,' . base64_encode($data);
