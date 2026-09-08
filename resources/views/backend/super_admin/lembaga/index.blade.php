@@ -15,6 +15,9 @@
                         <a href="{{ route('super_admin.lembaga.create') }}" class="btn btn-primary btn-sm shadow-sm">
                             <i class="fas fa-plus-circle mr-1"></i> Tambah Lembaga
                         </a>
+                        <button type="button" class="btn btn-danger btn-sm shadow-sm ml-2 d-none" id="btn-bulk-delete" onclick="confirmBulkDelete()">
+                            <i class="fas fa-trash-alt mr-1"></i> Hapus Terpilih (<span id="selected-count">0</span>)
+                        </button>
                         <button type="button" class="btn btn-tool" data-card-widget="maximize">
                             <i class="fas fa-expand"></i>
                         </button>
@@ -37,12 +40,21 @@
                         </div>
                     </div>
 
-                    <!-- Table -->
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped border">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="text-center" style="width: 50px;">No</th>
+                    <!-- Table wrapped in bulk delete form -->
+                    <form id="bulk-delete-form" action="{{ route('super_admin.lembaga.bulk_destroy') }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped border">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="text-center" style="width: 40px;">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="check-all">
+                                                <label class="custom-control-label" for="check-all"></label>
+                                            </div>
+                                        </th>
+                                        <th class="text-center" style="width: 50px;">No</th>
                                     <th style="width: 80px;">Logo</th>
                                     <th>Identitas Lembaga</th>
                                     <th class="text-center">Jenjang</th>
@@ -54,6 +66,12 @@
                             <tbody>
                                 @forelse($lembagas as $index => $lembaga)
                                     <tr>
+                                        <td class="text-center align-middle">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input checkbox-item" name="ids[]" value="{{ $lembaga->id }}" id="check-{{ $lembaga->id }}">
+                                                <label class="custom-control-label" for="check-{{ $lembaga->id }}"></label>
+                                            </div>
+                                        </td>
                                         <td class="text-center align-middle">{{ $lembagas->firstItem() + $index }}</td>
                                         <td class="align-middle text-center">
                                             @if($lembaga->logo)
@@ -109,7 +127,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-5 text-muted">
+                                        <td colspan="8" class="text-center py-5 text-muted">
                                             <i class="fas fa-folder-open fa-3x mb-3 opacity-25"></i>
                                             <p class="mb-0">Tidak ada data lembaga ditemukan.</p>
                                         </td>
@@ -118,6 +136,7 @@
                             </tbody>
                         </table>
                     </div>
+                    </form>
                 </div>
                 <div class="card-footer bg-white border-top">
                     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
@@ -133,4 +152,44 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkAll = document.getElementById('check-all');
+        const checkboxes = document.querySelectorAll('.checkbox-item');
+        const btnBulkDelete = document.getElementById('btn-bulk-delete');
+        const selectedCount = document.getElementById('selected-count');
+
+        function updateBulkDeleteButton() {
+            const checkedCount = document.querySelectorAll('.checkbox-item:checked').length;
+            selectedCount.textContent = checkedCount;
+            
+            if (checkedCount > 0) {
+                btnBulkDelete.classList.remove('d-none');
+            } else {
+                btnBulkDelete.classList.add('d-none');
+                checkAll.checked = false;
+            }
+        }
+
+        if (checkAll) {
+            checkAll.addEventListener('change', function () {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateBulkDeleteButton();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkDeleteButton);
+        });
+    });
+
+    function confirmBulkDelete() {
+        if (confirm('Apakah Anda yakin ingin menghapus semua lembaga yang dipilih secara permanen?')) {
+            document.getElementById('bulk-delete-form').submit();
+        }
+    }
+</script>
+@endpush
 @endsection

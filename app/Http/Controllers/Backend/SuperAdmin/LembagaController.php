@@ -127,6 +127,44 @@ class LembagaController extends Controller
     return redirect()->route('super_admin.lembaga.index')->with('success', 'Lembaga berhasil dihapus.');
   }
 
+  public function bulkDestroy(Request $request)
+  {
+      $request->validate([
+          'ids' => 'required|array',
+          'ids.*' => 'exists:lembagas,id'
+      ]);
+
+      $dinasId = Auth::user()->dinas_id;
+      $lembagas = Lembaga::whereIn('id', $request->ids)
+                         ->where('dinas_id', $dinasId)
+                         ->get();
+
+      $deleted = 0;
+      $failed = 0;
+
+      foreach ($lembagas as $lembaga) {
+          if ($lembaga->users()->exists() || $lembaga->perizinans()->exists()) {
+              $failed++;
+              continue;
+          }
+
+          if ($lembaga->logo) {
+              Storage::disk('public')->delete($lembaga->logo);
+          }
+
+          $lembaga->delete();
+          $deleted++;
+      }
+
+      $message = "$deleted lembaga berhasil dihapus.";
+      if ($failed > 0) {
+          $message .= " $failed lembaga gagal dihapus karena memiliki data terkait (user/pengajuan).";
+          return back()->with('warning', $message);
+      }
+
+      return back()->with('success', $message);
+  }
+
   private function authorizeSuperAdmin(Lembaga $lembaga)
   {
     if ($lembaga->dinas_id !== Auth::user()->dinas_id) {

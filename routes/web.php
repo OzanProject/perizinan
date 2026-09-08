@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Backend\DashboardController::class, 'index'])->name('dashboard');
 
         // Manajemen Lembaga
+        Route::delete('lembaga/bulk-destroy', [\App\Http\Controllers\Backend\SuperAdmin\LembagaController::class, 'bulkDestroy'])->name('lembaga.bulk_destroy');
         Route::resource('lembaga', \App\Http\Controllers\Backend\SuperAdmin\LembagaController::class);
 
         Route::get('/perizinan', [\App\Http\Controllers\Backend\SuperAdmin\PerizinanController::class, 'index'])->name('perizinan.index');
