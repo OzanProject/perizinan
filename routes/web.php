@@ -7,6 +7,7 @@ Route::get('/', [\App\Http\Controllers\Public\LandingPageController::class, 'ind
 Route::get('/jenis-perizinan', [\App\Http\Controllers\Public\LandingPageController::class, 'jenisPerizinan'])->name('perizinan.jenis');
 Route::get('/faq', [\App\Http\Controllers\Public\LandingPageController::class, 'faq'])->name('landing.faq');
 Route::get('/lacak-status', [\App\Http\Controllers\Public\LandingPageController::class, 'lacakStatus'])->name('landing.track');
+Route::get('/unduhan', [\App\Http\Controllers\Public\LandingPageController::class, 'unduhan'])->name('landing.unduhan');
 Route::get('/track', [\App\Http\Controllers\Public\TrackingController::class, 'track'])->name('track.check');
 
 // Public Verification Route (Anti-Tamper & Immutable)
@@ -125,6 +126,8 @@ Route::middleware('auth')->group(function () {
         // Landing Page settings
         Route::get('/landing-page', [\App\Http\Controllers\Backend\SuperAdmin\LandingPageController::class, 'index'])->name('landing_page.index');
         Route::post('/landing-page', [\App\Http\Controllers\Backend\SuperAdmin\LandingPageController::class, 'update'])->name('landing_page.update');
+
+        Route::resource('downloads', \App\Http\Controllers\Backend\SuperAdmin\DownloadController::class)->except('show');
 
     });
 });

@@ -159,9 +159,15 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="{{ route('super_admin.landing_page.index') }}" class="nav-link {{ request()->routeIs('super_admin.landing_page.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-desktop"></i>
+            <a href="{{ route('landing_page.index') }}" class="nav-link {{ request()->routeIs('landing_page.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-globe"></i>
               <p>Landing Page</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('super_admin.downloads.index') }}" class="nav-link {{ request()->routeIs('super_admin.downloads.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-download"></i>
+              <p>Pusat Unduhan</p>
             </a>
           </li>
           <li class="nav-item">

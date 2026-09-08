@@ -59,6 +59,20 @@ class LandingPageController extends Controller
     return view('public.track_status', $data);
   }
 
+  public function unduhan()
+  {
+    $data = $this->getCommonData();
+    if (is_string($data))
+      return $data;
+
+    $downloads = \App\Models\Download::where('dinas_id', $data['dinas']->id)
+      ->where('is_active', true)
+      ->latest()
+      ->get();
+
+    return view('public.downloads', array_merge($data, compact('downloads')));
+  }
+
   private function getCommonData()
   {
     $dinas = Dinas::first();

@@ -30,6 +30,8 @@
         href="{{ route('perizinan.jenis') }}">Jenis Izin</a>
       <a class="text-slate-600 dark:text-slate-400 text-sm font-bold hover:text-primary transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary hover:after:w-full after:transition-all {{ request()->routeIs('landing.faq') ? 'text-primary after:w-full' : '' }}"
         href="{{ route('landing.faq') }}">FAQ</a>
+      <a class="text-slate-600 dark:text-slate-400 text-sm font-bold hover:text-primary transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary hover:after:w-full after:transition-all {{ request()->routeIs('landing.unduhan') ? 'text-primary after:w-full' : '' }}"
+        href="{{ route('landing.unduhan') }}">Unduhan</a>
       <a class="text-slate-600 dark:text-slate-400 text-sm font-bold hover:text-primary transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary hover:after:w-full after:transition-all {{ request()->routeIs('landing.track') ? 'text-primary after:w-full' : '' }}"
         href="{{ route('landing.track') }}">Lacak Pengajuan</a>
     </nav>
@@ -81,6 +83,10 @@
     <a class="flex items-center justify-between text-lg font-black {{ request()->routeIs('landing.faq') ? 'text-primary' : 'text-slate-900 dark:text-white' }}"
       href="{{ route('landing.faq') }}">
       FAQ <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+    </a>
+    <a class="flex items-center justify-between text-lg font-black {{ request()->routeIs('landing.unduhan') ? 'text-primary' : 'text-slate-900 dark:text-white' }}"
+      href="{{ route('landing.unduhan') }}">
+      Unduhan <span class="material-symbols-outlined text-slate-400">chevron_right</span>
     </a>
     <a class="flex items-center justify-between text-lg font-black {{ request()->routeIs('landing.track') ? 'text-primary' : 'text-slate-900 dark:text-white' }}"
       href="{{ route('landing.track') }}">
