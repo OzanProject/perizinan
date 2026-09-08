@@ -55,6 +55,14 @@ class CertificateTemplateService
                 'use_border' => false,
                 'html' => view('backend.super_admin.jenis_perizinan.presets.daftar_ulang_lkp')->render()
             ],
+            'paud_heregister' => [
+                'name' => '7. Surat Keterangan Izin Operasional PAUD (Her-Registrasi)',
+                'description' => 'Surat Keterangan Her-Registrasi PAUD. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.heregistrasi_paud')->render()
+            ],
         ];
     }
 
