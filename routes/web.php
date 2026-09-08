@@ -8,6 +8,7 @@ Route::get('/jenis-perizinan', [\App\Http\Controllers\Public\LandingPageControll
 Route::get('/faq', [\App\Http\Controllers\Public\LandingPageController::class, 'faq'])->name('landing.faq');
 Route::get('/lacak-status', [\App\Http\Controllers\Public\LandingPageController::class, 'lacakStatus'])->name('landing.track');
 Route::get('/unduhan', [\App\Http\Controllers\Public\LandingPageController::class, 'unduhan'])->name('landing.unduhan');
+Route::get('/unduhan/file/{id}', [\App\Http\Controllers\Public\LandingPageController::class, 'downloadFile'])->name('landing.unduhan.file');
 Route::get('/track', [\App\Http\Controllers\Public\TrackingController::class, 'track'])->name('track.check');
 
 // Public Verification Route (Anti-Tamper & Immutable)

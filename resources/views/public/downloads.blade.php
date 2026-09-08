@@ -78,7 +78,7 @@
                     </p>
                   </td>
                   <td class="py-6 px-8 text-right align-middle">
-                    <a href="{{ Storage::url($file->file_path) }}" target="_blank" 
+                    <a href="{{ route('landing.unduhan.file', $file->id) }}" target="_blank" 
                        class="inline-flex items-center justify-center h-12 px-6 rounded-xl bg-primary/10 text-primary font-bold hover:bg-primary hover:text-white transition-all transform hover:-translate-y-0.5 active:translate-y-0">
                       <span class="material-symbols-outlined mr-2 text-[20px]">download</span>
                       Unduh

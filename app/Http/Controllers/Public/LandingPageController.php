@@ -73,6 +73,24 @@ class LandingPageController extends Controller
     return view('public.downloads', array_merge($data, compact('downloads')));
   }
 
+  public function downloadFile($id)
+  {
+      $download = \App\Models\Download::findOrFail($id);
+      
+      // Pastikan file tersebut aktif
+      if (!$download->is_active) {
+          abort(404);
+      }
+
+      $filePath = $download->file_path;
+
+      if (!\Illuminate\Support\Facades\Storage::exists($filePath)) {
+          abort(404, 'File tidak ditemukan.');
+      }
+
+      return \Illuminate\Support\Facades\Storage::download($filePath, $download->judul . '.' . pathinfo($filePath, PATHINFO_EXTENSION));
+  }
+
   private function getCommonData()
   {
     $dinas = Dinas::first();
