@@ -56,7 +56,7 @@
                     <label for="jenjang">Jenjang Pendidikan <span class="text-danger">*</span></label>
                     <select name="jenjang" id="jenjang" class="form-control @error('jenjang') is-invalid @enderror" required>
                       <option value="" disabled selected>-- Pilih Jenjang --</option>
-                      @foreach(['TK', 'SD', 'SMP', 'SMA', 'SMK', 'PKBM', 'LKP'] as $j)
+                      @foreach(['KB', 'TK', 'PAUD', 'SPS', 'TPA', 'SD', 'SMP', 'SMA', 'SMK', 'PKBM', 'LKP'] as $j)
                         <option value="{{ $j }}" {{ old('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
                       @endforeach
                     </select>

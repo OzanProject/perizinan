@@ -52,8 +52,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/panduan', [\App\Http\Controllers\Backend\AdminLembaga\GuideController::class, 'index'])->name('guide.index');
     });
 
-    // Super Admin Routes
-    Route::group(['prefix' => 'super-admin', 'as' => 'super_admin.', 'middleware' => ['role:super_admin']], function () {
+    // Super Admin & Bidang Routes
+    Route::group(['prefix' => 'super-admin', 'as' => 'super_admin.', 'middleware' => ['role:super_admin|bidang_dikmas|bidang_paud']], function () {
         Route::get('/dashboard', [\App\Http\Controllers\Backend\DashboardController::class, 'index'])->name('dashboard');
 
         // Manajemen Lembaga

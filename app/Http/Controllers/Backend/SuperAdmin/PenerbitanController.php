@@ -33,11 +33,28 @@ class PenerbitanController extends Controller
     $this->generatePdfAction = $generatePdfAction;
   }
 
+  private function scopeByRole($query)
+  {
+      $user = Auth::user();
+      if ($user->hasRole('bidang_dikmas')) {
+          $query->whereHas('lembaga', function($q) {
+              $q->whereIn('jenjang', ['PKBM', 'LKP']);
+          });
+      } elseif ($user->hasRole('bidang_paud')) {
+          $query->whereHas('lembaga', function($q) {
+              $q->whereIn('jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+          });
+      }
+      return $query;
+  }
+
   public function antrian()
   {
-    $totalCount = Perizinan::where('status', PerizinanStatus::DISETUJUI)->count();
-    $perizinans = Perizinan::with(['lembaga', 'jenisPerizinan'])
-      ->where('status', PerizinanStatus::DISETUJUI)
+    $query = Perizinan::where('status', PerizinanStatus::DISETUJUI);
+    $query = $this->scopeByRole($query);
+    
+    $totalCount = (clone $query)->count();
+    $perizinans = $query->with(['lembaga', 'jenisPerizinan'])
       ->latest()
       ->paginate(10);
 
@@ -46,9 +63,11 @@ class PenerbitanController extends Controller
 
   public function riwayat()
   {
-    $totalCount = Perizinan::whereIn('status', [PerizinanStatus::SIAP_DIAMBIL, PerizinanStatus::SELESAI])->count();
-    $perizinans = Perizinan::with(['lembaga', 'jenisPerizinan'])
-      ->whereIn('status', [PerizinanStatus::SIAP_DIAMBIL, PerizinanStatus::SELESAI])
+    $query = Perizinan::whereIn('status', [PerizinanStatus::SIAP_DIAMBIL, PerizinanStatus::SELESAI]);
+    $query = $this->scopeByRole($query);
+
+    $totalCount = (clone $query)->count();
+    $perizinans = $query->with(['lembaga', 'jenisPerizinan'])
       ->latest()
       ->paginate(10);
 
@@ -58,6 +77,7 @@ class PenerbitanController extends Controller
   public function pusatCetak(Request $request)
   {
     $query = Perizinan::query();
+    $query = $this->scopeByRole($query);
 
     // Hanya status yang sudah disetujui atau lebih lanjut yang bisa dicetak
     $query->whereIn('status', [

@@ -50,14 +50,16 @@
           @endrole
         </li>
 
-        @if(Auth::user()->hasRole('super_admin'))
-          <li class="nav-header">DATA UTAMA</li>
+        @if(Auth::user()->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud']))
+          @if(Auth::user()->hasRole('super_admin'))
+            <li class="nav-header">DATA UTAMA</li>
           <li class="nav-item">
             <a href="{{ route('super_admin.lembaga.index') }}" class="nav-link {{ request()->routeIs('super_admin.lembaga.index') ? 'active' : '' }}">
               <i class="nav-icon fas fa-university"></i>
               <p>Manajemen Lembaga</p>
             </a>
           </li>
+          @endif
 
           <li class="nav-header">MODUL PERIZINAN</li>
           
@@ -76,12 +78,14 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
+              @if(Auth::user()->hasRole('super_admin'))
               <li class="nav-item">
                 <a href="{{ route('super_admin.jenis_perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.jenis_perizinan.*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon text-warning"></i>
                   <p>1. Jenis Perizinan</p>
                 </a>
               </li>
+              @endif
               
               <li class="nav-item">
                 <a href="{{ route('super_admin.perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.perizinan.*') ? 'active' : '' }}">
@@ -122,6 +126,7 @@
             </ul>
           </li>
 
+          @if(Auth::user()->hasRole('super_admin'))
           <li class="nav-item {{ request()->routeIs('super_admin.laporan.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('super_admin.laporan.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-chart-line text-info"></i>
@@ -165,6 +170,7 @@
               <p>Konfigurasi</p>
             </a>
           </li>
+        @endif
         @endif
 
         @if(Auth::user()->hasRole('admin_lembaga'))

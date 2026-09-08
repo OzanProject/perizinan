@@ -52,14 +52,16 @@
           <?php endif; ?>
         </li>
 
-        <?php if(Auth::user()->hasRole('super_admin')): ?>
-          <li class="nav-header">DATA UTAMA</li>
+        <?php if(Auth::user()->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud'])): ?>
+          <?php if(Auth::user()->hasRole('super_admin')): ?>
+            <li class="nav-header">DATA UTAMA</li>
           <li class="nav-item">
             <a href="<?php echo e(route('super_admin.lembaga.index')); ?>" class="nav-link <?php echo e(request()->routeIs('super_admin.lembaga.index') ? 'active' : ''); ?>">
               <i class="nav-icon fas fa-university"></i>
               <p>Manajemen Lembaga</p>
             </a>
           </li>
+          <?php endif; ?>
 
           <li class="nav-header">MODUL PERIZINAN</li>
           
@@ -78,12 +80,14 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
+              <?php if(Auth::user()->hasRole('super_admin')): ?>
               <li class="nav-item">
                 <a href="<?php echo e(route('super_admin.jenis_perizinan.index')); ?>" class="nav-link <?php echo e(request()->routeIs('super_admin.jenis_perizinan.*') ? 'active' : ''); ?>">
                   <i class="far fa-circle nav-icon text-warning"></i>
                   <p>1. Jenis Perizinan</p>
                 </a>
               </li>
+              <?php endif; ?>
               
               <li class="nav-item">
                 <a href="<?php echo e(route('super_admin.perizinan.index')); ?>" class="nav-link <?php echo e(request()->routeIs('super_admin.perizinan.*') ? 'active' : ''); ?>">
@@ -124,11 +128,29 @@
             </ul>
           </li>
 
-          <li class="nav-item border-bottom pb-2 mb-2">
-            <a href="<?php echo e(route('super_admin.laporan.index')); ?>" class="nav-link <?php echo e(request()->routeIs('super_admin.laporan.*') ? 'active' : ''); ?>">
+          <?php if(Auth::user()->hasRole('super_admin')): ?>
+          <li class="nav-item <?php echo e(request()->routeIs('super_admin.laporan.*') ? 'menu-open' : ''); ?>">
+            <a href="#" class="nav-link <?php echo e(request()->routeIs('super_admin.laporan.*') ? 'active' : ''); ?>">
               <i class="nav-icon fas fa-chart-line text-info"></i>
-              <p>Laporan & Statistik</p>
+              <p>
+                Laporan & Statistik
+                <i class="right fas fa-angle-left"></i>
+              </p>
             </a>
+            <ul class="nav nav-treeview" style="padding-left: 15px;">
+              <li class="nav-item">
+                <a href="<?php echo e(route('super_admin.laporan.index')); ?>" class="nav-link <?php echo e(request()->routeIs('super_admin.laporan.index') ? 'active' : ''); ?>">
+                  <i class="far fa-circle nav-icon" style="font-size: 12px;"></i>
+                  <p>Laporan Umum</p>
+                </a>
+              </li>
+              <li class="nav-item border-bottom pb-2 mb-2">
+                <a href="<?php echo e(route('super_admin.laporan.kecamatan')); ?>" class="nav-link <?php echo e(request()->routeIs('super_admin.laporan.kecamatan') ? 'active' : ''); ?>">
+                  <i class="far fa-circle nav-icon" style="font-size: 12px;"></i>
+                  <p>Rekap per Kecamatan</p>
+                </a>
+              </li>
+            </ul>
           </li>
 
           <li class="nav-header">SYSTEM</li>
@@ -150,6 +172,7 @@
               <p>Konfigurasi</p>
             </a>
           </li>
+        <?php endif; ?>
         <?php endif; ?>
 
         <?php if(Auth::user()->hasRole('admin_lembaga')): ?>

@@ -42,7 +42,7 @@ class UserController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $roles = Role::whereIn('name', ['super_admin', 'verifikator', 'head_of_dept', 'admin_lembaga'])->get();
+        $roles = Role::whereIn('name', ['super_admin', 'verifikator', 'head_of_dept', 'admin_lembaga', 'bidang_dikmas', 'bidang_paud'])->get();
 
         // Filter lembaga yang belum memiliki user dengan role admin_lembaga
         $lembagas = \App\Models\Lembaga::where('dinas_id', Auth::user()->dinas_id)

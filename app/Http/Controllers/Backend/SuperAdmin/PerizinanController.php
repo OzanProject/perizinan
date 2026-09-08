@@ -27,8 +27,19 @@ class PerizinanController extends Controller
 
   public function index(Request $request): View
   {
-    $query = Perizinan::where('dinas_id', Auth::user()->dinas_id)
+    $user = Auth::user();
+    $query = Perizinan::where('dinas_id', $user->dinas_id)
       ->with(['lembaga', 'jenisPerizinan']);
+
+    if ($user->hasRole('bidang_dikmas')) {
+        $query->whereHas('lembaga', function($q) {
+            $q->whereIn('jenjang', ['PKBM', 'LKP']);
+        });
+    } elseif ($user->hasRole('bidang_paud')) {
+        $query->whereHas('lembaga', function($q) {
+            $q->whereIn('jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+        });
+    }
 
     // Pencarian Dinamis (ID, Nama Lembaga, NPSN)
     if ($request->filled('search')) {

@@ -9,13 +9,32 @@ use Illuminate\Auth\Access\Response;
 
 class PerizinanPolicy
 {
+    private function checkBidangAccess(User $user, Perizinan $perizinan): bool
+    {
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        $jenjang = $perizinan->lembaga->jenjang ?? '';
+
+        if ($user->hasRole('bidang_dikmas')) {
+            return in_array($jenjang, ['PKBM', 'LKP']);
+        }
+
+        if ($user->hasRole('bidang_paud')) {
+            return in_array($jenjang, ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+        }
+
+        return false;
+    }
+
     /**
      * Determine whether the user can view any models.
      */
     public function view(User $user, Perizinan $perizinan): bool
     {
-        if ($user->hasRole('super_admin')) {
-            return $user->dinas_id === $perizinan->dinas_id;
+        if ($user->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud'])) {
+            return $user->dinas_id === $perizinan->dinas_id && $this->checkBidangAccess($user, $perizinan);
         }
         return $user->lembaga_id === $perizinan->lembaga_id;
     }
@@ -39,8 +58,9 @@ class PerizinanPolicy
 
     public function verify(User $user, Perizinan $perizinan): bool
     {
-        return $user->hasRole('super_admin') &&
+        return $user->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud']) &&
             $user->dinas_id === $perizinan->dinas_id &&
+            $this->checkBidangAccess($user, $perizinan) &&
             in_array($perizinan->status, [
                 PerizinanStatus::DIAJUKAN->value,
                 PerizinanStatus::DISETUJUI->value,
