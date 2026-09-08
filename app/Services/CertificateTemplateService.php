@@ -63,6 +63,54 @@ class CertificateTemplateService
                 'use_border' => false,
                 'html' => view('backend.super_admin.jenis_perizinan.presets.heregistrasi_paud')->render()
             ],
+            'paud_pergantian_ketua' => [
+                'name' => '8. Surat Keterangan Pergantian Ketua Lembaga (PKBM/PAUD)',
+                'description' => 'Surat Keterangan Pergantian Ketua Lembaga untuk PAUD dan PKBM. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.pergantian_ketua_paud')->render()
+            ],
+            'paud_pergantian_penyelenggara' => [
+                'name' => '9. Surat Keterangan Pergantian Nama Penyelenggara PAUD',
+                'description' => 'Surat Keterangan Pergantian Nama Penyelenggara untuk PAUD. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.pergantian_penyelenggara_paud')->render()
+            ],
+            'paud_pergantian_alamat' => [
+                'name' => '10. Surat Keterangan Pergantian Alamat Lembaga PAUD',
+                'description' => 'Surat Keterangan Pergantian Alamat Lembaga untuk PAUD. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.pergantian_alamat_paud')->render()
+            ],
+            'paud_izin_memimpin' => [
+                'name' => '11. Surat Keterangan Izin Memimpin (PAUD)',
+                'description' => 'Surat Keterangan Izin Memimpin PAUD. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.izin_memimpin_paud')->render()
+            ],
+            'paud_pencabutan_izin' => [
+                'name' => '12. Keputusan Pencabutan Izin Pendirian (PAUD)',
+                'description' => 'Keputusan Pencabutan Izin Pendirian Satuan Pendidikan PAUD. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.pencabutan_izin_paud')->render()
+            ],
+            'paud_perubahan_layanan' => [
+                'name' => '13. Keputusan Perubahan Jenis Layanan (PAUD)',
+                'description' => 'Keputusan Perubahan Jenis Layanan Satuan Pendidikan PAUD. F4 Portrait.',
+                'paper_size' => 'F4',
+                'orientation' => 'portrait',
+                'use_border' => false,
+                'html' => view('backend.super_admin.jenis_perizinan.presets.perubahan_layanan_paud')->render()
+            ],
         ];
     }
 
