@@ -37,7 +37,7 @@
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-header">MAIN NAVIGATION</li>
         <li class="nav-item">
-          @role('super_admin')
+          @hasanyrole('super_admin|bidang_dikmas|bidang_paud')
             <a href="{{ route('super_admin.dashboard') }}" class="nav-link {{ request()->routeIs('super_admin.dashboard') ? 'active' : '' }}">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>Dashboard</p>
