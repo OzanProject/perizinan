@@ -90,25 +90,39 @@
               <div id="step-2-container" class="d-none transition-all duration-300">
                 <div class="text-center mb-4">
                   <h4 class="font-weight-bold text-dark">Pilih Bidang Pengajuan</h4>
-                  <p class="text-muted">Pilih bidang yang sesuai dengan lembaga Anda.</p>
+                  <p class="text-muted">Lanjutkan ke pilihan izin operasional yang tersedia.</p>
                 </div>
 
+                @php
+                    $jenjang = Auth::user()->lembaga->jenjang ?? '';
+                    $isDikmas = in_array(strtoupper($jenjang), ['PKBM', 'LKP']);
+                    $isPaud = in_array(strtoupper($jenjang), ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+                @endphp
+
                 <div class="row justify-content-center">
+                  @if($isDikmas || (!$isDikmas && !$isPaud))
                   <div class="col-md-5 mb-3">
                     <div class="card border border-primary h-100 cursor-pointer hover-shadow transition-all text-center p-4 bidang-card" data-bidang="dikmas" onclick="selectBidang('dikmas')">
                       <i class="fas fa-users fa-3x text-primary mb-3"></i>
                       <h5 class="font-weight-bold text-primary mb-0">PENGAJUAN<br>BIDANG DIKMAS</h5>
                     </div>
                   </div>
+                  @endif
+
+                  @if(($isDikmas && $isPaud) || (!$isDikmas && !$isPaud))
                   <div class="col-md-auto d-flex align-items-center justify-content-center mb-3">
                     <i class="fas fa-exchange-alt fa-2x text-muted d-none d-md-block px-3"></i>
                   </div>
+                  @endif
+
+                  @if($isPaud || (!$isDikmas && !$isPaud))
                   <div class="col-md-5 mb-3">
                     <div class="card border border-info h-100 cursor-pointer hover-shadow transition-all text-center p-4 bidang-card" data-bidang="paud" onclick="selectBidang('paud')">
                       <i class="fas fa-child fa-3x text-info mb-3"></i>
                       <h5 class="font-weight-bold text-info mb-0">PENGAJUAN<br>BIDANG PAUD</h5>
                     </div>
                   </div>
+                  @endif
                 </div>
 
                 <div class="text-center mt-3">
