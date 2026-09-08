@@ -89,7 +89,7 @@
               {{-- FLOW STEP 2: Pilih Bidang (Sembunyi by default) --}}
               <div id="step-2-container" class="d-none transition-all duration-300">
                 <div class="text-center mb-4">
-                  <h4 class="font-weight-bold text-dark">Pilih Bidang Pengajuan</h4>
+                  <h4 class="font-weight-bold text-dark">Pilih Seksi Pengajuan</h4>
                   <p class="text-muted">Lanjutkan ke pilihan izin operasional yang tersedia.</p>
                 </div>
 
@@ -104,7 +104,7 @@
                   <div class="col-md-5 mb-3">
                     <div class="card border border-primary h-100 cursor-pointer hover-shadow transition-all text-center p-4 bidang-card" data-bidang="dikmas" onclick="selectBidang('dikmas')">
                       <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                      <h5 class="font-weight-bold text-primary mb-0">PENGAJUAN<br>BIDANG DIKMAS</h5>
+                      <h5 class="font-weight-bold text-primary mb-0">PENGAJUAN<br>SEKSI DIKMAS</h5>
                     </div>
                   </div>
                   @endif
@@ -119,7 +119,7 @@
                   <div class="col-md-5 mb-3">
                     <div class="card border border-info h-100 cursor-pointer hover-shadow transition-all text-center p-4 bidang-card" data-bidang="paud" onclick="selectBidang('paud')">
                       <i class="fas fa-child fa-3x text-info mb-3"></i>
-                      <h5 class="font-weight-bold text-info mb-0">PENGAJUAN<br>BIDANG PAUD</h5>
+                      <h5 class="font-weight-bold text-info mb-0">PENGAJUAN<br>SEKSI PAUD</h5>
                     </div>
                   </div>
                   @endif
