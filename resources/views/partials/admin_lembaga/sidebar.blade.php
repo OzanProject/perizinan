@@ -76,6 +76,13 @@
             <p>Dashboard</p>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="{{ route('admin_lembaga.profile.index') }}"
+            class="nav-link {{ request()->routeIs('admin_lembaga.profile.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-university text-warning"></i>
+            <p>Profil Lembaga</p>
+          </a>
+        </li>
 
         <li class="nav-header font-weight-bold">MANAJEMEN IZIN</li>
         <li class="nav-item">
@@ -94,13 +101,6 @@
         </li>
 
         <li class="nav-header font-weight-bold">INFORMASI</li>
-        <li class="nav-item">
-          <a href="{{ route('admin_lembaga.profile.index') }}"
-            class="nav-link {{ request()->routeIs('admin_lembaga.profile.*') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-university text-warning"></i>
-            <p>Profil Lembaga</p>
-          </a>
-        </li>
         <li class="nav-item">
           <a href="{{ route('admin_lembaga.guide.index') }}"
             class="nav-link {{ request()->routeIs('admin_lembaga.guide.*') ? 'active' : '' }}">
