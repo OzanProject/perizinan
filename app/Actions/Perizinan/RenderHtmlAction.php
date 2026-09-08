@@ -111,10 +111,17 @@ class RenderHtmlAction
         $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape, $padding, $forPdf);
 
         $pageCss = $this->buildPageCss($paperSize, $orientation, $forPdf);
+        
+        // Di Linux (Hosting), font fallback bawaan DOMPDF biasanya sedikit lebih besar dari Times New Roman asli.
+        // Kita kurangi ukuran font 0.5pt khusus untuk PDF agar teks tidak meluber memicu halaman kedua.
         $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
+        if ($forPdf) {
+            $fontSize = $isLandscape ? '9pt' : '10pt';
+        }
+        
         $watermarkHtml = $this->buildWatermarkHtml($perizinan);
 
-        return $this->buildDocument($pageCss, $fontSize, $contentHeight, $padding, $watermarkHtml, $body);
+        return $this->buildDocument($pageCss, $fontSize, $contentHeight, $padding, $watermarkHtml, $body, $forPdf);
     }
 
     /* =====================================================================
@@ -127,8 +134,13 @@ class RenderHtmlAction
         string $contentHeight,
         string $padding,
         string $watermarkHtml,
-        string $body
+        string $body,
+        bool $forPdf
     ): string {
+        // DOMPDF memiliki bug di mana elemen absolute di dalam elemen yang terpotong halaman akan loncat.
+        // Solusinya: khusus PDF, kita gunakan 'fixed' (yang di DOMPDF berarti menempel absolut di kertas/kamera).
+        $qrPosition = $forPdf ? 'fixed' : 'absolute';
+
         return '<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -199,7 +211,7 @@ class RenderHtmlAction
         }
 
         .print-qr-floating {
-            position: absolute;
+            position: ' . $qrPosition . ';
             left: 5mm;
             bottom: 5mm;
             z-index: 30;
