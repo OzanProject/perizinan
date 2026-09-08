@@ -56,6 +56,9 @@ class SettingController extends Controller
       'app_name' => 'required|string|max:255',
       'kode_surat' => 'required|string|max:50',
       'alamat' => 'nullable|string|max:500',
+      'telepon' => 'nullable|string|max:50',
+      'email' => 'nullable|email|max:100',
+      'website' => 'nullable|string|max:100',
       'kabupaten' => 'nullable|string|max:255',
       'provinsi' => 'nullable|string|max:255',
       'pimpinan_nama' => 'required|string|max:255',
@@ -78,6 +81,9 @@ class SettingController extends Controller
     $dinas->app_name = $request->app_name;
     $dinas->kode_surat = $request->kode_surat;
     $dinas->alamat = $request->alamat;
+    $dinas->telepon = $request->telepon;
+    $dinas->email = $request->email;
+    $dinas->website = $request->website;
     $dinas->kabupaten = $request->kabupaten;
     $dinas->provinsi = $request->provinsi;
     $dinas->pimpinan_nama = $request->pimpinan_nama;

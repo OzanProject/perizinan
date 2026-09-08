@@ -220,7 +220,24 @@
                         <label class="small font-weight-bold text-muted text-uppercase">Alamat Dinas</label>
                         <input type="text" name="alamat" value="{{ old('alamat', $dinas->alamat) }}" class="form-control"
                           placeholder="Jl. Jenderal Sudirman No. 1">
-                        <small class="text-muted">Tampil di Kop Surat sertifikat.</small>
+                        <small class="text-muted">Tampil di Kop Surat sertifikat dan Tanda Terima.</small>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Telepon</label>
+                          <input type="text" name="telepon" value="{{ old('telepon', $dinas->telepon) }}" class="form-control"
+                            placeholder="(0262)233155">
+                        </div>
+                        <div class="col-md-4 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Email Dinas</label>
+                          <input type="email" name="email" value="{{ old('email', $dinas->email) }}" class="form-control"
+                            placeholder="disdik@garutkab.go.id">
+                        </div>
+                        <div class="col-md-4 form-group">
+                          <label class="small font-weight-bold text-muted text-uppercase">Website</label>
+                          <input type="text" name="website" value="{{ old('website', $dinas->website) }}" class="form-control"
+                            placeholder="www.disdik.garutkab.go.id">
+                        </div>
                       </div>
                       <div class="row">
                         <div class="col-6 form-group">
