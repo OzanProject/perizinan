@@ -111,8 +111,9 @@
     @endif
     <div class="header-text">
       <h2>PEMERINTAH KABUPATEN {{ strtoupper($dinas->kabupaten ?? 'GARUT') }}</h2>
-      <h3>DINAS PENDIDIKAN</h3>
-      <p style="margin: 0; font-size: 10pt;">{{ $dinas->alamat ?? 'Jl. Jenderal Sudirman No. 1' }}</p>
+      <h3 style="font-size: 16pt;">DINAS PENDIDIKAN</h3>
+      <p style="margin: 0; font-size: 10pt;">Jl. Pembangunan No. 179, Tarogong Kidul, Garut, Jawa Barat. 44151. Telp (0262)233155 E-Mail : disdik@garutkab.go.id</p>
+      <p style="margin: 0; font-size: 10pt;">Website : www.disdik.garutkab.go.id</p>
     </div>
     <div class="clear"></div>
   </div>
