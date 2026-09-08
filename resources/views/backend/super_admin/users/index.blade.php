@@ -117,7 +117,7 @@
                         title="Reset Password">
                         <i class="fas fa-key text-warning"></i>
                       </button>
-                      <button onclick="openModal('edit', {{ json_encode($user->load('roles')) }})"
+                      <button onclick="openModal('edit', {{ json_encode($user->load(['roles', 'lembaga'])) }})"
                         class="btn btn-sm btn-default shadow-sm" title="Edit">
                         <i class="fas fa-pencil-alt text-primary"></i>
                       </button>
