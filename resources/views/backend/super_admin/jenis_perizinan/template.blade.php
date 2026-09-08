@@ -290,5 +290,33 @@
       };
     </script>
     <script src="{{ asset('js/template-editor.js') }}?v={{ time() }}"></script>
+
+    <script>
+      // Sinkronkan dropdown ukuran kertas & orientasi ke hidden input yang dikirim ke server.
+      // Tanpa ini, perubahan dropdown TIDAK tersimpan karena yang dikirim form adalah hidden input-nya.
+      document.addEventListener('DOMContentLoaded', function () {
+        var sizeSelect   = document.getElementById('paper-size-selector');
+        var sizeInput    = document.getElementById('paper-size-input');
+        var orientSelect = document.getElementById('paper-orientation');
+        var orientInput  = document.getElementById('orientation-input');
+
+        if (sizeSelect && sizeInput) {
+          // Sinkron saat pertama kali load (pastikan hidden input = dropdown)
+          sizeInput.value = sizeSelect.value;
+
+          sizeSelect.addEventListener('change', function () {
+            sizeInput.value = this.value;
+          });
+        }
+
+        if (orientSelect && orientInput) {
+          orientInput.value = orientSelect.value;
+
+          orientSelect.addEventListener('change', function () {
+            orientInput.value = this.value;
+          });
+        }
+      });
+    </script>
   @endpush
 @endsection
