@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="file">File Unduhan {{ !isset($download) ? '<span class="text-danger">*</span>' : '' }}</label>
+                            <label for="file">File Unduhan {!! !isset($download) ? '<span class="text-danger">*</span>' : '' !!}</label>
                             <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar" {{ !isset($download) ? 'required' : '' }}>
                                 <label class="custom-file-label" for="file">Pilih file...</label>
@@ -67,7 +67,19 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
-        bsCustomFileInput.init();
+        if (typeof bsCustomFileInput !== 'undefined') {
+            bsCustomFileInput.init();
+        } else {
+            // Fallback manual script
+            $('.custom-file-input').on('change', function() {
+                var fileName = $(this).val().split('\\').pop();
+                if (fileName) {
+                    $(this).next('.custom-file-label').html(fileName);
+                } else {
+                    $(this).next('.custom-file-label').html('Pilih file...');
+                }
+            });
+        }
     });
 </script>
 @endpush
