@@ -28,7 +28,9 @@ class RenderHtmlAction
      * terlalu kecil untuk Chrome, itulah sumber print-html "tidak rapi"
      * walau PDF sudah pas.
      */
-    private const SAFETY_BUFFER_MM_PDF = 4.0;
+    // 12mm buffer untuk PDF: mengatasi selisih tinggi baris antara Times New Roman (Windows)
+    // dan Times-Roman built-in DOMPDF (Linux). Selisih bisa 4-8mm per halaman A4.
+    private const SAFETY_BUFFER_MM_PDF = 12.0;
     private const SAFETY_BUFFER_MM_HTML = 1.5;
 
     /* =====================================================================
@@ -111,17 +113,20 @@ class RenderHtmlAction
         $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape, $padding, $forPdf);
 
         $pageCss = $this->buildPageCss($paperSize, $orientation, $forPdf);
-        
-        // Di Linux (Hosting), font fallback bawaan DOMPDF biasanya sedikit lebih besar dari Times New Roman asli.
-        // Kita kurangi ukuran font 0.5pt khusus untuk PDF agar teks tidak meluber memicu halaman kedua.
-        $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
+
+        // PDF: font lebih kecil + line-height lebih ketat untuk kompensasi selisih
+        // font metric Times New Roman (Windows) vs Times-Roman DOMPDF built-in (Linux).
         if ($forPdf) {
-            $fontSize = $isLandscape ? '9pt' : '10pt';
+            $fontSize  = $isLandscape ? '8.5pt' : '9.5pt';
+            $lineHeight = '1.1';
+        } else {
+            $fontSize  = $isLandscape ? '9.5pt' : '10.5pt';
+            $lineHeight = '1.15';
         }
-        
+
         $watermarkHtml = $this->buildWatermarkHtml($perizinan);
 
-        return $this->buildDocument($pageCss, $fontSize, $contentHeight, $padding, $watermarkHtml, $body, $forPdf);
+        return $this->buildDocument($pageCss, $fontSize, $lineHeight, $contentHeight, $padding, $watermarkHtml, $body, $forPdf);
     }
 
     /* =====================================================================
@@ -131,6 +136,7 @@ class RenderHtmlAction
     private function buildDocument(
         string $pageCss,
         string $fontSize,
+        string $lineHeight,
         string $contentHeight,
         string $padding,
         string $watermarkHtml,
@@ -142,6 +148,14 @@ class RenderHtmlAction
         // konten/tanda-tangan bisa loncat ke halaman 2 — ini biang kerok kekacauan tampilan.
         $qrPosition = 'absolute';
 
+        // Untuk PDF: gunakan "Times-Roman" (PDF Base 14 font) secara eksplisit.
+        // Font ini sudah ter-embed di setiap PDF engine dan TIDAK bergantung pada font
+        // sistem OS — identik di Windows, Linux, maupun Mac.
+        // Untuk HTML: tetap pakai "Times New Roman" agar tampilan browser konsisten.
+        $fontFamily = $forPdf
+            ? '"Times-Roman", Times, serif'
+            : '"Times New Roman", Times, serif';
+
         return '<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -151,9 +165,9 @@ class RenderHtmlAction
         * { box-sizing: border-box; }
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: "Times New Roman", Times, serif;
+            font-family: ' . $fontFamily . ';
             font-size: ' . $fontSize . ' !important;
-            line-height: 1.15; color: #000; background: #fff;
+            line-height: ' . $lineHeight . '; color: #000; background: #fff;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }

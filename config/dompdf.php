@@ -292,8 +292,8 @@ return [
          */
         // Nilai default 1.1 membuat DOMPDF menambah 10% ekstra tinggi per baris.
         // Di Linux, font fallback sudah lebih tinggi dari Windows, kombinasi keduanya
-        // menyebabkan teks meluber ke halaman kedua. Turunkan ke 1.0 untuk presisi.
-        'font_height_ratio' => 1.0,
+        // menyebabkan teks meluber ke halaman kedua. Turunkan ke 0.9 untuk kompensasi agresif.
+        'font_height_ratio' => 0.9,
 
         /**
          * Use the HTML5 Lib parser
