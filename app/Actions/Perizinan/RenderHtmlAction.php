@@ -28,7 +28,7 @@ class RenderHtmlAction
      * terlalu kecil untuk Chrome, itulah sumber print-html "tidak rapi"
      * walau PDF sudah pas.
      */
-    private const SAFETY_BUFFER_MM_PDF = 0.4;
+    private const SAFETY_BUFFER_MM_PDF = 4.0;
     private const SAFETY_BUFFER_MM_HTML = 1.5;
 
     /* =====================================================================
