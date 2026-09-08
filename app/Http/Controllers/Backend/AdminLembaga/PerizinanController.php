@@ -193,9 +193,10 @@ class PerizinanController extends Controller
     $syarat = \App\Models\SyaratPerizinan::findOrFail($request->syarat_id);
 
     // Hapus file lama jika ada
+    /** @var \App\Models\Dokumen|null $oldDokumen */
     $oldDokumen = $perizinan->dokumens()->where('syarat_perizinan_id', $syarat->id)->first();
     if ($oldDokumen) {
-      \Illuminate\Support\Facades\Storage::delete($oldDokumen->path);
+      \Illuminate\Support\Facades\Storage::disk('public')->delete($oldDokumen->path);
       $oldDokumen->delete();
     }
 
