@@ -28,9 +28,7 @@ class RenderHtmlAction
      * terlalu kecil untuk Chrome, itulah sumber print-html "tidak rapi"
      * walau PDF sudah pas.
      */
-    // 12mm buffer untuk PDF: mengatasi selisih tinggi baris antara Times New Roman (Windows)
-    // dan Times-Roman built-in DOMPDF (Linux). Selisih bisa 4-8mm per halaman A4.
-    private const SAFETY_BUFFER_MM_PDF = 12.0;
+    private const SAFETY_BUFFER_MM_PDF = 0.4;
     private const SAFETY_BUFFER_MM_HTML = 1.5;
 
     /* =====================================================================
@@ -113,20 +111,10 @@ class RenderHtmlAction
         $contentHeight = $this->resolveContentHeight($paperSize, $isLandscape, $padding, $forPdf);
 
         $pageCss = $this->buildPageCss($paperSize, $orientation, $forPdf);
-
-        // PDF: font lebih kecil + line-height lebih ketat untuk kompensasi selisih
-        // font metric Times New Roman (Windows) vs Times-Roman DOMPDF built-in (Linux).
-        if ($forPdf) {
-            $fontSize  = $isLandscape ? '8.5pt' : '9.5pt';
-            $lineHeight = '1.1';
-        } else {
-            $fontSize  = $isLandscape ? '9.5pt' : '10.5pt';
-            $lineHeight = '1.15';
-        }
-
+        $fontSize = $isLandscape ? '9.5pt' : '10.5pt';
         $watermarkHtml = $this->buildWatermarkHtml($perizinan);
 
-        return $this->buildDocument($pageCss, $fontSize, $lineHeight, $contentHeight, $padding, $watermarkHtml, $body, $forPdf);
+        return $this->buildDocument($pageCss, $fontSize, $contentHeight, $padding, $watermarkHtml, $body);
     }
 
     /* =====================================================================
@@ -136,26 +124,11 @@ class RenderHtmlAction
     private function buildDocument(
         string $pageCss,
         string $fontSize,
-        string $lineHeight,
         string $contentHeight,
         string $padding,
         string $watermarkHtml,
-        string $body,
-        bool $forPdf
+        string $body
     ): string {
-        // QR selalu position: absolute — mengikuti .print-page yang sudah dibatasi overflow:hidden.
-        // position:fixed di DOMPDF justru menyebabkan QR terpaku di halaman 1 sementara
-        // konten/tanda-tangan bisa loncat ke halaman 2 — ini biang kerok kekacauan tampilan.
-        $qrPosition = 'absolute';
-
-        // Untuk PDF: gunakan "Times-Roman" (PDF Base 14 font) secara eksplisit.
-        // Font ini sudah ter-embed di setiap PDF engine dan TIDAK bergantung pada font
-        // sistem OS — identik di Windows, Linux, maupun Mac.
-        // Untuk HTML: tetap pakai "Times New Roman" agar tampilan browser konsisten.
-        $fontFamily = $forPdf
-            ? '"Times-Roman", Times, serif'
-            : '"Times New Roman", Times, serif';
-
         return '<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -165,9 +138,9 @@ class RenderHtmlAction
         * { box-sizing: border-box; }
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            font-family: ' . $fontFamily . ';
+            font-family: "Times New Roman", Times, serif;
             font-size: ' . $fontSize . ' !important;
-            line-height: ' . $lineHeight . '; color: #000; background: #fff;
+            line-height: 1.15; color: #000; background: #fff;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -226,7 +199,7 @@ class RenderHtmlAction
         }
 
         .print-qr-floating {
-            position: ' . $qrPosition . ';
+            position: absolute;
             left: 5mm;
             bottom: 5mm;
             z-index: 30;
