@@ -50,17 +50,31 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="jenjang">Jenjang Pendidikan <span class="text-danger">*</span></label>
-                <select name="jenjang" id="jenjang" class="form-control @error('jenjang') is-invalid @enderror" required>
-                  <option value="" disabled selected>-- Pilih Jenjang --</option>
-                  @foreach(['TK', 'SD', 'SMP', 'SMA', 'SMK', 'PKBM', 'LKP'] as $j)
-                    <option value="{{ $j }}" {{ old('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                  @endforeach
-                </select>
-                @error('jenjang')
-                  <span class="error invalid-feedback">{{ $message }}</span>
-                @enderror
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="jenjang">Jenjang Pendidikan <span class="text-danger">*</span></label>
+                    <select name="jenjang" id="jenjang" class="form-control @error('jenjang') is-invalid @enderror" required>
+                      <option value="" disabled selected>-- Pilih Jenjang --</option>
+                      @foreach(['TK', 'SD', 'SMP', 'SMA', 'SMK', 'PKBM', 'LKP'] as $j)
+                        <option value="{{ $j }}" {{ old('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                      @endforeach
+                    </select>
+                    @error('jenjang')
+                      <span class="error invalid-feedback">{{ $message }}</span>
+                    @enderror
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label for="kecamatan">Kecamatan <span class="text-danger">*</span></label>
+                    <input type="text" name="kecamatan" id="kecamatan" value="{{ old('kecamatan') }}"
+                      class="form-control @error('kecamatan') is-invalid @enderror" placeholder="Contoh: GARUT KOTA" required>
+                    @error('kecamatan')
+                      <span class="error invalid-feedback">{{ $message }}</span>
+                    @enderror
+                  </div>
+                </div>
               </div>
 
               <div class="form-group">

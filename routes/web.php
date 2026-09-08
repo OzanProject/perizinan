@@ -91,6 +91,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', [\App\Http\Controllers\Backend\SuperAdmin\ReportController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/export-excel', [\App\Http\Controllers\Backend\SuperAdmin\ReportController::class, 'exportExcel'])->name('laporan.export_excel');
         Route::get('/laporan/export-pdf', [\App\Http\Controllers\Backend\SuperAdmin\ReportController::class, 'exportPdf'])->name('laporan.export_pdf');
+        Route::get('/laporan/kecamatan', [\App\Http\Controllers\Backend\SuperAdmin\RekapKecamatanController::class, 'index'])->name('laporan.kecamatan');
 
         // Penerbitan Sertifikat
         Route::group(['prefix' => 'penerbitan', 'as' => 'penerbitan.'], function () {

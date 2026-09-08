@@ -17,6 +17,7 @@ class Lembaga extends Model
     'jenjang',
     'npsn',
     'alamat',
+    'kecamatan',
     'sk_pendirian',
     'tanggal_sk_pendirian',
     'sk_izin_operasional',

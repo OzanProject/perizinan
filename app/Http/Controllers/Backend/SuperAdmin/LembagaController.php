@@ -43,6 +43,7 @@ class LembagaController extends Controller
       'nama_lembaga' => 'required|string|max:255',
       'jenjang' => 'required|string',
       'npsn' => 'required|string|max:20|unique:lembagas,npsn',
+      'kecamatan' => 'required|string|max:255',
       'alamat' => 'required|string',
       'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ], [
@@ -85,6 +86,7 @@ class LembagaController extends Controller
       'nama_lembaga' => 'required|string|max:255',
       'jenjang' => 'required|string',
       'npsn' => 'required|string|max:20|unique:lembagas,npsn,' . $lembaga->id,
+      'kecamatan' => 'required|string|max:255',
       'alamat' => 'required|string',
       'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
