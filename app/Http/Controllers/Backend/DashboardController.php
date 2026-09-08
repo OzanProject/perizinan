@@ -15,7 +15,7 @@ class DashboardController extends Controller
   {
     $user = Auth::user();
 
-    if ($user->hasRole('super_admin')) {
+    if ($user->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud'])) {
       return $this->superAdminDashboard($user);
     } elseif ($user->hasRole('admin_lembaga')) {
       return $this->adminLembagaDashboard($user);
@@ -26,23 +26,39 @@ class DashboardController extends Controller
 
   private function superAdminDashboard($user)
   {
+    $baseLembagaQuery = Lembaga::where('dinas_id', $user->dinas_id);
+    $basePerizinanQuery = Perizinan::where('dinas_id', $user->dinas_id);
+
+    // Filter berdasarkan role bidang
+    if ($user->hasRole('bidang_dikmas')) {
+      $baseLembagaQuery->whereIn('jenjang', ['PKBM', 'LKP']);
+      $basePerizinanQuery->whereHas('lembaga', function ($q) {
+        $q->whereIn('jenjang', ['PKBM', 'LKP']);
+      });
+    } elseif ($user->hasRole('bidang_paud')) {
+      $baseLembagaQuery->whereIn('jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+      $basePerizinanQuery->whereHas('lembaga', function ($q) {
+        $q->whereIn('jenjang', ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+      });
+    }
+
     $stats = [
-      'total_lembaga' => Lembaga::where('dinas_id', $user->dinas_id)->count(),
-      'pending' => Perizinan::where('dinas_id', $user->dinas_id)
+      'total_lembaga' => (clone $baseLembagaQuery)->count(),
+      'pending' => (clone $basePerizinanQuery)
         ->where('status', PerizinanStatus::DIAJUKAN->value)
         ->count(),
-      'disetujui' => Perizinan::where('dinas_id', $user->dinas_id)
+      'disetujui' => (clone $basePerizinanQuery)
         ->whereIn('status', [
           PerizinanStatus::DISETUJUI->value,
           PerizinanStatus::SIAP_DIAMBIL->value,
           PerizinanStatus::SELESAI->value
         ])->count(),
-      'perbaikan' => Perizinan::where('dinas_id', $user->dinas_id)
+      'perbaikan' => (clone $basePerizinanQuery)
         ->where('status', PerizinanStatus::PERBAIKAN->value)
         ->count(),
     ];
 
-    $pengajuanTerbaru = Perizinan::where('dinas_id', $user->dinas_id)
+    $pengajuanTerbaru = (clone $basePerizinanQuery)
       ->with(['lembaga', 'jenisPerizinan'])
       ->latest()
       ->limit(5)
@@ -57,7 +73,7 @@ class DashboardController extends Controller
     for ($i = 5; $i >= 0; $i--) {
       $date = now()->subMonths($i);
       $monthName = $date->translatedFormat('F');
-      $count = Perizinan::where('dinas_id', $user->dinas_id)
+      $count = (clone $basePerizinanQuery)
         ->whereMonth('created_at', $date->month)
         ->whereYear('created_at', $date->year)
         ->count();

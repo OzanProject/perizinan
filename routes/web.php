@@ -15,7 +15,7 @@ Route::get('/verify/{hash}/download', [\App\Http\Controllers\Public\Verification
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        if (auth()->user()->hasRole('super_admin')) {
+        if (auth()->user()->hasAnyRole(['super_admin', 'bidang_dikmas', 'bidang_paud'])) {
             return redirect()->route('super_admin.dashboard');
         }
         return redirect()->route('admin_lembaga.dashboard');
