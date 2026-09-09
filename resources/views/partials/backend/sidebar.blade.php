@@ -65,6 +65,7 @@
           
           @php
             $isPerizinanActive = request()->routeIs('super_admin.jenis_perizinan.*') || 
+                                 request()->routeIs('super_admin.jenjang.*') || 
                                  request()->routeIs('super_admin.perizinan.*') || 
                                  request()->routeIs('super_admin.penerbitan.*');
           @endphp
