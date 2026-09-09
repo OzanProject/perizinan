@@ -93,39 +93,24 @@
                   <p class="text-muted">Lanjutkan ke pilihan izin operasional yang tersedia.</p>
                 </div>
 
-                @php
-                    $jenjangNama = Auth::user()->lembaga->jenjang ?? '';
-                    $jenjangModel = \App\Models\Jenjang::where('nama', $jenjangNama)->first();
-                    $seksi = $jenjangModel ? $jenjangModel->seksi : 'lainnya';
-
-                    $isDikmas = $seksi == 'dikmas';
-                    $isPaud = $seksi == 'paud';
-                @endphp
-
                 <div class="row justify-content-center">
-                  @if($isDikmas || (!$isDikmas && !$isPaud))
                   <div class="col-md-5 mb-3">
                     <div class="card border border-primary h-100 cursor-pointer hover-shadow transition-all text-center p-4 bidang-card" data-bidang="dikmas" onclick="selectBidang('dikmas')">
                       <i class="fas fa-users fa-3x text-primary mb-3"></i>
                       <h5 class="font-weight-bold text-primary mb-0">PENGAJUAN<br>SEKSI DIKMAS</h5>
                     </div>
                   </div>
-                  @endif
 
-                  @if(($isDikmas && $isPaud) || (!$isDikmas && !$isPaud))
                   <div class="col-md-auto d-flex align-items-center justify-content-center mb-3">
                     <i class="fas fa-exchange-alt fa-2x text-muted d-none d-md-block px-3"></i>
                   </div>
-                  @endif
 
-                  @if($isPaud || (!$isDikmas && !$isPaud))
                   <div class="col-md-5 mb-3">
                     <div class="card border border-info h-100 cursor-pointer hover-shadow transition-all text-center p-4 bidang-card" data-bidang="paud" onclick="selectBidang('paud')">
                       <i class="fas fa-child fa-3x text-info mb-3"></i>
                       <h5 class="font-weight-bold text-info mb-0">PENGAJUAN<br>SEKSI PAUD</h5>
                     </div>
                   </div>
-                  @endif
                 </div>
 
                 <div class="text-center mt-3">
