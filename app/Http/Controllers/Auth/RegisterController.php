@@ -13,7 +13,7 @@ class RegisterController extends Controller
 {
     public function showRegistrationForm()
     {
-        $dinas = Dinas::first();
+        $dinas = \App\Models\Dinas::first();
         if (!$dinas) {
             abort(404, 'Sistem belum dikonfigurasi (Dinas tidak ditemukan).');
         }
