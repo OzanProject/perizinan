@@ -153,7 +153,7 @@
                     @endphp
                     <div class="col-md-6 mb-3 perizinan-item" data-bidang="{{ $bidang }}">
                       <div class="custom-control custom-radio custom-selectable-card h-100">
-                        <input type="radio" id="jp_{{ $jp->id }}" name="jenis_perizinan_id" value="{{ $jp->id }}" class="custom-control-input">
+                        <input type="checkbox" id="jp_{{ $jp->id }}" name="jenis_perizinan_ids[]" value="{{ $jp->id }}" class="custom-control-input checkbox-perizinan">
                         <label class="custom-control-label d-block p-3 border rounded h-100 w-100 cursor-pointer transition-all" for="jp_{{ $jp->id }}" style="padding-left: 2.5rem !important;">
                           <span class="d-block font-weight-bold text-dark mb-1">{{ $jp->nama }}</span>
                           <small class="text-muted line-height-sm d-block">{{ $jp->deskripsi ?? 'Pengajuan izin untuk operasional lembaga.' }}</small>
@@ -194,7 +194,7 @@
                 style="width: 32px; height: 32px; flex-shrink: 0;">1</div>
               <div>
                 <h6 class="font-weight-bold text-dark mb-1">Pilih Jenis Izin</h6>
-                <p class="text-muted small mb-0">Pilih salah satu izin operasional yang ingin Anda ajukan.</p>
+                <p class="text-muted small mb-0">Pilih hingga maksimal 3 izin operasional sekaligus untuk diproses dalam satu waktu.</p>
               </div>
             </div>
             <div class="d-flex mb-4 opacity-50">
@@ -260,6 +260,7 @@
   </style>
 
   @push('scripts')
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         const step1 = document.getElementById('step-1-container');
@@ -275,12 +276,27 @@
             step2.classList.add('fade-in');
         });
 
-        // Radios behavior
-        const radios = document.querySelectorAll('input[name="jenis_perizinan_id"]');
-        radios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if(this.checked) {
+        // Checkbox behavior (Max 3)
+        const checkboxes = document.querySelectorAll('.checkbox-perizinan');
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const checkedCount = document.querySelectorAll('.checkbox-perizinan:checked').length;
+                
+                if (checkedCount > 3) {
+                    this.checked = false;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Batas Maksimal',
+                        text: 'Anda hanya dapat mengajukan maksimal 3 perizinan sekaligus.',
+                        confirmButtonText: 'Mengerti'
+                    });
+                    return;
+                }
+
+                if(checkedCount > 0) {
                     btnSubmit.removeAttribute('disabled');
+                } else {
+                    btnSubmit.setAttribute('disabled', 'true');
                 }
             });
         });
@@ -289,20 +305,18 @@
         window.selectBidang = function(bidangId) {
             // Update Title
             const title = document.getElementById('step-3-title');
-            title.textContent = bidangId === 'dikmas' ? 'Pilih Jenis Perizinan DIKMAS' : 'Pilih Jenis Perizinan PAUD';
+            title.textContent = bidangId === 'dikmas' ? 'Pilih Jenis Perizinan DIKMAS (Maks 3)' : 'Pilih Jenis Perizinan PAUD (Maks 3)';
 
             // Filter items
             const items = document.querySelectorAll('.perizinan-item');
             let hasVisibleItems = false;
             items.forEach(item => {
                 // Remove required and checked state
-                const radio = item.querySelector('input[type="radio"]');
-                radio.required = false;
-                radio.checked = false;
+                const cb = item.querySelector('input[type="checkbox"]');
+                cb.checked = false;
 
                 if (item.dataset.bidang === bidangId || item.dataset.bidang === 'lainnya') {
                     item.style.display = 'block';
-                    radio.required = true;
                     hasVisibleItems = true;
                 } else {
                     item.style.display = 'none';
@@ -340,8 +354,8 @@
             step2.classList.remove('d-none');
             step2.classList.add('fade-in');
             
-            // Uncheck all radios
-            radios.forEach(r => r.checked = false);
+            // Uncheck all checkboxes
+            checkboxes.forEach(cb => cb.checked = false);
             btnSubmit.setAttribute('disabled', 'true');
         };
     });

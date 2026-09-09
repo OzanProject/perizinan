@@ -66,16 +66,19 @@ class PerizinanController extends Controller
   public function store(Request $request)
   {
     $request->validate([
-      'jenis_perizinan_id' => 'required|exists:jenis_perizinans,id',
+      'jenis_perizinan_ids' => 'required|array|min:1|max:3',
+      'jenis_perizinan_ids.*' => 'exists:jenis_perizinans,id',
     ]);
 
-    // Cek jika ada pengajuan aktif
-    $activeRequest = Perizinan::where('lembaga_id', Auth::user()->lembaga_id)
+    // Hitung berapa pengajuan aktif yang sudah dimiliki
+    $activeCount = Perizinan::where('lembaga_id', Auth::user()->lembaga_id)
       ->whereNotIn('status', [PerizinanStatus::SELESAI->value])
-      ->exists();
+      ->count();
 
-    if ($activeRequest) {
-      return back()->with('error', 'Anda masih memiliki pengajuan yang aktif.');
+    $newCount = count($request->jenis_perizinan_ids);
+
+    if ($activeCount + $newCount > 3) {
+      return back()->with('error', 'Maksimal total pengajuan aktif (sedang diproses) adalah 3. Anda saat ini memiliki ' . $activeCount . ' pengajuan aktif.');
     }
 
     // Cari izin sebelumnya yang sudah selesai untuk menyalin perizinan_data
@@ -84,15 +87,17 @@ class PerizinanController extends Controller
       ->latest()
       ->first();
 
-    $perizinan = Perizinan::create([
-      'dinas_id' => Auth::user()->dinas_id,
-      'lembaga_id' => Auth::user()->lembaga_id,
-      'jenis_perizinan_id' => $request->jenis_perizinan_id,
-      'status' => PerizinanStatus::DRAFT->value,
-      'perizinan_data' => $lastPerizinan ? $lastPerizinan->perizinan_data : null,
-    ]);
+    foreach ($request->jenis_perizinan_ids as $jp_id) {
+        Perizinan::create([
+          'dinas_id' => Auth::user()->dinas_id,
+          'lembaga_id' => Auth::user()->lembaga_id,
+          'jenis_perizinan_id' => $jp_id,
+          'status' => PerizinanStatus::DRAFT->value,
+          'perizinan_data' => $lastPerizinan ? $lastPerizinan->perizinan_data : null,
+        ]);
+    }
 
-    return redirect()->route('admin_lembaga.perizinan.edit', $perizinan)->with('success', 'Draf pengajuan berhasil dibuat. Silakan lengkapi berkas.');
+    return redirect()->route('admin_lembaga.perizinan.index')->with('success', $newCount . ' draf pengajuan berhasil dibuat. Silakan lengkapi berkas untuk masing-masing pengajuan.');
   }
 
   public function submit(Perizinan $perizinan)
