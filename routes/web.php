@@ -86,6 +86,9 @@ Route::middleware('auth')->group(function () {
         Route::get('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanFormController::class, 'edit'])->name('jenis_perizinan.form');
         Route::post('jenis-perizinan/{jenisPerizinan}/form', [\App\Http\Controllers\Backend\SuperAdmin\JenisPerizinanFormController::class, 'update'])->name('jenis_perizinan.form.update');
 
+        // Master Data: Jenjang Pendidikan
+        Route::resource('jenjang', \App\Http\Controllers\Backend\SuperAdmin\JenjangController::class)->except('show', 'create', 'edit');
+
         // Pengguna
         Route::resource('users', \App\Http\Controllers\Backend\SuperAdmin\UserController::class);
         Route::post('users/{user}/reset-password', [\App\Http\Controllers\Backend\SuperAdmin\UserController::class, 'resetPassword'])->name('users.reset_password');

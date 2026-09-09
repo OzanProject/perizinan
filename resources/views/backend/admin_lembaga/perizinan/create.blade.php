@@ -94,9 +94,12 @@
                 </div>
 
                 @php
-                    $jenjang = Auth::user()->lembaga->jenjang ?? '';
-                    $isDikmas = in_array(strtoupper($jenjang), ['PKBM', 'LKP']);
-                    $isPaud = in_array(strtoupper($jenjang), ['KB', 'TK', 'PAUD', 'SPS', 'TPA']);
+                    $jenjangNama = Auth::user()->lembaga->jenjang ?? '';
+                    $jenjangModel = \App\Models\Jenjang::where('nama', $jenjangNama)->first();
+                    $seksi = $jenjangModel ? $jenjangModel->seksi : 'lainnya';
+
+                    $isDikmas = $seksi == 'dikmas';
+                    $isPaud = $seksi == 'paud';
                 @endphp
 
                 <div class="row justify-content-center">
@@ -144,14 +147,9 @@
                 <div class="row" id="perizinan-list">
                   @foreach($jenisPerizinans as $jp)
                     @php
-                      // Kategorisasi berdasarkan nama
-                      $nama = strtolower($jp->nama);
-                      $bidang = 'lainnya';
-                      if (str_contains($nama, 'pkbm') || str_contains($nama, 'lkp')) {
-                        $bidang = 'dikmas';
-                      } elseif (str_contains($nama, 'paud') || str_contains($nama, 'tk') || str_contains($nama, 'sps') || str_contains($nama, 'tpa') || str_contains($nama, 'kober')) {
-                        $bidang = 'paud';
-                      }
+                      $kode = strtoupper($jp->kode ?? '');
+                      $jenjangModel = \App\Models\Jenjang::where('nama', $kode)->first();
+                      $bidang = $jenjangModel ? $jenjangModel->seksi : 'lainnya';
                     @endphp
                     <div class="col-md-6 mb-3 perizinan-item" data-bidang="{{ $bidang }}">
                       <div class="custom-control custom-radio custom-selectable-card h-100">

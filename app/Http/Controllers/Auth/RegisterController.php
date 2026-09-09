@@ -13,8 +13,14 @@ class RegisterController extends Controller
 {
     public function showRegistrationForm()
     {
-        $lembagas = \App\Models\Lembaga::all();
-        return view('auth.register', compact('lembagas'));
+        $dinas = Dinas::first();
+        if (!$dinas) {
+            abort(404, 'Sistem belum dikonfigurasi (Dinas tidak ditemukan).');
+        }
+
+        $jenjangs = \App\Models\Jenjang::where('is_active', true)->orderBy('nama')->get();
+
+        return view('auth.register', compact('dinas', 'jenjangs'));
     }
 
     public function register(Request $request)

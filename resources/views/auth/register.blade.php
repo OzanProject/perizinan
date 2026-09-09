@@ -159,13 +159,9 @@
                                 <select name="jenjang" id="jenjang-select" required
                                     class="block w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none appearance-none">
                                     <option value="" disabled selected>Pilih Jenjang</option>
-                                    <option value="TK">TK (Taman Kanak-kanak)</option>
-                                    <option value="SD">SD (Sekolah Dasar)</option>
-                                    <option value="SMP">SMP (Sekolah Menengah Pertama)</option>
-                                    <option value="SMA">SMA (Sekolah Menengah Atas)</option>
-                                    <option value="SMK">SMK (Sekolah Menengah Kejuruan)</option>
-                                    <option value="PKBM">PKBM (Pusat Kegiatan Belajar Masyarakat)</option>
-                                    <option value="LKP">LKP (Lembaga Kursus & Pelatihan)</option>
+                                    @foreach($jenjangs as $j)
+                                        <option value="{{ $j->nama }}">{{ $j->nama }} (Seksi {{ strtoupper($j->seksi) }})</option>
+                                    @endforeach
                                 </select>
                             </div>
 

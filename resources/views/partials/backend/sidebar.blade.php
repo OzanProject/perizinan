@@ -85,12 +85,18 @@
                   <p>1. Jenis Perizinan</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a href="{{ route('super_admin.jenjang.index') }}" class="nav-link {{ request()->routeIs('super_admin.jenjang.*') ? 'active' : '' }}">
+                  <i class="far fa-circle nav-icon text-primary"></i>
+                  <p>2. Jenjang Pendidikan</p>
+                </a>
+              </li>
               @endif
               
               <li class="nav-item">
                 <a href="{{ route('super_admin.perizinan.index') }}" class="nav-link {{ request()->routeIs('super_admin.perizinan.*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon text-info"></i>
-                  <p>2. Daftar Pengajuan</p>
+                  <p>3. Daftar Pengajuan</p>
                 </a>
               </li>
 
@@ -98,7 +104,7 @@
                 <a href="#" class="nav-link {{ request()->routeIs('super_admin.penerbitan.*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon text-success"></i>
                   <p>
-                    3. Pusat Penerbitan
+                    4. Pusat Penerbitan
                     <i class="right fas fa-angle-left"></i>
                   </p>
                 </a>
